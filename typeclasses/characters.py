@@ -47,6 +47,12 @@ class Player_Character(DefaultCharacter):
         self.db.face_shape = 'narrow'
         self.db.face_color = 'ivory'
 
+        # Hair Attributes
+        self.db.hair_length = 'long'
+        self.db.hair_texture = 'bouncy'
+        self.db.hair_color = 'tawny'
+        self.db.hair_style = 'in a pony-tail'
+
     def create_figure(self):
         # The figure should result in "You see a short burly man."
         figure = []
@@ -68,3 +74,14 @@ class Player_Character(DefaultCharacter):
         facial.append(self.attributes.get("face_color"))
         full_facial = f"{facial[0]} has {facial[1]} eyes set above a {facial[2]} nose, {facial[3]} lips and a {facial[4]} chin in a {facial[5]} {facial[6]} face."
         return full_facial
+
+    def create_hair(self):
+        # The hair should result in "<gender> has <length> <texture> <color> hair <style>."
+        hair = []
+        hair.append("He" if self.attributes.get("gender") == 'male' else "She")
+        hair.append(self.attributes.get("hair_length"))
+        hair.append(self.attributes.get("hair_texture"))
+        hair.append(self.attributes.get("hair_color"))
+        hair.append(self.attributes.get("hair_style"))
+        full_hair = f"{hair[0]} has {hair[1]} {hair[2]} {hair[3]} hair {hair[4]}."
+        return full_hair

@@ -36,5 +36,6 @@ class CmdTestFigure(BaseCommand):
         appear = self.caller.create_figure()
         appear += " "
         appear += self.caller.create_facial()
+        appear += " "
+        appear += self.caller.create_hair()
         self.msg(appear)
-        pass
