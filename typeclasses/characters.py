@@ -35,53 +35,45 @@ class Character(DefaultCharacter):
 class Player_Character(DefaultCharacter):
     def at_object_creation(self):
         # Figure Attributes
-        self.db.height_desc = 'short'
-        self.db.build_desc = 'burly'
-        self.db.gender = 'male'
+        self.db.figure = {}
+        self.db.figure['height'] = 'short'
+        self.db.figure['build'] = 'burly'
+        self.db.figure['gender'] = 'male'
 
         # Facial Attributes
-        self.db.eye_color = 'blue'
-        self.db.nose_shape = 'thin'
-        self.db.lip_shape = 'thin'
-        self.db.chin_shape = 'pointed'
-        self.db.face_shape = 'narrow'
-        self.db.face_color = 'ivory'
+        self.db.facial = {}
+        self.db.facial['eye_color'] = 'blue'
+        self.db.facial['nose'] = 'thin'
+        self.db.facial['lips'] = 'thin'
+        self.db.facial['chin'] = 'pointed'
+        self.db.facial['face_shape'] = 'narrow'
+        self.db.facial['face_color'] = 'ivory'
 
         # Hair Attributes
-        self.db.hair_length = 'long'
-        self.db.hair_texture = 'bouncy'
-        self.db.hair_color = 'tawny'
-        self.db.hair_style = 'in a pony-tail'
+        self.db.hair = {}
+        self.db.hair['length'] = 'long'
+        self.db.hair['texture'] = 'bouncy'
+        self.db.hair['color'] = 'tawny'
+        self.db.hair['style'] = 'in a pony-tail'
 
     def create_figure(self):
         # The figure should result in "You see a short burly man."
-        figure = []
-        figure.append(self.attributes.get("height_desc"))
-        figure.append(self.attributes.get("build_desc"))
-        figure.append(self.attributes.get("gender"))
-        full_figure = f"You see a {figure[0]} {figure[1]} {figure[2]}."
+        figure = self.db.figure
+        full_figure = f"You see a {figure['height']} {figure['build']} {figure['gender']}."
         return full_figure
 
     def create_facial(self):
         # The facial should result in "He has <color> eyes set above an <shape> nose, <shape> lips and a <shape> chin in a <shape> <color> face."
-        facial = []
-        facial.append("He" if self.attributes.get("gender") == 'male' else "She")
-        facial.append(self.attributes.get("eye_color"))
-        facial.append(self.attributes.get("nose_shape"))
-        facial.append(self.attributes.get("lip_shape"))
-        facial.append(self.attributes.get("chin_shape"))
-        facial.append(self.attributes.get("face_shape"))
-        facial.append(self.attributes.get("face_color"))
-        full_facial = f"{facial[0]} has {facial[1]} eyes set above a {facial[2]} nose, {facial[3]} lips and a {facial[4]} chin in a {facial[5]} {facial[6]} face."
+        facial = self.db.facial
+        gender = self.db.figure.get('gender')
+        gender = ("He" if gender == 'male' else "She")
+        full_facial = f"{gender} has {facial.get('eye_color')} eyes set above a {facial.get('nose')} nose, {facial.get('lips')} lips and a {facial.get('chin')} chin in a {facial.get('face_shape')} {facial.get('face_color')} face."
         return full_facial
 
     def create_hair(self):
         # The hair should result in "<gender> has <length> <texture> <color> hair <style>."
-        hair = []
-        hair.append("He" if self.attributes.get("gender") == 'male' else "She")
-        hair.append(self.attributes.get("hair_length"))
-        hair.append(self.attributes.get("hair_texture"))
-        hair.append(self.attributes.get("hair_color"))
-        hair.append(self.attributes.get("hair_style"))
-        full_hair = f"{hair[0]} has {hair[1]} {hair[2]} {hair[3]} hair {hair[4]}."
+        hair = self.db.hair
+        gender = self.db.figure.get('gender')
+        gender = ("He" if gender == 'male' else "She")
+        full_hair = f"{gender} has {hair.get('length')} {hair.get('texture')} {hair.get('color')} hair {hair.get('style')}."
         return full_hair
