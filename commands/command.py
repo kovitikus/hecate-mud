@@ -6,7 +6,7 @@ Commands describe the input the account can do to the game.
 """
 
 from evennia import Command as BaseCommand
-# from evennia import default_cmds
+from evennia.utils.evmenu import EvMenu
 
 
 class Command(BaseCommand):
@@ -39,3 +39,10 @@ class CmdTestFigure(BaseCommand):
         appear += " "
         appear += self.caller.create_hair()
         self.msg(appear)
+
+class CmdCharGen(Command):
+    key = "chargen"
+
+    def func(self):
+        EvMenu(self.caller, "world.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
+       auto_quit=True, auto_look=True, auto_help=True)
