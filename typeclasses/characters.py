@@ -35,26 +35,27 @@ class Character(DefaultCharacter):
 class Player_Character(DefaultCharacter):
     def at_object_creation(self):
         # Figure Attributes
-        self.db.figure = {}
-        self.db.figure['height'] = 'short'
-        self.db.figure['build'] = 'burly'
-        self.db.figure['gender'] = 'male'
+        # self.db.figure = {}
+        # self.db.figure['height'] = 'short'
+        # self.db.figure['build'] = 'burly'
+        # self.db.figure['gender'] = 'male'
 
         # Facial Attributes
-        self.db.facial = {}
-        self.db.facial['eye_color'] = 'blue'
-        self.db.facial['nose'] = 'thin'
-        self.db.facial['lips'] = 'thin'
-        self.db.facial['chin'] = 'pointed'
-        self.db.facial['face_shape'] = 'narrow'
-        self.db.facial['face_color'] = 'ivory'
+        # self.db.facial = {}
+        # self.db.facial['eye_color'] = 'blue'
+        # self.db.facial['nose'] = 'thin'
+        # self.db.facial['lips'] = 'thin'
+        # self.db.facial['chin'] = 'pointed'
+        # self.db.facial['face_shape'] = 'narrow'
+        # self.db.facial['face_color'] = 'ivory'
 
         # Hair Attributes
-        self.db.hair = {}
-        self.db.hair['length'] = 'long'
-        self.db.hair['texture'] = 'bouncy'
-        self.db.hair['color'] = 'tawny'
-        self.db.hair['style'] = 'in a pony-tail'
+        # self.db.hair = {}
+        # self.db.hair['length'] = 'long'
+        # self.db.hair['texture'] = 'bouncy'
+        # self.db.hair['color'] = 'tawny'
+        # self.db.hair['style'] = 'in a pony-tail'
+        pass
 
     def create_figure(self):
         # The figure should result in "You see a short burly man."
