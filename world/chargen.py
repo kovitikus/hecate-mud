@@ -61,104 +61,76 @@ def _set_name(self, raw_string, **kwargs):
         if prev_entry:
             self.ndb._menutree.name = prev_entry
             self.msg(f"Your character's name has been set to |c{prev_entry}|n.")
-            return "main"
+            return ("main", {'prev': 'prev'})
         else:
             self.msg("Aborted.")
-            return "main"
+            return ("main", {'prev': 'prev'})
     else:
         #Re-run old node, but pass in the name given.
         return None, {"prev_entry": inp}
 
 def appearance(self, raw_string, **kwargs):
+    get = self.ndb._menutree.attr.get
     text = "Please choose."
     options = (
-    {"key": ("1", "gender"),
-    "desc": f"Set your character's gender.\n        Currently: |c{self.ndb._menutree.attr.get('gender')}|n",
+    {"key": ("1", "figure"),
+    "desc": f"Set your character's figure.\nGender: |c{get('gender')}|n Height: |c{get('height')}|n Build: |c{get('build')}|n\n",
     "goto": "gender"},
-    {"key": ("2", "height"),
-    "desc": f"Set your character's height.\n        Currently: |c{self.ndb._menutree.attr.get('height')}|n",
-    "goto": "height"},
-    {"key": ("3", "build"),
-    "desc": f"Set your character's build.\n        Currently: |c{self.ndb._menutree.attr.get('build')}|n",
-    "goto": "build"},
-    {"key": ("4", "face"),
-    "desc": f"Set your character's face type.\n        Currently: |c{self.ndb._menutree.attr.get('face')}|n",
+    {"key": ("2", "face"),
+    "desc": f"Set your character's facial attributes.\nFace Shape: |c{get('face')}|n Eye Color: |c{get('eye_color')}|n Nose: |c{get('nose')}|n Lips: |c{get('lips')}|n Chin: |c{get('chin')}|n Skin Color: |c{get('skin_color')}|n\n",
     "goto": "face"},
-    {"key": ("5", "eye"),
-    "desc": f"Set your character's eye color.\n        Currently: |c{self.ndb._menutree.attr.get('eye_color')}|n",
-    "goto": "eye_color"},
-    {"key": ("6", "nose"),
-    "desc": f"Set your character's nose.\n        Currently: |c{self.ndb._menutree.attr.get('nose')}|n",
-    "goto": "nose"},
-    {"key": ("7", "lips"),
-    "desc": f"Set your character's lips.\n        Currently: |c{self.ndb._menutree.attr.get('lips')}|n",
-    "goto": "lips"},
-    {"key": ("8", "chin"),
-    "desc": f"Set your character's chin.\n        Currently: |c{self.ndb._menutree.attr.get('chin')}|n",
-    "goto": "chin"},
-    {"key": ("9", "skin"),
-    "desc": f"Set your character's skin color.\n        Currently: |c{self.ndb._menutree.attr.get('skin_color')}|n",
-    "goto": "skin_color"},
-    {"key": ("10", "hair"),
-    "desc": f"Set your character's hair color.\n        Currently: |c{self.ndb._menutree.attr.get('hair_color')}|n",
-    "goto": "hair_color"},
-    {"key": ("11", "texture"),
-    "desc": f"Set your character's hair texture.\n        Currently: |c{self.ndb._menutree.attr.get('texture')}|n",
-    "goto": "texture"},
-    {"key": ("12", "length"),
-    "desc": f"Set your character's hair length.\n        Currently: |c{self.ndb._menutree.attr.get('length')}|n",
+    {"key": ("3", "hair"),
+    "desc": f"Set your character's hair.\nLength: |c{get('length')}|n Color: |c{get('hair_color')}|n Texture: |c{get('texture')}|n Style: |c{get('style')}|n\n",
     "goto": "length"},
-    {"key": ("13", "style"),
-    "desc": f"Set your character's hair style.\n        Currently: |c{self.ndb._menutree.attr.get('style')}|n",
-    "goto": "style"},
-    {"key": ("14", "back", "main"),
+    {"key": ("4", "back", "main"),
     "desc": "Back to main menu.",
-    "goto": ("main", {'prev': 'prev'})}     
-    )
+    "goto": ("main", {'prev': 'prev'})})
     return text, options
 
 def _set_appearance(self, raw_string, **kwargs):
     prev = kwargs.get('prev_node')
     choice = kwargs.get('choice')
+    attr = self.ndb._menutree.attr
 
     if prev == 'gender':
-        self.ndb._menutree.attr['gender'] = choice
-        return 'appearance'
+        attr['gender'] = choice
+        return 'height'
     if prev == 'height':
-        self.ndb._menutree.attr['height'] = choice
-        return 'appearance'
+        attr['height'] = choice
+        return 'build'
     if prev == 'build':
-        self.ndb._menutree.attr['build'] = choice
+        attr['build'] = choice
         return 'appearance'
     if prev == 'face':
-        self.ndb._menutree.attr['face'] = choice
-        return 'appearance'
+        attr['face'] = choice
+        return 'eye_color'
     if prev == 'eye_color':
-        self.ndb._menutree.attr['eye_color'] = choice
-        return 'appearance'
+        attr['eye_color'] = choice
+        return 'nose'
     if prev == 'nose':
-        self.ndb._menutree.attr['nose'] = choice
-        return 'appearance'
+        attr['nose'] = choice
+        return 'lips'
     if prev == 'lips':
-        self.ndb._menutree.attr['lips'] = choice
-        return 'appearance'
+        attr['lips'] = choice
+        return 'chin'
     if prev == 'chin':
-        self.ndb._menutree.attr['chin'] = choice
-        return 'appearance'
+        attr['chin'] = choice
+        return 'skin_color'
     if prev == 'skin_color':
-        self.ndb._menutree.attr['skin_color'] = choice
-        return 'appearance'
-    if prev == 'hair_color':
-        self.ndb._menutree.attr['hair_color'] = choice
-        return 'appearance'
-    if prev == 'texture':
-        self.ndb._menutree.attr['texture'] = choice
+        attr['skin_color'] = choice
         return 'appearance'
     if prev == 'length':
-        self.ndb._menutree.attr['length'] = choice
-        return 'appearance'
+        attr['length'] = choice
+        next_node = 'appearance' if choice == 'bald' else 'hair_color'
+        return next_node
+    if prev == 'hair_color':
+        attr['hair_color'] = choice
+        return 'length'
+    if prev == 'length':
+        attr['length'] = choice
+        return 'style'
     if prev == 'style':
-        self.ndb._menutree.attr['style'] = choice
+        attr['style'] = choice
         return 'appearance'
 
     return 'appearance'
@@ -269,26 +241,26 @@ def style(self, raw_string, **kwargs):
 
 def _create_char(self, raw_string, **kwargs):
     name = self.ndb._menutree.name
-    attr = self.ndb._menutree.attr
+    get = self.ndb._menutree.attr.get
 
     #Figure Attributes
-    gender = attr.get('gender')
-    height = attr.get('height')
-    build = attr.get('build')
+    gender = get('gender')
+    height = get('height')
+    build = get('build')
 
     #Facial Attributes
-    face = attr.get('face')
-    eye_color = attr.get('eye_color')
-    nose = attr.get('nose')
-    lips = attr.get('lips')
-    chin = attr.get('chin')
-    skin_color = attr.get('skin_color')
+    face = get('face')
+    eye_color = get('eye_color')
+    nose = get('nose')
+    lips = get('lips')
+    chin = get('chin')
+    skin_color = get('skin_color')
 
     #Hair Attributes
-    hair_color = attr.get('hair_color')
-    texture = attr.get('texture')
-    length = attr.get('length')
-    style = attr.get('style')
+    hair_color = get('hair_color')
+    texture = get('texture')
+    length = get('length')
+    style = get('style')
 
 
     # Check for chars attribute and initilize if none.
