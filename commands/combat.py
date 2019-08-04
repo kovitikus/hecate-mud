@@ -18,7 +18,7 @@ class CmdStaveBash(BaseCommand):
             self.caller.msg('Usage: bash <target>')
             return
         
-        damage = 5
+        damage = 20
         attacker = self.caller
         target = self.caller.search(self.args)
         if not target:
@@ -44,11 +44,14 @@ class CmdStaveBash(BaseCommand):
             self.caller.msg(message)
             return
 
-        roll = random.randint(1, 100)
-        success = random.randint(5, 95)
+        # roll = random.randint(1, 100)
+        # success = random.randint(5, 95)
+        roll = 100
+        success = 0
+
         if roll > success:
             self.caller.msg(f'[Success: {success} Roll: {roll}] You bash {target} with your stave!')
-            target.db.hp -= damage
+            target.take_damage(damage)
         else:
             self.caller.msg(f'[Success: {success} Roll: {roll}] You miss {target} with your stave!')
 
