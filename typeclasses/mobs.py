@@ -6,20 +6,21 @@ class DefaultMob(DefaultCharacter):
         self.db.ko = False
     def take_damage(self, damage):
         mob = self.key
+        location = self.location
         
         self.db.hp -= damage
         hp = self.db.hp
-        self.location.msg_contents(hp)
+        location.msg_contents(f'{mob} has {hp} health remaining!')
         if hp >= 1:
             self.db.ko = False
         elif hp <= 0 and self.db.ko != True:
             self.db.ko = True
-            self.location.msg_contents(f'{mob} falls unconscious!')
+            location.msg_contents(f'{mob} falls unconscious!')
         if hp <= -100:
             okay = self.delete()
             if not okay:
-                self.location.msg_contents(f'\nERROR: {mob} not deleted, probably because delete() returned False.')
+                location.msg_contents(f'\nERROR: {mob} not deleted, probably because delete() returned False.')
             else:
-                self.location.msg_contents(f'{mob} breathes a final breath and expires.')
+                location.msg_contents(f'{mob} breathes a final breath and expires.')
         return
         

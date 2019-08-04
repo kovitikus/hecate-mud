@@ -9,7 +9,8 @@ creation commands.
 """
 from evennia import DefaultCharacter
 from collections import defaultdict
-from evennia.utils.utils import (list_to_string, inherits_from)
+from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
+from typeclasses.combat_handler import CombatHandler
 
 
 class Character(DefaultCharacter):
@@ -35,6 +36,9 @@ class Character(DefaultCharacter):
     pass
 
 class Player_Character(DefaultCharacter):
+    def at_object_creation(self):
+        self.scripts.add(CombatHandler)
+
     def return_appearance(self, looker, **kwargs):
         if not looker:
             return ""
@@ -81,3 +85,7 @@ class Player_Character(DefaultCharacter):
         else:
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
+    
+    @lazy_property
+    def combat(self):
+        return CombatHandler(self)
