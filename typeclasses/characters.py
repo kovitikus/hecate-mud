@@ -8,6 +8,8 @@ creation commands.
 
 """
 from evennia import DefaultCharacter
+from collections import defaultdict
+from evennia.utils.utils import (list_to_string, inherits_from)
 
 
 class Character(DefaultCharacter):
@@ -33,69 +35,49 @@ class Character(DefaultCharacter):
     pass
 
 class Player_Character(DefaultCharacter):
-    def at_object_creation(self):
-        # Figure Attributes
-        # self.db.figure = {}
-        # self.db.figure['height'] = 'short'
-        # self.db.figure['build'] = 'burly'
-        # self.db.figure['gender'] = 'male'
+    def return_appearance(self, looker, **kwargs):
+        if not looker:
+            return ""
+        
+        # get description, build string
+        string  = self.create_desc()
+        return string
 
-        # Facial Attributes
-        # self.db.facial = {}
-        # self.db.facial['eye_color'] = 'blue'
-        # self.db.facial['nose'] = 'thin'
-        # self.db.facial['lips'] = 'thin'
-        # self.db.facial['chin'] = 'pointed'
-        # self.db.facial['face_shape'] = 'narrow'
-        # self.db.facial['face_color'] = 'ivory'
+    def create_desc(self):
+        desc = ""
+        
+        figure = self.db.figure
+        facial = self.db.facial
+        hair = self.db.hair
 
-        # Hair Attributes
-        # self.db.hair = {}
-        # self.db.hair['length'] = 'long'
-        # self.db.hair['texture'] = 'bouncy'
-        # self.db.hair['color'] = 'tawny'
-        # self.db.hair['style'] = 'in a pony-tail'
-        pass
+        height = figure.get('height')
+        build = figure.get('build')
+        sex = figure.get('gender')
 
-    def create_figure(self):
-        # The figure should result in "You see a short burly man."
-        # figure = []
-        # for k, v in self.db.figure.items():
-        #     figure.append(v)
-        # full_figure = f"You see a {figure[0]} {figure[1]} {figure[2]}."
-        f = self.db.figure
-        full_figure = f"You see a {f.get('height')} {f.get('build')} {f.get('gender')}."
-        return full_figure
+        eye_color = facial.get('eye_color')
+        nose = facial.get('nose')
+        lips = facial.get('lips')
+        chin = facial.get('chin')
+        face = facial.get('face')
+        skin_color = facial.get('skin_color')
 
-    def create_facial(self):
+        length = hair.get('length')
+        texture = hair.get('texture')
+        hair_color = hair.get('hair_color')
+        style = hair.get('style')
+
+        # The figure should result in "You see a <height> <build> <gender>."
+        gender = ('man' if sex == 'male' else 'woman')
+        desc += f"You see a {height} {build} {gender}. "
+        
         # The facial should result in "He has <color> eyes set above an <shape> nose, <shape> lips and a <shape> chin in a <shape> <color> face."
-        # facial = []
-        # for k, v in self.db.facial.items():
-        #     facial.append(v)
-        # gender = self.db.figure.get('gender')
-        # gender = ("He" if gender == 'male' else "She")
-        # full_facial = f"{gender} has {facial[0]} eyes set above a {facial[1]} nose, {facial[2]} lips and a {facial[3]} chin in a {facial[4]} {facial[5]} face."
-        f = self.db.facial
-        gender = self.db.figure.get('gender')
-        gender = ('He' if gender == 'male' else 'She')
-        full_facial = f"{gender} has {f.get('eye_color')} eyes set above a {f.get('nose')} nose, "
-        full_facial += f"{f.get('lips')} lips and a {f.get('chin')} chin in a {f.get('face')} {f.get('skin_color')} face."
-        return full_facial
+        gender = ('He' if sex == 'male' else 'She')
+        desc += (f"{gender} has {eye_color} eyes set above a {nose} nose, "
+                f"{lips} lips and a {chin} chin in a {face} {skin_color} face. ")
 
-    def create_hair(self):
         # The hair should result in "<gender> has <length> <texture> <color> hair <style>."
-        # hair = []
-        # for k, v in self.db.hair.items():
-        #     hair.append(v)
-        # gender = self.db.figure.get('gender')
-        # gender = ("He" if gender == 'male' else "She")
-        # full_hair = f"{gender} has {hair[0]} {hair[1]} {hair[2]} hair {hair[3]}."
-        f = self.db.hair
-        gender = self.db.figure.get('gender')
-        gender = ('He' if gender == 'male' else 'She')
-
-        if f.get('length') == 'bald':
-            full_hair = f"{gender} is {f.get('length')}."
+        if length == 'bald':
+            desc += f"{gender} is {length}. "
         else:
-            full_hair = f"{gender} has {f.get('length')} {f.get('texture')} {f.get('hair_color')} hair {f.get('style')}."
-        return full_hair
+            desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
+        return desc

@@ -30,15 +30,11 @@ class Command(BaseCommand):
     """
     pass
 
-class CmdTestFigure(BaseCommand):
-    key = "figure"
+class CmdDesc(BaseCommand):
+    key = "desc"
     def func(self):
-        appear = self.caller.create_figure()
-        appear += " "
-        appear += self.caller.create_facial()
-        appear += " "
-        appear += self.caller.create_hair()
-        self.msg(appear)
+        desc = self.caller.desc()
+        self.msg(desc)
 
 class CmdCharGen(Command):
     key = "chargen"
