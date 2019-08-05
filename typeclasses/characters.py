@@ -10,8 +10,6 @@ creation commands.
 from evennia import DefaultCharacter
 from collections import defaultdict
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
-from combat_script import ScrptCombat
-from typeclasses.combat_handler import CombatHandler
 
 
 class Character(DefaultCharacter):
@@ -41,8 +39,10 @@ class Player_Character(DefaultCharacter):
     # def combat(self):
     #     return CombatHandler(self)
 
-    def at_object_creation(self):
-        self.scripts.add(CombatHandler)
+    # def at_object_creation(self):
+    #     self.scripts.add(ScrptCombat, autostart=True)
+    #     self.db.combat_script = ScrptCombat
+    #     pass
 
     def return_appearance(self, looker, **kwargs):
         if not looker:

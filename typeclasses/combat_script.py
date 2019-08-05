@@ -3,7 +3,7 @@ from evennia import utils
 import time
 import random
 
-class ScrptCombat(DefaultScript):
+class CombatScript(DefaultScript):
     # def roll_die(self):
     #     roll = random.randint(1, 100)
     #     success = random.randint(0, 95)
