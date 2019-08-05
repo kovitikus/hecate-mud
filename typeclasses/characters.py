@@ -10,6 +10,7 @@ creation commands.
 from evennia import DefaultCharacter
 from collections import defaultdict
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
+from combat_script import ScrptCombat
 from typeclasses.combat_handler import CombatHandler
 
 
@@ -36,6 +37,10 @@ class Character(DefaultCharacter):
     pass
 
 class Player_Character(DefaultCharacter):
+    # @lazy_property
+    # def combat(self):
+    #     return CombatHandler(self)
+
     def at_object_creation(self):
         self.scripts.add(CombatHandler)
 
@@ -85,7 +90,3 @@ class Player_Character(DefaultCharacter):
         else:
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
-    
-    @lazy_property
-    def combat(self):
-        return CombatHandler(self)
