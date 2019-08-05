@@ -267,7 +267,7 @@ def _create_char(self, raw_string, **kwargs):
     if not self.attributes.get("chars"):
         self.db.chars = {}
     chars_len = len(self.db.chars) + 1
-    self.msg("You currently have a total of {chars_len} characters.")
+    self.msg(f"You currently have a total of {chars_len} characters.")
 
     #Add the new character object to the chars attribute as next number in the character list.
     self.db.chars[str(chars_len)] = create_object(typeclass="typeclasses.characters.Player_Character", key=name, home=None,
