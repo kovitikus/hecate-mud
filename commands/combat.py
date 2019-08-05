@@ -25,3 +25,4 @@ class CmdStaveBash(BaseCommand):
         if not target.attributes.has('hp'):
             self.caller.msg('You cannot attack that target!')
             return
+        self.caller.combat.attack(target)
