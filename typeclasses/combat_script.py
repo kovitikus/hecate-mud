@@ -27,9 +27,9 @@ class CombatScript(DefaultScript):
 
     def attack(self, target):  
         damage = 20
-        
+        self.obj.db.stave_bash = 0
         now = time.time()
-        lastcast = self.db.stave_bash
+        lastcast = self.obj.db.stave_bash
         cooldown = lastcast + 3
         time_remaining = cooldown - now
 
@@ -65,7 +65,7 @@ class CombatScript(DefaultScript):
         location.msg_contents(f'{mob} has {hp} health remaining!')
         if hp >= 1:
             target.db.ko = False
-        elif hp <= 0 and self.db.ko != True:
+        elif hp <= 0 and target.db.ko != True:
             target.db.ko = True
             location.msg_contents(f'{mob} falls unconscious!')
         if hp <= -100:

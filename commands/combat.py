@@ -1,5 +1,6 @@
 from evennia import Command as BaseCommand
 from evennia import utils
+from evennia import create_script
 import time
 import random
 
@@ -24,8 +25,9 @@ class CmdStaveBash(BaseCommand):
         if not target.attributes.has('hp'):
             self.caller.msg('You cannot attack that target!')
             return
-        self.caller.db.combat_script.attack(target)
-        
+        begin = create_script('typeclasses.combat_script.CombatScript', obj=self.caller)
+        begin.attack(target)
+
         # if not target:
         #     self.caller.msg('That target does not exist!')
         #     return
