@@ -35,14 +35,6 @@ class Character(DefaultCharacter):
     pass
 
 class Player_Character(DefaultCharacter):
-    # @lazy_property
-    # def combat(self):
-    #     return CombatHandler(self)
-
-    # def at_object_creation(self):
-    #     self.scripts.add(ScrptCombat, autostart=True)
-    #     self.db.combat_script = ScrptCombat
-    #     pass
 
     def return_appearance(self, looker, **kwargs):
         if not looker:
