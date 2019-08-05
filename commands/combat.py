@@ -25,5 +25,3 @@ class CmdStaveBash(BaseCommand):
         if not target.attributes.has('hp'):
             self.caller.msg('You cannot attack that target!')
             return
-        begin = create_script('typeclasses.combat_script.CombatScript', obj=self.caller)
-        begin.attack(target)

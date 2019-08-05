@@ -39,7 +39,7 @@ class CombatScript(DefaultScript):
         else:
             self.obj.msg(f'[Success: {success} Roll: {roll}] You miss {target} with your stave!')
         utils.delay(3, self.unbusy)
-        self.db.stave_bash = now
+        self.obj.db.stave_bash = now
 
     def take_damage(self, target, damage):
         mob = target.key
