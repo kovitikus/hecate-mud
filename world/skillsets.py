@@ -8,7 +8,7 @@ class rank_bonus():
         '''
         pass
     
-def skill_level(self, rb, rank):
+def skill_level(self, rank):
     '''
     RANK += RANK BONUS
     --------------------------
@@ -28,67 +28,58 @@ def skill_level(self, rb, rank):
     501 to 1,000 += 0.025
     1,001 to infinity += 0.01
     '''
+    #Temp Values
+    rb = 0
+    rank = 100
+
+    #Formula
     if rank:
-        r = rank if rank <= 9
-        for i in r:
-            rb += 3
+        r = rank if rank < 9 else 9
+        rb += (3 * r)
         if rank >= 10:
             r = rank - 9 if rank < 19 else 10
-            for i in r:
-                rb += 2
+            rb += (2 * r)
             if rank >= 20:
                 r = rank - 19 if rank < 29 else 10
-                for i in r:
-                    rb += 2
+                rb += (2 * r)
                 if rank >= 30:
                     r = rank - 29 if rank < 39 else 10
-                    for i in r:
-                        rb += 1
+                    rb += (1 * r)
                     if rank >= 40:
                         r = rank - 39 if rank < 49 else 10
-                        for i in r:
-                            rb += 1
+                        rb += (1 * r)
                         if rank >= 50:
                             r = rank - 49 if rank < 59 else 10
-                            for i in r:
-                                rb += 0.5
+                            rb += (0.5 * r)
                             if rank >= 60:
                                 r = rank - 59 if rank < 69 else 10
-                                for i in r:
-                                    rb += 0.5
+                                rb += (0.5 * r)
                                 if rank >= 70:
                                     r = rank - 69 if rank < 79 else 10
-                                    for i in r:
-                                        rb += 0.5
+                                    rb += (0.5 * r)
                                     if rank >= 80:
                                         r = rank - 79 if rank < 89 else 10
-                                        for i in r:
-                                            rb += 0.5
+                                        rb += (0.5 * r)
                                         if rank >= 90:
-                                            r = rank - 89 if rank < 100 else 10
-                                            for i in r:
-                                                rb += 0.5
+                                            r = rank - 89 if rank < 100 else 11
+                                            rb += (0.5 * r)
                                             if rank >= 101:
                                                 r = rank - 100 if rank < 150 else 50
-                                                for i in r:
-                                                    rb += 0.25
+                                                rb += (0.25 * r)
                                                 if rank >= 151:
                                                     r = rank - 150 if rank < 200 else 50
-                                                    for i in r:
-                                                        rb += 0.125
+                                                    rb += (0.125 * r)
                                                     if rank >= 201:
                                                         r = rank - 200 if rank < 500 else 300
-                                                        for i in r:
-                                                            rb += 0.0625
+                                                        rb += (0.0625 * r)
                                                         if rank >= 501:
                                                             r = rank - 500 if rank < 1000 else 500
-                                                            for i in r:
-                                                                rb += 0.025
+                                                            rb += (0.025 * r)
                                                             if rank >= 1001:
                                                                 r = rank - 1000
-                                                                for i in r:
-                                                                    rb += 0.01
-        return rb
+                                                                rb += (0.01 * r)
+        return rb # Return if any rank.
+    return None # Return if no rank.
 
 
     def rb_stance(self, o_rb, d_rb):
