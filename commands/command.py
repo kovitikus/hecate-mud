@@ -7,6 +7,7 @@ Commands describe the input the account can do to the game.
 
 from evennia import Command as BaseCommand
 from evennia.utils.evmenu import EvMenu
+from world.skillsets import training
 
 
 class Command(BaseCommand):
@@ -42,3 +43,13 @@ class CmdCharGen(Command):
     def func(self):
         EvMenu(self.caller, "world.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
        auto_quit=True, auto_look=True, auto_help=True)
+
+class CmdLearnSkill(Command):
+    key = 'learn'
+
+    def func(self):
+        if not self.args:
+            self.caller.msg('Usage: learn <skillset> <skill>')
+            return
+        skillset, skill = self.args
+        training.learn_skill(self.caller, skillset, skill)

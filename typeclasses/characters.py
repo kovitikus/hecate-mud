@@ -13,6 +13,9 @@ class Player_Character(DefaultCharacter):
     def combat(self):
         return CombatHandler(self)
 
+    def at_object_creation(self):
+        self.db.gsp = 10
+
     def return_appearance(self, looker, **kwargs):
         if not looker:
             return ""
