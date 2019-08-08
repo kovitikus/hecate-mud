@@ -6,8 +6,9 @@ Commands describe the input the account can do to the game.
 """
 
 from evennia import Command as BaseCommand
+from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
-from world.skillsets import training
+from world import skillsets
 
 
 class Command(BaseCommand):
@@ -47,9 +48,18 @@ class CmdCharGen(Command):
 class CmdLearnSkill(Command):
     key = 'learn'
 
+    def parse(self):
+        args = self.args.lstrip()
+        try:
+            self.skillset, self.skill = args.split(" ", 1)
+        except ValueError:
+            self.caller.msg("Invalid usage. Enter two words separated by a space.")
+            raise InterruptCommand
+        self.caller.msg(f'Skillset is {self.skillset!r} and skill is {self.skill!r}')
+
     def func(self):
         if not self.args:
             self.caller.msg('Usage: learn <skillset> <skill>')
             return
-        skillset, skill = self.args
-        training.learn_skill(self.caller, skillset, skill)
+
+        skillsets.learn_skill(self.caller, self.skillset, self.skill)
