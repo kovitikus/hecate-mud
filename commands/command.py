@@ -63,3 +63,32 @@ class CmdLearnSkill(Command):
             return
 
         skillsets.learn_skill(self.caller, self.skillset, self.skill)
+
+class CmdGrantSP(Command):
+    key = '@grant-sp'
+    '''
+    Usage: @grant-sp <person> <number> <skill>
+    '''
+
+    def parse(self):
+        args = self.args.lstrip()
+        try:
+            self.person, self.number, self.skill = args.split(" ", 2)
+        except ValueError:
+            self.caller.msg("Requires 3 arguments. Usage: @grant <person> <number> <skill>")
+            raise InterruptCommand
+        try:
+            self.number = int(self.number)
+        except ValueError:
+            self.caller.msg("The number must be an integer.")
+            raise InterruptCommand
+    
+    def func(self):
+        char = self.caller.search(self.person)
+        num = self.number
+        skill = self.skill
+        skill = char.attributes.get(skill)
+        skill['total_sp'] += num
+        self.caller.msg(f'Granted {char} {num} skillpoints in {self.skill}.')
+
+

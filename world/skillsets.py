@@ -1,3 +1,5 @@
+from evennia.utils.dbserialize import deserialize
+
 def skill_level(rank, difficulty):
     '''
     RANK += RANK BONUS PER RANK
@@ -183,16 +185,19 @@ def learn_skill(char, skillset, skill):
             char.db.staves = {'total_sp': sp_cost, 'total_ranks': 0}
         char.db.gsp -= sp_cost
         
-
+    staves = char.db.staves
+    d_skill = char.db.staves.get(skill)
     # Check for stave skills.
     if skillset == 'staves':
-        if not char.db.staves['total_sp'] >= sp_cost:
+        if not staves['total_sp'] >= sp_cost:
             char.msg('You do not have enough skill points to learn this skill.')
             return
-        if not char.db.staves[skill]:
-            char.db.staves[skill] = {'rank': 0, 'rb': 0}
-        char.db.staves[skill]['rank'] += 1
-        char.db.staves['total_sp'] -= sp_cost
-        rank = char.db.staves[skill]['rank']
-        char.db.staves[skill]['rb'] = rb[rank-1]
-        char.msg(f'Created {skillset} and added {skill} of rank {char.db.staves[skill][rank]} with rank bonus of {char.db.staves[skill]["rb"]}.')
+        if not d_skill:
+            staves[skill] = {'rank': 0, 'rb': 0}
+        rank = staves[skill]['rank']
+        rank += 1
+        staves[skill]['rank'] = rank
+        staves['total_sp'] -= sp_cost
+        staves[skill]['rb'] = rb[rank - 1]
+        staves['total_ranks'] += 1
+        char.msg(f"Created {skillset} and added {skill} of rank {rank} with rank bonus of {staves[skill]['rb']}.")
