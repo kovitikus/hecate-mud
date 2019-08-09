@@ -59,14 +59,12 @@ class CmdLearnSkill(Command):
             self.caller.msg("Usage: learn <skillset> <skill>")
             raise InterruptCommand
 
-        for i in skillsets.VIABLE_SKILLSETS:
-            if self.skillset != i:
-                self.caller.msg(f"{self.skillset} is not a viable skillset!")
-                raise InterruptCommand
-        for i in skillsets.VIABLE_SKILLS:
-            if self.skill != i:
-                self.caller.msg(f"{self.skill} is not a viable skill of {self.skillset}!")
-                raise InterruptCommand
+        if self.skillset not in skillsets.VIABLE_SKILLSETS:
+            self.caller.msg(f"{self.skillset} is not a viable skillset!")
+            raise InterruptCommand
+        if self.skill not in skillsets.VIABLE_SKILLS:
+            self.caller.msg(f"{self.skill} is not a viable skill of {self.skillset}!")
+            raise InterruptCommand
 
     def func(self):
         if not self.args:
