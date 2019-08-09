@@ -74,16 +74,26 @@ class CmdGrantSP(Command):
         try:
             self.person, self.number, self.skill = args.split(" ", 2)
         except ValueError:
-            self.caller.msg("Requires 3 arguments. Usage: @grant <person> <number> <skill>")
+            self.caller.msg("Requires 3 arguments. Usage: @grant-sp <person> <number> <skill>")
             raise InterruptCommand
+
+        self.char = self.caller.search(self.person)
+        if not self.char:
+            raise InterruptCommand
+
         try:
             self.number = int(self.number)
         except ValueError:
             self.caller.msg("The number must be an integer.")
             raise InterruptCommand
+
+        for i in skillsets.VIABLE_SKILLSETS:
+            if not self.skill == i:
+                self.caller.msg(f"{self.skill} is not a viable skillset!")
+                raise InterruptCommand
     
     def func(self):
-        char = self.caller.search(self.person)
+        char = self.char
         num = self.number
         skill = self.skill
         skill = char.attributes.get(skill)
