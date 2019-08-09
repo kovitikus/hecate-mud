@@ -14,9 +14,7 @@ def skill_level(rank, difficulty):
     501 to 1,000 += 0.025
     1,001 to infinity += 0.01
     '''
-    #Temp Values
     rb = 0
-    rank = 100
 
     #Formula
     if rank:
@@ -160,7 +158,7 @@ def learn_skill(char, skillset, skill):
 
     difficulty = skillsets[skillset][skill]['difficulty']
     
-    # Set the per rank SP cost of the skill.
+    # Set the per rank SP cost and rank bonus dictionary of the skill.
     sp_cost = 0
     if difficulty == 'easy':
         rb = easy_rb
@@ -200,4 +198,4 @@ def learn_skill(char, skillset, skill):
         staves['total_sp'] -= sp_cost
         staves[skill]['rb'] = rb[rank - 1]
         staves['total_ranks'] += 1
-        char.msg(f"Created {skillset} and added {skill} of rank {rank} with rank bonus of {staves[skill]['rb']}.")
+        char.msg(f"You have learned rank {rank} of {skillset} {skill}, earning the rank bonus of {staves[skill]['rb']}.")

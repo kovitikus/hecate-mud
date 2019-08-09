@@ -55,7 +55,6 @@ class CmdLearnSkill(Command):
         except ValueError:
             self.caller.msg("Invalid usage. Enter two words separated by a space.")
             raise InterruptCommand
-        self.caller.msg(f'Skillset is {self.skillset!r} and skill is {self.skill!r}')
 
     def func(self):
         if not self.args:
