@@ -1,6 +1,6 @@
 from evennia.utils.dbserialize import deserialize
 
-VIABLE_SKILLSETS = ('staves')
+VIABLE_SKILLSETS = ['staves']
 
 def skill_level(rank, difficulty):
     '''
