@@ -47,14 +47,26 @@ class CmdCharGen(Command):
 
 class CmdLearnSkill(Command):
     key = 'learn'
+    """
+    Usage: learn <skillset> <skill>
+    """
 
     def parse(self):
         args = self.args.lstrip()
         try:
             self.skillset, self.skill = args.split(" ", 1)
         except ValueError:
-            self.caller.msg("Invalid usage. Enter two words separated by a space.")
+            self.caller.msg("Usage: learn <skillset> <skill>")
             raise InterruptCommand
+
+        for i in skillsets.VIABLE_SKILLSETS:
+            if self.skillset != i:
+                self.caller.msg(f"{self.skillset} is not a viable skillset!")
+                raise InterruptCommand
+        for i in skillsets.VIABLE_SKILLS:
+            if self.skill != i:
+                self.caller.msg(f"{self.skill} is not a viable skill of {self.skillset}!")
+                raise InterruptCommand
 
     def func(self):
         if not self.args:
@@ -101,3 +113,7 @@ class CmdGrantSP(Command):
         self.caller.msg(f'Granted {char} {num} skillpoints in {self.skill}.')
 
 
+class CmdTest(Command):
+    key = 'testy'
+    def func(self):
+        self.caller.msg(skillsets.skill_list)

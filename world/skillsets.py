@@ -1,6 +1,3 @@
-from evennia.utils.dbserialize import deserialize
-
-VIABLE_SKILLSETS = ['staves']
 
 def skill_level(rank, difficulty):
     '''
@@ -117,28 +114,40 @@ for i in range(1, 1_001):
 
 # Skillsets
 skillsets = {'staves': 
-            {'leg_sweep': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+            {'leg sweep': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
             'feint': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-            'end_jab': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'end jab': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
             'swat': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'simple_strike': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'side_strike': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'pivot_smash': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'longarm_strike': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'simple_block': {'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
-            'cross_block': {'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
-            'overhead_block': {'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'parting_jab': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'parting_swat': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-            'parting_smash': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'defensive_sweep': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-            'stepping_spin': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'simple strike': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'side strike': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'pivot smash': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'longarm strike': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+            'simple block': {'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
+            'cross block': {'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
+            'overhead block': {'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+            'parting jab': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'parting swat': {'damge_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+            'parting smash': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+            'defensive sweep': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+            'stepping spin': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
             'snapstrike': {'damge_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'sweep_strike': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ('low', 'high')},
+            'sweep strike': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ('low', 'high')},
             'spinstrike': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
             'tbash': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'whirling_block': {'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-            'pivoting_longarm': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'}}}
+            'whirling block': {'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+            'pivoting longarm': {'damge_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'}}}
+
+# Create lists of the skillsets and their skills.
+VIABLE_SKILLSETS = []
+VIABLE_SKILLS = []
+temp_skill_list = []
+for k, v in skillsets.items():
+    VIABLE_SKILLSETS.append(k)
+    temp_skill_list.append(v)
+for i in temp_skill_list:
+    for k, v in i.items():
+        VIABLE_SKILLS.append(k)
+    
 
 def learn_skill(char, skillset, skill):
     '''
@@ -176,28 +185,25 @@ def learn_skill(char, skillset, skill):
         sp_cost = 11
     
     # Check if the skillset is not already learned and if not, create it.
-    if not char.attributes.get(skillset):
+    if not char.attributes.has(skillset):
         #Check for general skill points required to learn.
         if not gsp >= sp_cost:
             char.msg('You do not have enough general skill points to learn this skillset.')
             return
-        if skillset == 'staves':
-            char.db.staves = {'total_sp': sp_cost, 'total_ranks': 0}
+        char.attributes.add(skillset, {'total_sp': sp_cost, 'total_ranks': 0})
         char.db.gsp -= sp_cost
-        
-    staves = char.db.staves
-    d_skill = char.db.staves.get(skill)
-    # Check for stave skills.
-    if skillset == 'staves':
-        if not staves['total_sp'] >= sp_cost:
-            char.msg('You do not have enough skill points to learn this skill.')
-            return
-        if not d_skill:
-            staves[skill] = {'rank': 0, 'rb': 0}
-        rank = staves[skill]['rank']
-        rank += 1
-        staves[skill]['rank'] = rank
-        staves['total_sp'] -= sp_cost
-        staves[skill]['rb'] = rb[rank - 1]
-        staves['total_ranks'] += 1
-        char.msg(f"You have learned rank {rank} of {skillset} {skill}, earning the rank bonus of {staves[skill]['rb']}.")
+
+    d_skillset = char.attributes.get(skillset)
+    total_sp = d_skillset['total_sp']
+    if not total_sp >= sp_cost:
+        char.msg('You do not have enough skill points to learn this skill.')
+        return
+    if not d_skillset.get(skill):
+        d_skillset[skill] = {'rank': 0, 'rb': 0}
+    rank = d_skillset[skill]['rank']
+    rank += 1
+    d_skillset[skill]['rank'] = rank
+    d_skillset['total_sp'] -= sp_cost
+    d_skillset[skill]['rb'] = rb[rank - 1]
+    d_skillset['total_ranks'] += 1
+    char.msg(f"You have spent {sp_cost} SP to learn rank {rank} of {skillset} {skill}, earning the rank bonus of {d_skillset[skill]['rb']}.")

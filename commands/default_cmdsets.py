@@ -41,6 +41,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStaveBash())
         self.add(command.CmdLearnSkill())
         self.add(command.CmdGrantSP())
+        self.add(command.CmdTest())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
