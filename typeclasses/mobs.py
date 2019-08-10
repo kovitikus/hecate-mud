@@ -24,3 +24,8 @@ class DefaultMob(DefaultCharacter):
                 location.msg_contents(f'{mob} breathes a final breath and expires.')
         return
         
+class Rat(DefaultMob):
+    def at_object_creation(self):
+        pass
+    def bite(self):
+        pass

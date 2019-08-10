@@ -8,7 +8,7 @@ Commands describe the input the account can do to the game.
 from evennia import Command as BaseCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
-from world import skillsets
+from world import skillsets, attack_desc
 
 
 class Command(BaseCommand):
@@ -114,4 +114,11 @@ class CmdGrantSP(Command):
 class CmdTest(Command):
     key = 'testy'
     def func(self):
-        self.caller.msg(skillsets.skill_list)
+        attacker = self.caller
+        target = 'rat'
+        damage_type = 'bruise'
+        damage_tier = 2
+        body_part = 'head'
+        attacker_desc, target_desc = attack_desc.create_attack_desc(attacker, target, damage_type, damage_tier, body_part)
+        self.caller.msg(attacker_desc)
+        self.caller.msg(target_desc)
