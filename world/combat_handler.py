@@ -1,4 +1,6 @@
 from evennia import utils
+from world import skillsets
+from world import build_skill_str
 import time
 import random
 
@@ -6,42 +8,7 @@ class CombatHandler:
     def __init__(self, owner):
         self.owner = owner
 
-    wound_tier = {'slash': ['shallow cut', 'cut', 'deep cut', 'severe cut', 'devastating cut'],
-    'pierce': ['faint wound', 'puncture', 'deep puncture', 'severe puncture', 'gaping wound'],
-    'bruise': ['small bruise', 'bruise', 'ugly bruise', 'major bruise', 'fracture']}
-
-
-    def create_attack_desc(self, attacker, target, damage_type, damage_tier, body_part):
-        attack_wound = self.wound_tier[damage_type][damage_tier]
-        determiner = 'an' if attack_wound[0] in ['a', 'e', 'i', 'o', 'u'] else 'a'
-
-        if not attacker.attributes.has('figure'):
-            a_gender_pos = 'its'
-            a_gender_sin = 'it'
-        elif attacker.db.figure['gender'] == 'male':
-            a_gender_pos = 'his'
-            a_gender_sin = 'he'
-        elif attacker.db.figure['gender'] == 'female':
-            a_gender_pos = 'her'
-            a_gender_sin = 'she'
-
-        if not target.attributes.has('figure'):
-            t_gender_pos = 'its'
-            t_gender_sin = 'it'
-        elif target.db.figure['gender'] == 'male':
-            t_gender_pos = 'his'
-            t_gender_sin = 'he'
-        elif target.db.figure['gender'] == 'female':
-            t_gender_pos = 'her'
-            t_gender_sin = 'she'
-
-
-        attacker_desc = str.capitalize(f"{t_gender_sin} suffers {determiner} {attack_wound} to {t_gender_pos} {body_part}.")
-        target_desc = str.capitalize(f"you suffer {determiner} {attack_wound} to your {body_part}.")
-
-        return attacker_desc, target_desc
-
-    def attack(self, target, damage_type):  
+    def attack(self, target, damage_type, skillset, skill):  
         damage = 20
 
         # Create cooldown attribute if non-existent.
@@ -74,10 +41,13 @@ class CombatHandler:
         damage_tier = 0
         body_part = 'head'
 
-        a_desc, t_desc = self.create_attack_desc(self.owner, target, damage_type, damage_tier, body_part)
+        a_desc, t_desc = build_skill_str.create_attack_desc(self.owner, target, damage_type, damage_tier, body_part)
+        outcome = a_desc
+        success_attack = skillsets.skillsets[skillset][skill]['attack_desc']['self']
+        weapon = 'quarterstave'
 
         if roll > success:
-            self.owner.msg(f"[Success: {success} Roll: {roll}] You bash {target} with your stave! " + a_desc)
+            self.owner.msg(f"[Success: {success} Roll: {roll}] " + success_attack + " and hit! " + a_desc)
             self.take_damage(target, damage)
         else:
             self.owner.msg(f"[Success: {success} Roll: {roll}] You miss {target} with your stave!")
@@ -91,7 +61,7 @@ class CombatHandler:
         hp = target.db.hp
         hp -= damage
         target.db.hp = hp
-        
+
         location.msg_contents(f'{mob} has {hp} health remaining!')
         if hp >= 1:
             target.db.ko = False

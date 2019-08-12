@@ -26,4 +26,4 @@ class CmdStaveBash(BaseCommand):
             self.caller.msg('You cannot attack that target!')
             return
         damage_type = skillsets.skillsets['staves']['swat']['damage_type']
-        self.caller.combat.attack(target, damage_type)
+        self.caller.combat.attack(target, damage_type, 'staves', 'swat')
