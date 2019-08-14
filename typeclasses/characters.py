@@ -14,8 +14,9 @@ class Player_Character(DefaultCharacter):
         return CombatHandler(self)
 
     def at_object_creation(self):
-        self.db.gsp = 10
-        self.db.approached = []
+        self.attributes.add('gsp', 10)
+        self.attributes.add('approached', [])
+        self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
 
     def return_appearance(self, looker, **kwargs):
         if not looker:

@@ -10,9 +10,9 @@ import random
 
 class DefaultMob(DefaultCharacter):
     def at_object_creation(self):
-        self.db.hp = 100
-        self.db.ko = False
-        self.db.approached = []
+        self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
+        self.attributes.add('ko', False)
+        self.attributes.add('approached', [])
 
     @lazy_property
     def combat(self):

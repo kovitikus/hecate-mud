@@ -107,38 +107,45 @@ class CombatHandler:
 
         if roll > success:
             self.owner.msg(f"[Success: {success} Roll: {roll}] " + " and hit! ")
+            target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and hits!|n")
             self.take_damage(target, damage)
         else:
             self.owner.msg(f"[Success: {success} Roll: {roll}] You miss {target} with your stave!")
+            target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and misses!|n")
         utils.delay(3, self.unbusy)
         self.owner.db.attack_cd = now
 
     def take_damage(self, target, damage):
-        mob = target.key
+        t_name = target.key
         location = target.location
-        mob_app = target.attributes.get('approached')
+        targ_app = target.attributes.get('approached')
         
-        hp = target.db.hp
-        hp -= damage
-        target.db.hp = hp
+        hp = target.attributes.get('hp')
+        current_hp = hp['current_hp']
+        current_hp -= damage
+        target.db.hp['current_hp'] = current_hp
 
-        location.msg_contents(f'{mob} has {hp} health remaining!')
-        if hp >= 1:
+        location.msg_contents(f'{t_name} has {current_hp} health remaining!')
+        if current_hp >= 1:
             target.db.ko = False
-        elif hp <= 0 and target.db.ko != True:
+        elif current_hp <= 0 and target.db.ko != True:
             target.db.ko = True
-            location.msg_contents(f'{mob} falls unconscious!')
-        if hp <= -100:
+            location.msg_contents(f'{t_name} falls unconscious!')
+        if current_hp <= -100:
             # Check for
-            for a in mob_app:
+            for a in targ_app:
                 ap_list = a.attributes.get('approached')
                 ap_list.remove(target)
-            okay = target.delete()
-            if not okay:
-                location.msg_contents(f'\nERROR: {mob} not deleted, probably because delete() returned False.')
+            if not target.has_account:
+                okay = target.delete()
+                if not okay:
+                    location.msg_contents(f'\nERROR: {t_name} not deleted, probably because delete() returned False.')
+                else:
+                    location.msg_contents(f'{t_name} breathes a final breath and expires.')
             else:
-                location.msg_contents(f'{mob} breathes a final breath and expires.')
-        return
+                target.db.hp['current_hp'] = target.db.hp['max_hp']
+                location.msg_contents(f"{t_name} dies and is resurrected to max HP.", exclude=target)
+                target.msg("You die and are resurrected to full HP.")
     
     def unbusy(self):
             self.owner.msg('|yYou are no longer busy.|n')
