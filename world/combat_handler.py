@@ -44,6 +44,27 @@ class CombatHandler:
         
         a_app.clear()
     
+    def success_calc(self, target, skillset, skill):
+        a_skillset = self.owner.attributes.get(skillset)
+        a_skill = a_skillset.get(skill)
+        a_rb = a_skill.get('rb')
+
+        t_rb = 0
+
+        if a_rb > t_rb:
+            bonus = a_rb - t_rb
+            success = 50 - bonus
+        elif t_rb > a_rb:
+            loss = t_rb - a_rb
+            success = 50 + loss
+        else:
+            success = 50
+
+        return success
+            
+
+
+
     def attack(self, target, damage_type, skillset, skill):  
         damage = 20
 
@@ -68,21 +89,24 @@ class CombatHandler:
             self.owner.msg(message)
             return
 
-        # roll = random.randint(1, 100)
-        # success = random.randint(5, 95)
-        roll = 100
-        success = 0
-
+        roll = random.randint(1, 100)
+        success = self.success_calc(target, skillset, skill)
+        if success < 5 or target.db.ko == True:
+            success = 5
+        elif success > 95:
+            success = 95
+        
+        
         #temp values
         damage_tier = 0
         body_part = 'head'
 
-        a_desc, t_desc = build_skill_str.create_attack_desc(self.owner, target, damage_type, damage_tier, body_part)
-        outcome = a_desc
-        weapon = 'quarterstave'
+        # a_desc, t_desc = build_skill_str.create_attack_desc(self.owner, target, damage_type, damage_tier, body_part)
+        # outcome = a_desc
+        # weapon = 'quarterstave'
 
         if roll > success:
-            self.owner.msg(f"[Success: {success} Roll: {roll}] " + success_attack + " and hit! " + a_desc)
+            self.owner.msg(f"[Success: {success} Roll: {roll}] " + " and hit! ")
             self.take_damage(target, damage)
         else:
             self.owner.msg(f"[Success: {success} Roll: {roll}] You miss {target} with your stave!")
@@ -92,6 +116,7 @@ class CombatHandler:
     def take_damage(self, target, damage):
         mob = target.key
         location = target.location
+        mob_app = target.attributes.get('approached')
         
         hp = target.db.hp
         hp -= damage
@@ -104,6 +129,10 @@ class CombatHandler:
             target.db.ko = True
             location.msg_contents(f'{mob} falls unconscious!')
         if hp <= -100:
+            # Check for
+            for a in mob_app:
+                ap_list = a.attributes.get('approached')
+                ap_list.remove(target)
             okay = target.delete()
             if not okay:
                 location.msg_contents(f'\nERROR: {mob} not deleted, probably because delete() returned False.')
