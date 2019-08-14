@@ -41,37 +41,30 @@ class Rat(DefaultMob):
         app_len = len(approached)
         if app_len >= 1:
             target = approached[0]
-            print(target)
             return target
 
         # If approached is empty, find new target and approach it.
         visible = []
-        print('Location: ', self.location)
-        print('Location contents: ', self.location.contents)
-        for targ in self.location.contents:
-            if targ.has_account:
-                if targ != self:
+        for targ in self.location.contents_get(exclude=self):
+            if targ.has_account and not targ.is_superuser:
                     visible.append(targ)
-        print('Visible list: ', visible)
         t_len = len(visible)
+        if not t_len:
+            return
         
-        # Pick target from visible targets.
+        # Pick random target from visible targets.
         rand_targ = random.randrange(t_len)
-        print('Random target number: ', rand_targ)
         target = visible[rand_targ - 1]
         # self.combat.approach(self, target)
-        print('Target is: ', target)
         return target
 
     def claw(self):
         target = self.get_target()
-        print('Target is: ', target)
         damage_type = self.rat_skills['claw']['damage_type']
         skillset = 'rat'
         skill = 'claw'
-
-        self.combat.attack(target, damage_type, skillset, skill)
-        utils.delay(3, self.claw)
+        if target:
+            self.combat.attack(target, damage_type, skillset, skill)
 
     def bite(self):
         pass

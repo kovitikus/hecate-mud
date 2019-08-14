@@ -65,7 +65,11 @@ class CombatHandler:
 
 
 
-    def attack(self, target, damage_type, skillset, skill):  
+    def attack(self, target, damage_type, skillset, skill):
+        if self.owner.db.ko == True:
+            self.owner.msg("You can't do that while unconscious!")
+            return
+
         damage = 20
 
         # Create cooldown attribute if non-existent.
@@ -106,11 +110,11 @@ class CombatHandler:
         # weapon = 'quarterstave'
 
         if roll > success:
-            self.owner.msg(f"[Success: {success} Roll: {roll}] " + " and hit! ")
+            self.owner.msg(f"|430[Success: {success} Roll: {roll}] " + " and hit! |n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and hits!|n")
             self.take_damage(target, damage)
         else:
-            self.owner.msg(f"[Success: {success} Roll: {roll}] You miss {target} with your stave!")
+            self.owner.msg(f"|430[Success: {success} Roll: {roll}] You miss {target} with your stave!|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and misses!|n")
         utils.delay(3, self.unbusy)
         self.owner.db.attack_cd = now
@@ -146,6 +150,7 @@ class CombatHandler:
                 target.db.hp['current_hp'] = target.db.hp['max_hp']
                 location.msg_contents(f"{t_name} dies and is resurrected to max HP.", exclude=target)
                 target.msg("You die and are resurrected to full HP.")
+                target.db.ko = False
     
     def unbusy(self):
             self.owner.msg('|yYou are no longer busy.|n')
