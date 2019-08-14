@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 from commands import command
-from commands.combat import CmdStaveBash
+from commands import combat
 
 
 
@@ -38,10 +38,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         self.add(command.CmdDesc())
         self.add(command.CmdCharGen())
-        self.add(CmdStaveBash())
+        self.add(combat.CmdStaveBash())
         self.add(command.CmdLearnSkill())
         self.add(command.CmdGrantSP())
         self.add(command.CmdTest())
+        self.add(combat.Approach())
+        self.add(combat.Retreat())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """

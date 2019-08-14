@@ -15,6 +15,7 @@ class Player_Character(DefaultCharacter):
 
     def at_object_creation(self):
         self.db.gsp = 10
+        self.db.approached = []
 
     def return_appearance(self, looker, **kwargs):
         if not looker:
