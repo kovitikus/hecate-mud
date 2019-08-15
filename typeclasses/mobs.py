@@ -36,7 +36,7 @@ class Rat(DefaultMob):
 
 
     def get_target(self):
-        # Set target to first approached.
+        # Set target to first approached if already approached.
         approached = self.attributes.get('approached')
         app_len = len(approached)
         if app_len >= 1:
