@@ -13,6 +13,7 @@ class DefaultMob(DefaultCharacter):
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
         self.attributes.add('ko', False)
         self.attributes.add('approached', [])
+        self.attributes.add('busy', False)
 
     @lazy_property
     def combat(self):

@@ -85,7 +85,7 @@ class CombatHandler:
         time_remaining = cooldown - now
 
         # Inform the attacker that they are in cooldown and exit the function.
-        if time_remaining > 0:
+        if time_remaining > 0 or self.owner.db.busy == True:
             if time_remaining >= 2:
                 message = f"You need to wait {int(time_remaining)} more seconds."
             elif time_remaining >= 1 and time_remaining < 2:
@@ -103,7 +103,6 @@ class CombatHandler:
             success = 5
         elif success > 95:
             success = 95
-        
         
         #temp values
         damage_tier = 0
@@ -131,13 +130,14 @@ class CombatHandler:
             self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
 
         utils.delay(3, self.unbusy)
+        self.owner.db.busy = True
         self.owner.db.attack_cd = now
 
     def take_damage(self, target, damage):
         t_name = target.key
         location = target.location
         targ_app = target.attributes.get('approached')
-        print('targ_app is: ', targ_app)
+        print('Target\'s approached list is: ', targ_app)
         
         hp = target.attributes.get('hp')
         current_hp = hp['current_hp']
@@ -153,12 +153,13 @@ class CombatHandler:
         if current_hp <= -100:
             # Check for
             for a in targ_app:
-                print('This is a in targ_app: ', a)
+                print('This is a in target\'s approached list: ', a)
                 ap_list = a.attributes.get('approached')
-                print('this is the approached of the target: ', ap_list)
+                print('This is the approached list of the attacker: ', ap_list)
                 if ap_list:
                     ap_list.remove(target)
-            targ_app.remove(self.owner)
+            if targ_app:
+                targ_app.remove(self.owner)
             if not target.has_account:
                 okay = target.delete()
                 if not okay:
@@ -173,3 +174,4 @@ class CombatHandler:
     
     def unbusy(self):
             self.owner.msg('|yYou are no longer busy.|n')
+            self.owner.db.busy = False

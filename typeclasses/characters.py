@@ -17,6 +17,7 @@ class Player_Character(DefaultCharacter):
         self.attributes.add('gsp', 10)
         self.attributes.add('approached', [])
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
+        self.attributes.add('busy', False)
 
     def return_appearance(self, looker, **kwargs):
         if not looker:
