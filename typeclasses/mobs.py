@@ -55,7 +55,7 @@ class Rat(DefaultMob):
         # Pick random target from visible targets.
         rand_targ = random.randrange(t_len)
         target = visible[rand_targ - 1]
-        # self.combat.approach(self, target)
+        self.combat.approach(self, target)
         return target
 
     def claw(self):

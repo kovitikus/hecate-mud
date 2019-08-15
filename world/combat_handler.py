@@ -137,6 +137,7 @@ class CombatHandler:
         t_name = target.key
         location = target.location
         targ_app = target.attributes.get('approached')
+        print('targ_app is: ', targ_app)
         
         hp = target.attributes.get('hp')
         current_hp = hp['current_hp']
@@ -152,8 +153,12 @@ class CombatHandler:
         if current_hp <= -100:
             # Check for
             for a in targ_app:
+                print('This is a in targ_app: ', a)
                 ap_list = a.attributes.get('approached')
-                ap_list.remove(target)
+                print('this is the approached of the target: ', ap_list)
+                if ap_list:
+                    ap_list.remove(target)
+            targ_app.remove(self.owner)
             if not target.has_account:
                 okay = target.delete()
                 if not okay:
