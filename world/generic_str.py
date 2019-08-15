@@ -1,3 +1,4 @@
+cap = str.capitalize
 vowels = ['a', 'e', 'i', 'o', 'u']
 
 consonant_vowels = ['amazigh', 'euboean', 'eucharist', 'eumenides', 'eurasian', 'euro-american', 'europe', 
@@ -43,3 +44,10 @@ def pronoun(char):
         singular_subject = 'she'
         singular_object = 'her'
     return possessive, singular_subject, singular_object
+
+def proper_name(char):
+    if not char.attributes.has('figure'):
+        name = char.key
+    elif char.db.figure['gender'] == 'male' or 'female':
+        name = cap(char.key)
+    return name

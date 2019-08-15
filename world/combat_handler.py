@@ -66,6 +66,8 @@ class CombatHandler:
 
 
     def attack(self, target, damage_type, skillset, skill):
+        attacker = self.owner
+
         if self.owner.db.ko == True:
             self.owner.msg("You can't do that while unconscious!")
             return
@@ -95,6 +97,8 @@ class CombatHandler:
 
         roll = random.randint(1, 100)
         success = self.success_calc(target, skillset, skill)
+
+        # Make sure that the success is never below 5 or above 95 and always 5 if the target is unconscious.
         if success < 5 or target.db.ko == True:
             success = 5
         elif success > 95:
@@ -110,12 +114,22 @@ class CombatHandler:
         # weapon = 'quarterstave'
 
         if roll > success:
-            self.owner.msg(f"|430[Success: {success} Roll: {roll}] " + " and hit! |n")
-            target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and hits!|n")
+            hit = True
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, damage_type, damage_tier, body_part, hit)
+
+            self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
+            self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
             self.take_damage(target, damage)
+
         else:
-            self.owner.msg(f"|430[Success: {success} Roll: {roll}] You miss {target} with your stave!|n")
-            target.msg(f"|r[Success: {success} Roll: {roll}] {self.owner} attacks you and misses!|n")
+            hit = False
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, damage_type, damage_tier, body_part, hit)
+
+            self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
+            self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
+
         utils.delay(3, self.unbusy)
         self.owner.db.attack_cd = now
 
