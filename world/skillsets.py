@@ -62,6 +62,29 @@ def skill_level(rank, difficulty):
         return rb # Return if any rank.
     return None # Return if no rank.
 
+def defense_calc(self, target, skillset, skill):
+        """
+        Defensive rank bonus includes up to 3 layers of defense.
+        The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
+        The second highest RB will supply 50% and the third will only be worth 33%.
+        Each layer can only consist of a single defensive manuever from each of the following categories:
+            Weapon Blocks, Combat Manuever Dodges, and Shield Blocks.
+            Weapons that require 2 hands can only ever gain 2 defensive layers. Shields are the only way to gain all 3 layers.
+
+        For Example:
+        Staves Mid Block with 100 Rank Bonus * 1 = 100
+        CM Mid Dodge with 80 Rank Bonus * 0.5 = 40
+        Total Mid Defensive Rank Bonus = 140
+
+        Swords Mid Block with 100 Rank Bonus * 0.33 = 33
+        CM Mid Dodge with 150 Rank Bonus * 0.5 = 75
+        Shield Mid Block with 200 Rank Bonus * 1 = 200
+        Total Mid Defensive Rank Bonus = 308
+
+        Decimal places are used to determine the highest RB priority, but only whole numbers rounded down are used to determine the total RB.
+        """
+        pass
+
 def rb_stance(self, o_rb, d_rb, stance):
     '''
     o_rb = Offensive Rank Bonus

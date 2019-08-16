@@ -45,6 +45,10 @@ class CombatHandler:
         a_app.clear()
     
     def success_calc(self, target, skillset, skill):
+        """
+        Only whole numbers rounded down are used to determine the offensive RB.
+        TO DO: ADD A ROUND DOWN!!
+        """
         a_skillset = self.owner.attributes.get(skillset)
         a_skill = a_skillset.get(skill)
         a_rb = a_skill.get('rb')
@@ -61,9 +65,6 @@ class CombatHandler:
             success = 50
 
         return success
-            
-
-
 
     def attack(self, target, damage_type, skillset, skill):
         attacker = self.owner
