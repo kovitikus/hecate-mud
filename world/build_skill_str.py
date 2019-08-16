@@ -10,8 +10,8 @@ def create_attack_desc(attacker, target, skillset, skill, damage_type, damage_ti
     weapon = 'quarterstave'
 
     wound_tier = {'slash': ['shallow cut', 'cut', 'deep cut', 'severe cut', 'devastating cut'],
-        'pierce': ['faint wound', 'puncture', 'deep puncture', 'severe puncture', 'gaping wound'],
-        'bruise': ['small bruise', 'bruise', 'ugly bruise', 'major bruise', 'fracture']}
+                'pierce': ['faint wound', 'puncture', 'deep puncture', 'severe puncture', 'gaping wound'],
+                'bruise': ['small bruise', 'bruise', 'ugly bruise', 'major bruise', 'fracture']}
     attack_wound = wound_tier[damage_type][damage_tier]
 
     # Attacker and target pronouns. Possessive (its, his, her), Singular Subject (it, he, she), Singular Object (it, him, her)
@@ -34,76 +34,129 @@ def create_attack_desc(attacker, target, skillset, skill, damage_type, damage_ti
         t_outcome = f"{c_a_name} misses!"
         o_outcome = f"{c_a_name} misses!"
 
-    skillsets = {'staves': {'leg sweep': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'feint': {'attack_desc': {'attacker': f"You sweep your {weapon} at {target}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'end jab': {'attack_desc': {'attacker': f"You sweep your {weapon} at {target}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'swat': {'attack_desc': {'attacker': f"Using the center of {art_weap} {weapon} as a fulcrum, you swat at {t_name} with one end of the weapon! {a_outcome}",
-                                            'target': f"Using the center of {art_weap} {weapon} as a fulcrum, {attacker} swats at you with one end of the weapon! {t_outcome}",
-                                            'others': f"Using the center of {art_weap} {weapon} as a fulcrum, {attacker} swats at {t_name} with one end of the weapon! {o_outcome}"}},
-
-            'simple strike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'side strike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'pivot smash': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'longarm strike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'simple block': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'cross block': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'overhead block': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'parting jab': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'parting swat': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'parting smash': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'defensive sweep': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'stepping spin': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'snapstrike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'sweep strike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'spinstrike': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'tbash': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'whirling block': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}},
-
-            'pivoting longarm': {'attack_desc': {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
-                                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}}},
+    skillsets = {'staves': 
+                    {'leg sweep': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'feint': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {target}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'end jab': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {target}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'swat': 
+                        {'attack_desc': 
+                            {'attacker': f"Using the center of {art_weap} {weapon} as a fulcrum, you swat at {t_name} with one end of the weapon! {a_outcome}",
+                            'target': f"Using the center of {art_weap} {weapon} as a fulcrum, {attacker} swats at you with one end of the weapon! {t_outcome}",
+                            'others': f"Using the center of {art_weap} {weapon} as a fulcrum, {attacker} swats at {t_name} with one end of the weapon! {o_outcome}"}
+                        },
+                    'simple strike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'side strike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'pivot smash': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'longarm strike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'simple block': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'cross block': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'overhead block': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'parting jab': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'parting swat': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'parting smash': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'defensive sweep': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'stepping spin': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'snapstrike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'sweep strike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'spinstrike': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },         
+                    'tbash': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'whirling block': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        },
+                    'pivoting longarm': 
+                        {'attack_desc': 
+                            {'attacker': f"You sweep your {weapon} at {t_name}\'s legs, {a_outcome}",
+                            'others': f"{c_a_name} sweeps {art_weap} {weapon} at {t_name}\'s legs, {o_outcome}"}
+                        }
+                    },
                                             
-            'rat': {'claw': {'attack_desc': {'attacker': f"You claw at {t_name} with your front paws! {a_outcome}",
-                                                'target': f"{c_a_name} claws at you with {a_poss} front paws! {t_outcome}",
-                                                'others': f"{c_a_name} claws at {t_name} with {a_poss} front paws! {o_outcome}"}}}}
+                'rat': 
+                    {'claw': 
+                        {'attack_desc': 
+                            {'attacker': f"You claw at {t_name} with your front paws! {a_outcome}",
+                            'target': f"{c_a_name} claws at you with {a_poss} front paws! {t_outcome}",
+                            'others': f"{c_a_name} claws at {t_name} with {a_poss} front paws! {o_outcome}"}
+                        }
+                    }
+                }
 
     attacker_desc = skillsets[skillset][skill]['attack_desc']['attacker']
     target_desc = skillsets[skillset][skill]['attack_desc']['target']
