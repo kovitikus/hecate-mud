@@ -14,10 +14,21 @@ class Player_Character(DefaultCharacter):
         return CombatHandler(self)
 
     def at_object_creation(self):
+        # Stats
         self.attributes.add('gsp', 10)
-        self.attributes.add('approached', [])
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
+
+        # Statuses
+        self.attributes.add('approached', [])
+        self.attributes.add('ko', False)
+        self.attributes.add('feinted', None)
         self.attributes.add('busy', False)
+
+        # Skills
+        self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})
+        self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
+        
+        
 
     def return_appearance(self, looker, **kwargs):
         if not looker:

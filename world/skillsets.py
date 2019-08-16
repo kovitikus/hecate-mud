@@ -81,8 +81,9 @@ def defense_calc(self, target, skillset, skill):
         Shield Mid Block with 200 Rank Bonus * 1 = 200
         Total Mid Defensive Rank Bonus = 308
 
-        Decimal places are used to determine the highest RB priority, but only whole numbers rounded down are used to determine the total RB.
+        Floats are used to determine the highest RB priority, but only rounded down integers are used to determine the total RB.
         """
+
         pass
 
 def rb_stance(self, o_rb, d_rb, stance):
@@ -251,6 +252,76 @@ def learn_skill(char, skillset, skill):
     rank += 1
     d_skillset[skill]['rank'] = rank
     d_skillset['total_sp'] -= sp_cost
-    d_skillset[skill]['rb'] = rb[rank - 1]
+    rb = rb[rank - 1]
+    d_skillset[skill]['rb'] = rb
     d_skillset['total_ranks'] += 1
     char.msg(f"You have spent {sp_cost} SP to learn rank {rank} of {skillset} {skill}, earning the rank bonus of {d_skillset[skill]['rb']}.")
+
+
+
+    # Setup the defensive skill attributes for future High, Mid, Low defensive layering calculations.
+    d_skill = skillsets[skillset][skill]
+    print('d_skill is equal to: ', d_skill)
+    default_aim = []
+    default_aim.append(d_skill['default_aim'])
+    print('the d_skill default_aim is equal to: ', default_aim)
+    damage_type = d_skill['damage_type']
+    print('the d_skill damage_type is equal to: ', damage_type)
+    def_skills = char.attributes.get('def_skills')
+    print('def_skills has been acquired as such: ', def_skills)
+
+    if len(default_aim) == 1:
+        print('Now we are inside the default aim == 1 block.')
+        d_a = default_aim[0]
+        print('d_a was once the default_aim list, but is now: ', d_a)
+        if damage_type == 'weapon_block':
+            print('The damage_type of "weapon_block" has been accessed.')
+            if not skillset in def_skills:
+                print('the def_skills skillset was not found in the ', d_a, 'key and will be created.')
+                def_skills['weapon'][d_a] = {skillset}
+                if not skill in def_skills:
+                    print('the def_skills skill was not found in the ', d_a, skillset, 'key and will be created.')
+                    d_s = def_skills.get(skillset)
+                    d_s = {skill}
+            d_s = def_skills.get(skill)
+            d_s = rb
+
+    
+        elif damage_type == 'dodge':
+            def_skills['dodge'][default_aim][skillset][skill] = rb
+
+        elif damage_type == 'shield_block':
+            def_skills['dodge'][default_aim][skillset][skill] = rb
+
+    elif len(default_aim) == 2:
+        d_a1, d_a2 = default_aim
+        if damage_type == 'weapon_block':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+    
+        elif damage_type == 'dodge':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+
+        elif damage_type == 'shield_block':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+
+    elif len(default_aim) == 3:
+        d_a1, d_a2, d_a3 = default_aim
+        if damage_type == 'weapon_block':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+            def_skills['weapon'][d_a3][skillset][skill] = rb
+    
+        elif damage_type == 'dodge':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+            def_skills['weapon'][d_a3][skillset][skill] = rb
+
+        elif damage_type == 'shield_block':
+            def_skills['weapon'][d_a1][skillset][skill] = rb
+            def_skills['weapon'][d_a2][skillset][skill] = rb
+            def_skills['weapon'][d_a3][skillset][skill] = rb
+
+

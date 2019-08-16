@@ -10,10 +10,20 @@ import random
 
 class DefaultMob(DefaultCharacter):
     def at_object_creation(self):
+        # Stats
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
-        self.attributes.add('ko', False)
+
+        # Statuses
         self.attributes.add('approached', [])
+        self.attributes.add('ko', False)
+        self.attributes.add('feinted', None)
         self.attributes.add('busy', False)
+
+        # Skills
+        self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})
+        self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
+        
+
 
     @lazy_property
     def combat(self):
