@@ -45,6 +45,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdGet())
         self.add(command.CmdInhand())
         self.add(command.CmdDrop())
+        self.add(command.CmdStow())
         self.add(combat_cmds.Approach())
         self.add(combat_cmds.Retreat())
         self.add(combat_cmds.CmdStaveBash())
