@@ -41,6 +41,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdLearnSkill())
         self.add(command.CmdGrantSP())
         self.add(command.CmdTest())
+        self.add(command.CmdInventory())
         self.add(combat_cmds.Approach())
         self.add(combat_cmds.Retreat())
         self.add(combat_cmds.CmdStaveBash())

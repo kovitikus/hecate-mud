@@ -32,7 +32,7 @@ class Command(BaseCommand):
     """
     pass
 
-class CmdDesc(BaseCommand):
+class CmdDesc(Command):
     key = "desc"
     def func(self):
         desc = self.caller.desc()
@@ -122,3 +122,37 @@ class CmdTest(Command):
         attacker_desc, target_desc = attack_desc.create_attack_desc(attacker, target, damage_type, damage_tier, body_part)
         self.caller.msg(attacker_desc)
         self.caller.msg(target_desc)
+
+class CmdInventory(Command):
+    """
+    view inventory
+    Usage:
+      inventory
+      inv
+    Shows your inventory.
+    """
+    key = "inventory"
+    aliases = ["inv", "i"]
+    locks = "cmd:all()"
+    arg_regex = r"$"
+
+    def func(self):
+        """check inventory"""
+        items = self.caller.contents
+        print('The original items list: ', items)
+
+        # Remove unwanted items.
+        filtered_items = []
+        for i in items:
+            print('Item of the for loop: ', i)
+            if not i.key in ['right hand', 'left hand']:
+                filtered_items.append(i)
+
+        if not filtered_items:
+            string = "You are not carrying anything."
+        else:
+            table = self.styled_table(border="header")
+            for item in filtered_items:
+                table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
+            string = f"|wYou are carrying:\n{table}"
+        self.caller.msg(string)

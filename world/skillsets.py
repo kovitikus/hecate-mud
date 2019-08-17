@@ -155,11 +155,11 @@ skillsets = {'staves':
                 'longarm strike': 
                     {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
                 'simple block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
+                    {'damage_type': 'weapon_block', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': ['mid', 'low']},
                 'cross block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ('mid', 'low')},
+                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ['mid', 'low']},
                 'overhead block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ['high']},
                 'parting jab': 
                     {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
                 'parting swat': 
@@ -173,13 +173,13 @@ skillsets = {'staves':
                 'snapstrike': 
                     {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
                 'sweep strike': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ('low', 'high')},
+                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
                 'spinstrike': 
                     {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
                 'tbash': 
                     {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
                 'whirling block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'damage_type': 'weapon_block', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['high']},
                 'pivoting longarm': 
                     {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'}
                 }
@@ -261,67 +261,28 @@ def learn_skill(char, skillset, skill):
 
     # Setup the defensive skill attributes for future High, Mid, Low defensive layering calculations.
     d_skill = skillsets[skillset][skill]
-    print('d_skill is equal to: ', d_skill)
-    default_aim = []
-    default_aim.append(d_skill['default_aim'])
-    print('the d_skill default_aim is equal to: ', default_aim)
+    def_a = d_skill.get('default_aim')
     damage_type = d_skill['damage_type']
-    print('the d_skill damage_type is equal to: ', damage_type)
     def_skills = char.attributes.get('def_skills')
-    print('def_skills has been acquired as such: ', def_skills)
 
-    if len(default_aim) == 1:
-        print('Now we are inside the default aim == 1 block.')
-        d_a = default_aim[0]
-        print('d_a was once the default_aim list, but is now: ', d_a)
+    for d_a in def_a:
         if damage_type == 'weapon_block':
-            print('The damage_type of "weapon_block" has been accessed.')
             if not skillset in def_skills:
-                print('the def_skills skillset was not found in the ', d_a, 'key and will be created.')
-                def_skills['weapon'][d_a] = {skillset}
+                def_skills['weapon'][d_a] = {skillset: None}
                 if not skill in def_skills:
-                    print('the def_skills skill was not found in the ', d_a, skillset, 'key and will be created.')
-                    d_s = def_skills.get(skillset)
-                    d_s = {skill}
-            d_s = def_skills.get(skill)
-            d_s = rb
-
+                    def_skills['weapon'][d_a][skillset] = {skill: None}
+            def_skills['weapon'][d_a][skillset][skill] = rb
     
         elif damage_type == 'dodge':
-            def_skills['dodge'][default_aim][skillset][skill] = rb
+            if not skillset in def_skills:
+                def_skills['weapon'][d_a] = {skillset: None}
+                if not skill in def_skills:
+                    def_skills['weapon'][d_a][skillset] = {skill: None}
+            def_skills['weapon'][d_a][skillset][skill] = rb
 
         elif damage_type == 'shield_block':
-            def_skills['dodge'][default_aim][skillset][skill] = rb
-
-    elif len(default_aim) == 2:
-        d_a1, d_a2 = default_aim
-        if damage_type == 'weapon_block':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-    
-        elif damage_type == 'dodge':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-
-        elif damage_type == 'shield_block':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-
-    elif len(default_aim) == 3:
-        d_a1, d_a2, d_a3 = default_aim
-        if damage_type == 'weapon_block':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-            def_skills['weapon'][d_a3][skillset][skill] = rb
-    
-        elif damage_type == 'dodge':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-            def_skills['weapon'][d_a3][skillset][skill] = rb
-
-        elif damage_type == 'shield_block':
-            def_skills['weapon'][d_a1][skillset][skill] = rb
-            def_skills['weapon'][d_a2][skillset][skill] = rb
-            def_skills['weapon'][d_a3][skillset][skill] = rb
-
-
+            if not skillset in def_skills:
+                def_skills['weapon'][d_a] = {skillset: None}
+                if not skill in def_skills:
+                    def_skills['weapon'][d_a][skillset] = {skill: None}
+            def_skills['weapon'][d_a][skillset][skill] = rb

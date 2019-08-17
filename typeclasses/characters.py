@@ -1,5 +1,5 @@
 from evennia import DefaultCharacter
-from collections import defaultdict
+from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 from world.combat_handler import CombatHandler
 
@@ -27,6 +27,13 @@ class Player_Character(DefaultCharacter):
         # Skills
         self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})
         self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
+
+        # Hands
+        if not 'left hand' or 'right hand' in self.contents:
+            left_hand = create_object(typeclass='objects.ObjHands', key='left hand', location=self, home=self)
+            right_hand = create_object(typeclass='objects.ObjHands', key='right hand', location=self, home=self)
+            self.attributes.add('left_hand', left_hand.contents)
+            self.attributes.add('right_hand', right_hand.contents)
         
         
 
