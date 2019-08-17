@@ -363,3 +363,70 @@ class CmdStow(Command):
 
         # calling at_get hook method
         obj.at_get(caller)
+
+class CmdWield(Command):
+    """
+    Wield a weapon.
+    
+    Usage: wield <weapon>
+    """
+    key = 'wield'
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage: wield <weapon>")
+            return
+        args = self.args.strip()
+        left_hand, right_hand = get_hands(caller)
+        obj = caller.search(args, location=[caller, left_hand, right_hand],
+                            nofound_string="You must be holding a weapon to wield it.",
+                            multimatch_string=f"There are more than one {args}.")
+        if not obj:
+            return
+        if obj == caller:
+            caller.msg("You can't wield yourself.")
+            return
+        if not obj.attributes.get('wieldable'):
+            caller.msg("That's not a wieldable item.")
+
+        hands_req = obj.attributes.get('wieldable')
+
+        left_cont = left_hand.contents
+        right_cont = right_hand.contents
+        print(f'left hand contents is {left_cont} and right hand contents is {right_cont}.')
+
+
+        if obj.location == caller:
+            caller.msg(f"You get {obj.name} from your inventory.")
+            caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
+            if right_cont:
+                caller.msg(f"You stow away {right_cont}.")
+                right_cont.move_to(caller, quiet=True)
+        if obj.location in (left_hand, right_hand):
+            if hands_req == 1:
+                if obj.location == left_hand:
+                    caller.msg(f"You swap the contents of your hands and wield {obj.name} in your right hand.")
+                    caller.location.msg_contents(f"{caller.name} swaps the content of their hands and wields {obj.name} in their right hand.", exclude=caller)
+                    obj.move_to(right_hand, quiet=True)
+                    right_cont.move_to(left_hand, quiet=True)
+                    caller.db.wielding = {obj.name: 'right'}
+                elif obj.location == right_hand:
+                    caller.msg(f"You wield {obj.name} in your right hand.")
+                    caller.location.msg_contents(f"{caller.name} wields {obj.name} in their right hand.", exclude=caller)
+                    caller.db.wielding = {obj.name: 'right'}
+            elif hands_req == 2:
+                if obj.location == left_hand:
+                    caller.msg(f"You stow away {right_cont}.")
+                    caller.location.msg_contents(f"{caller.name} stows away {right_cont}.", exclude=caller)
+                    right_cont.move_to(caller, quiet=True)
+                elif obj.location == right_hand:
+                    caller.msg(f"You stow away {left_cont}.")
+                    caller.location.msg_contents(f"{caller.name} stows away {left_cont}.", exclude=caller)
+                    left_cont.move_to(caller, quiet=True)
+                caller.msg(f"You wield {obj.name} in both hands.")
+                caller.location.msg_contents(f"{caller.name} wields {obj.name} in both hands.", exclude=caller)
+                caller.db.wielding = {obj.name: 'both'}
+        elif obj.location == caller.locations:
+            caller.msg(f"You must be carrying a weapon to wield it.")
+            return

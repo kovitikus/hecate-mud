@@ -23,17 +23,21 @@ class Player_Character(DefaultCharacter):
         self.attributes.add('ko', False)
         self.attributes.add('feinted', None)
         self.attributes.add('busy', False)
+        self.attributes.add('wielding', None)
 
         # Skills
         self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})
         self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 
         # Hands
-        if not 'left hand' or 'right hand' in self.contents:
-            left_hand = create_object(typeclass='objects.ObjHands', key='left hand', location=self, home=self)
-            right_hand = create_object(typeclass='objects.ObjHands', key='right hand', location=self, home=self)
-            self.attributes.add('left_hand', left_hand.contents)
-            self.attributes.add('right_hand', right_hand.contents)
+        left = self.search('left hand', quiet=True)
+        right = self.search('right hand', quiet=True)
+        if not left:
+            create_object(typeclass='objects.ObjHands', key='left hand', location=self, home=self)
+        if not right:
+            create_object(typeclass='objects.ObjHands', key='right hand', location=self, home=self)
+        self.attributes.add('left_hand', None)
+        self.attributes.add('right_hand', None)
         
         
 
