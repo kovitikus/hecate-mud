@@ -9,6 +9,7 @@ from evennia import Command as BaseCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
 from world import skillsets, attack_desc
+from typeclasses.objects import ObjHands
 
 
 class Command(BaseCommand):
@@ -139,13 +140,11 @@ class CmdInventory(Command):
     def func(self):
         """check inventory"""
         items = self.caller.contents
-        print('The original items list: ', items)
 
         # Remove unwanted items.
         filtered_items = []
         for i in items:
-            print('Item of the for loop: ', i)
-            if not i.key in ['right hand', 'left hand']:
+            if not i.is_typeclass('typeclasses.objects.ObjHands'):
                 filtered_items.append(i)
 
         if not filtered_items:
@@ -156,3 +155,140 @@ class CmdInventory(Command):
                 table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
             string = f"|wYou are carrying:\n{table}"
         self.caller.msg(string)
+
+class CmdGet(Command):
+    """
+    pick up something
+    Usage:
+      get <obj>
+    Picks up an object from your location and puts it in
+    your inventory.
+    """
+    key = "get"
+    aliases = ["take",]
+    locks = "cmd:all()"
+    arg_regex = r"\s|$"
+
+    def func(self):
+        """implements the command."""
+
+        caller = self.caller
+
+        if not self.args:
+            caller.msg("Get what?")
+            return
+        self.args = self.args.strip()
+        obj = caller.search(self.args, location=(caller.location or caller))
+        if not obj:
+            return
+        if caller == obj:
+            caller.msg("You can't get yourself.")
+            return
+        if not obj.access(caller, 'get'):
+            if obj.db.get_err_msg:
+                caller.msg(obj.db.get_err_msg)
+            else:
+                caller.msg("You can't get that.")
+            return
+
+        # calling at_before_get hook method
+        if not obj.at_before_get(caller):
+            return
+        
+        # Find the character's hands and assign the hand objects to variables.
+        right_hand = caller.search('right hand', location=caller)
+        left_hand = caller.search('left hand', location=caller)
+
+        obj.move_to(right_hand, quiet=True)
+        caller.msg(f"You pick up {obj.name}.")
+        caller.location.msg_contents(f"{caller.name} picks up {obj.name}.", exclude=caller)
+        # calling at_get hook method
+        obj.at_get(caller)
+
+class CmdInhand(Command):
+    key = 'inhand'
+    aliases = 'inh'
+    def func(self):
+        items = self.caller.contents
+        for item in items:
+            if item.key == 'left hand':
+                left_hand = item
+            elif item.key == 'right hand':
+                right_hand = item
+        left_cont = left_hand.contents
+        right_cont = right_hand.contents
+
+        left_str = ''
+        right_str = ''
+
+        if left_cont:
+            for i in left_cont:
+                left_str = i.key
+        else:
+            left_str = 'nothing'
+        if right_cont:
+            for i in right_cont:
+                right_str = i.key
+        else:
+            right_str = 'nothing'
+        if left_str and right_str == 'nothing':
+            self.caller.msg(f"Your hands are empty.")
+            return
+        
+        self.caller.msg(f"You are holding {left_str} in your left hand and {right_str} in your right hand.")
+
+class CmdDrop(Command):
+    """
+    drop something
+    Usage:
+      drop <obj>
+    Lets you drop an object from your inventory into the
+    location you are currently in.
+    """
+
+    key = "drop"
+    locks = "cmd:all()"
+    arg_regex = r"\s|$"
+
+    def func(self):
+        """Implement command"""
+
+        caller = self.caller
+        if not self.args:
+            caller.msg("Drop what?")
+            return
+        self.args = self.args.strip()
+
+        items = self.caller.contents
+        for item in items:
+            if item.key == 'left hand':
+                left_hand = item
+            elif item.key == 'right hand':
+                right_hand = item
+        
+        obj = caller.search(self.args, location=[left_hand, right_hand, caller],
+                            nofound_string=' ',
+                            multimatch_string=f"You are carrying more than one {self.args}.")
+        # if not obj:
+        #     # If the object is not in the character's hands, search their inventory instead.
+        #     obj = caller.search(self.args, location=caller,
+        #                         nofound_string=' ',
+        #                         multimatch_string=f"You are carrying more than one {self.args}.")
+        if not obj:
+            caller.msg(f"You aren't carrying {self.args}.")
+            return
+
+        # Call the object script's at_before_drop() method.
+        if not obj.at_before_drop(caller):
+            return
+
+        if obj.location == caller:
+            caller.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
+            caller.location.msg_contents(f"{caller.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=caller)
+        else:
+            caller.msg(f"You drop {obj.name}.")
+            caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
+        obj.move_to(caller.location, quiet=True)
+
+        # Call the object script's at_drop() method.
+        obj.at_drop(caller)
