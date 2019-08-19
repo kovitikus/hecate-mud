@@ -317,6 +317,9 @@ class CmdDrop(Command):
         args = self.args.strip()
 
         left_hand, right_hand = get_hands(caller)
+
+        wielding = caller.db.wielding
+        left_wield, right_wield, both_wield  = wielding.values()
         
         obj = caller.search(args, location=[left_hand, right_hand, caller, caller.location],
                             nofound_string=f"You can't find {args}.",
@@ -332,8 +335,14 @@ class CmdDrop(Command):
             caller.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
             caller.location.msg_contents(f"{caller.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=caller)
         elif obj.location in [left_hand, right_hand]:
-            caller.msg(f"You drop {obj.name}.")
-            caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
+            # If the dropped object is currently wielded, stop wielding it and drop it.
+            if obj in [left_wield, right_wield, both_wield]:
+                caller.msg(f"You stop wielding {obj.name} and drop it.")
+                caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and drops it.", exclude=caller)
+                wielding['left'], wielding['right'], wielding['both'] = None, None, None
+            else:
+                caller.msg(f"You drop {obj.name}.")
+                caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
         elif obj.location == caller.location:
             caller.msg(f"The {obj.name} is already on the ground.")
             return
@@ -366,6 +375,8 @@ class CmdStow(Command):
         args = self.args.strip()
 
         left_hand, right_hand = get_hands(caller)
+        wielding = caller.db.wielding
+        left_wield, right_wield, both_wield  = wielding.values()
         
         obj = caller.search(args, location=[left_hand, right_hand, caller.location, caller],
                             nofound_string=f"You can't find {args}.",
@@ -386,9 +397,15 @@ class CmdStow(Command):
         if not obj.at_before_get(caller):
             return
         
-        if obj.location in (left_hand, right_hand):
-            caller.msg(f"You stow away {obj.name}.")
-            caller.location.msg_contents(f"{caller.name} stows away {obj.name}.", exclude=caller)
+        if obj.location in [left_hand, right_hand]:
+            # If the stowed object is currently wielded, stop wielding it and stow it.
+            if obj in [left_wield, right_wield, both_wield]:
+                caller.msg(f"You stop wielding {obj.name} and stow it away.")
+                caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and stows it away.", exclude=caller)
+                wielding['left'], wielding['right'], wielding['both'] = None, None, None
+            else:
+                caller.msg(f"You stow away {obj.name}.")
+                caller.location.msg_contents(f"{caller.name} stows away {obj.name}.", exclude=caller)
         elif obj.location == caller.location:
             caller.msg(f"You pick up {obj.name} and stow it away.")
             caller.location.msg_contents(f"{caller.name} picks up {obj.name} and stows it away.", exclude=caller)
@@ -439,12 +456,14 @@ class CmdWield(Command):
 
 
         if obj.location == caller:
-            caller.msg(f"You get {obj.name} from your inventory.")
-            caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
             if right_cont:
                 caller.msg(f"You stow away {right_item.name}.")
                 right_item.move_to(caller, quiet=True)
-        if obj.location in (left_hand, right_hand):
+            caller.msg(f"You get {obj.name} from your inventory.")
+            caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
+            obj.move_to(right_hand, quiet=True)
+            
+        if obj.location in [left_hand, right_hand]:
             if hands_req == 1:
                 if obj.location == left_hand:
                     caller.msg(f"You swap the contents of your hands and wield {obj.name} in your right hand.")
@@ -470,7 +489,7 @@ class CmdWield(Command):
                 caller.msg(f"You wield {obj.name} in both hands.")
                 caller.location.msg_contents(f"{caller.name} wields {obj.name} in both hands.", exclude=caller)
                 caller.db.wielding['both'] = obj
-        elif obj.location == caller.locations:
+        elif obj.location == caller.location:
             caller.msg(f"You must be carrying a weapon to wield it.")
             return
 
