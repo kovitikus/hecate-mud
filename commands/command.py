@@ -6,9 +6,12 @@ Commands describe the input the account can do to the game.
 """
 
 from evennia import Command as BaseCommand
+from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
+from evennia.utils import create
 from world import skillsets, attack_desc
+from world.generic_str import article
 from typeclasses.objects import ObjHands
 
 
@@ -217,7 +220,7 @@ class CmdGet(Command):
     key = "get"
     aliases = ["take",]
     locks = "cmd:all()"
-    arg_regex = r"\s|$"
+    
 
     def func(self):
         """implements the command."""
@@ -304,7 +307,7 @@ class CmdDrop(Command):
 
     key = "drop"
     locks = "cmd:all()"
-    arg_regex = r"\s|$"
+    
 
     def func(self):
         """Implement command"""
@@ -362,7 +365,7 @@ class CmdStow(Command):
 
     key = 'stow'
     locks = 'cmd:all()'
-    arg_regex = r"\s|$"
+    
 
     def func(self):
         """implements the command."""
@@ -514,6 +517,125 @@ class CmdUnwield(Command):
             caller.msg(f"You stop wielding {obj.name}.")
             caller.location.msg_contents(f"{caller.name} stops wielding {obj.name}.", exclude=caller)
             wielding['left'], wielding['right'], wielding['both'] = None, None, None
+
+class CmdLook(Command):
+    """
+    look at location or object
+    Usage:
+      look
+      look <obj>
+      look *<account>
+    Observes your location or objects in your vicinity.
+    """
+    key = "look"
+    aliases = ["l", "ls"]
+    locks = "cmd:all()"
+    
+    def func(self):
+        """
+        Handle the looking.
+        """
+        caller = self.caller
+        left_hand, right_hand = get_hands(caller)
+        if not self.args:
+            target = caller.location
+            if not target:
+                caller.msg("You have no location to look at!")
+                return
+        else:
+            target = caller.search(self.args, location=[caller, caller.location, left_hand, right_hand])
+            if not target:
+                return
+        self.msg((caller.at_look(target), {'type': 'look'}), options=None)
+
+class CmdCreate(ObjManipCommand):
+    """
+    create new objects
+    Usage:
+      create[/drop] <objname>[;alias;alias...][:typeclass], <objname>...
+    switch:
+       drop - automatically drop the new object into your current
+              location (this is not echoed). This also sets the new
+              object's home to the current location rather than to you.
+    Creates one or more new objects. If typeclass is given, the object
+    is created as a child of this typeclass. The typeclass script is
+    assumed to be located under types/ and any further
+    directory structure is given in Python notation. So if you have a
+    correct typeclass 'RedButton' defined in
+    types/examples/red_button.py, you could create a new
+    object of this type like this:
+       create/drop button;red : examples.red_button.RedButton
+    """
+
+    key = "create"
+    switch_options = ("drop",)
+    locks = "cmd:perm(create) or perm(Builder)"
+    help_category = "Building"
+
+    # lockstring of newly created objects, for easy overloading.
+    # Will be formatted with the {id} of the creating object.
+    new_obj_lockstring = "control:id({id}) or perm(Admin);delete:id({id}) or perm(Admin)"
+
+    def func(self):
+        """
+        Creates the object.
+        """
+
+        caller = self.caller
+
+        if not self.args:
+            string = "Usage: create[/drop] <newname>[;alias;alias...] [:typeclass.path]"
+            caller.msg(string)
+            return
+
+        # create the objects
+        for objdef in self.lhs_objs:
+            string = ""
+            name = objdef['name']
+            art = article(name)
+            name = f"{art} {name}"
+            aliases = objdef['aliases']
+            typeclass = objdef['option']
+
+            # create object (if not a valid typeclass, the default
+            # object typeclass will automatically be used)
+            lockstring = self.new_obj_lockstring.format(id=caller.id)
+            obj = create.create_object(typeclass, name, caller,
+                                       home=caller, aliases=aliases,
+                                       locks=lockstring, report_to=caller)
+            if not obj:
+                continue
+            if aliases:
+                string = f"You create a new {obj.typename}: {obj.name} (aliases: {', '.join(aliases)})."
+            else:
+                string = f"You create a new {obj.typename}: {obj.name}."
+            # set a default desc
+            if not obj.db.desc:
+                obj.db.desc = f"You see nothing special about {obj.name}."
+            if 'drop' in self.switches:
+                if caller.location:
+                    obj.home = caller.location
+                    obj.move_to(caller.location, quiet=True)
+        if string:
+            caller.msg(string)
+
+    def _desc_load(caller):
+        return caller.db.evmenu_target.db.desc or ""
+
+
+    def _desc_save(caller, buf):
+        """
+        Save line buffer to the desc prop. This should
+        return True if successful and also report its status to the user.
+        """
+        caller.db.evmenu_target.db.desc = buf
+        caller.msg("Saved.")
+        return True
+
+
+    def _desc_quit(caller):
+        caller.attributes.remove("evmenu_target")
+        caller.msg("Exited editor.")
 
 
 class CmdMatch(Command): # NOT FINISHED
