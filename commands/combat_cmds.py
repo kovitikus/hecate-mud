@@ -79,4 +79,3 @@ class CmdStaveBash(BaseCommand):
             return
         damage_type = skillsets.skillsets['staves']['swat']['damage_type']
         caller.combat.attack(target, 'staves', 'swat', weapon, damage_type)
-        #test
