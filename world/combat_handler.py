@@ -66,7 +66,7 @@ class CombatHandler:
 
         return success
 
-    def attack(self, target, damage_type, skillset, skill):
+    def attack(self, target, skillset, skill, weapon, damage_type):
         attacker = self.owner
 
         if self.owner.db.ko == True:
@@ -115,7 +115,7 @@ class CombatHandler:
 
         if roll > success:
             hit = True
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, damage_type, damage_tier, body_part, hit)
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit)
 
             self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
@@ -124,7 +124,7 @@ class CombatHandler:
 
         else:
             hit = False
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, damage_type, damage_tier, body_part, hit)
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit)
 
             self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")

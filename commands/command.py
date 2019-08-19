@@ -293,7 +293,6 @@ class CmdGet(Command):
         # calling at_get hook method
         obj.at_get(caller)
 
-# TODO Deal with dropping a wielded item.
 class CmdDrop(Command):
     """
     drop something
@@ -352,7 +351,6 @@ class CmdDrop(Command):
         # Call the object script's at_drop() method.
         obj.at_drop(caller)
 
-# TODO Deal with stowing a wielded item.
 class CmdStow(Command):
     """
     pick up something

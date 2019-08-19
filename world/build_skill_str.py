@@ -3,11 +3,9 @@ from world import generic_str
 article = generic_str.article
 pronoun = generic_str.pronoun
 prop_name = generic_str.proper_name
-
-def create_attack_desc(attacker, target, skillset, skill, damage_type, damage_tier, body_part, hit):
+                    
+def create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit):
     cap = str.capitalize
-    # Temp Values
-    weapon = 'quarterstave'
 
     wound_tier = {'slash': ['shallow cut', 'cut', 'deep cut', 'severe cut', 'devastating cut'],
                 'pierce': ['faint wound', 'puncture', 'deep puncture', 'severe puncture', 'gaping wound'],
@@ -24,7 +22,7 @@ def create_attack_desc(attacker, target, skillset, skill, damage_type, damage_ti
     c_t_name = cap(target.key)
 
     # Weapon's article. 'a' or 'an'
-    art_weap = article(weapon)
+    art_weap = article(weapon.name)
     if hit:
         a_outcome = f"{cap(t_sin_sub)} suffers {article(attack_wound)} {attack_wound} to {t_poss} {body_part}."
         t_outcome = f"You suffer {article(attack_wound)} {attack_wound} to your {body_part}."
