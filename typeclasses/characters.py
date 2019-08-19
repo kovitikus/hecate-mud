@@ -23,7 +23,7 @@ class Player_Character(DefaultCharacter):
         self.attributes.add('ko', False)
         self.attributes.add('feinted', None)
         self.attributes.add('busy', False)
-        self.attributes.add('wielding', None)
+        self.attributes.add('wielding', {'left': None, 'right': None, 'both': None})
 
         # Skills
         self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})

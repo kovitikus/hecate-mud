@@ -4,7 +4,8 @@ class Object(DefaultObject):
     pass
 
 class ObjHands(Object):
-    pass
+    def return_appearance(self, looker, **kwargs):
+        looker.msg(f"You see nothing spectacular about your {self.key}.")
 
 class Stave(Object):
     def at_object_creation(self):
