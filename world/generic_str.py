@@ -21,8 +21,9 @@ consonant_vowels = ['amazigh', 'euboean', 'eucharist', 'eumenides', 'eurasian', 
 
 def article(word):
     word.lower()
-
-    if word[0] in vowels:
+    if word in consonant_vowels:
+        article = 'a'
+    elif word[0] in vowels:
         article = 'an'
     elif word in consonant_vowels:
         article = 'a'
