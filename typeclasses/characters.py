@@ -30,14 +30,7 @@ class Player_Character(DefaultCharacter):
         self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 
         # Hands
-        left = self.search('left hand', quiet=True)
-        right = self.search('right hand', quiet=True)
-        if not left:
-            create_object(typeclass='objects.ObjHands', key='left hand', location=self, home=self)
-        if not right:
-            create_object(typeclass='objects.ObjHands', key='right hand', location=self, home=self)
-        self.attributes.add('left_hand', None)
-        self.attributes.add('right_hand', None)
+        self.attributes.add('hands', {'left': None, 'right': None})
         
         
 

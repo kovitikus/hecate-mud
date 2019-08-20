@@ -218,18 +218,18 @@ class CmdInventory(Command):
     key = "inventory"
     aliases = ["inv", "i"]
     locks = "cmd:all()"
-    arg_regex = r"$"
 
     def func(self):
         """check inventory"""
 
         caller = self.caller
         items = caller.contents
+        left_hand, right_hand = caller.db.hands.values()
 
         # Remove hands and append all other items to a new list.
         filtered_items = []
         for i in items:
-            if not i.is_typeclass('objects.ObjHands'):
+            if i not in [left_hand, right_hand]:
                 filtered_items.append(i)
 
         if not filtered_items:
@@ -250,37 +250,35 @@ class CmdInhand(Command):
 
         left_wield, right_wield, both_wield  = caller.db.wielding.values()
 
-        left_hand, right_hand = get_hands(caller)
+        left_hand, right_hand = caller.db.hands.values()
 
-        left_cont = left_hand.contents
-        right_cont = right_hand.contents
+        
+        
 
-        if left_cont:
-            left_item = left_cont[0]
-            left_item = left_item.name
+        if left_hand:
+            left_hand = left_hand.name
         else:
-            left_item = 'nothing'
+            left_hand = 'nothing'
 
-        if right_cont:
-            right_item = right_cont[0]
-            right_item = right_item.name
+        if right_hand:
+            right_hand = right_hand.name
         else:
-            right_item = 'nothing'
+            right_hand = 'nothing'
 
-        if left_item and right_item == 'nothing':
+        if left_hand and right_hand == 'nothing':
             caller.msg(f"Your hands are empty.")
             return
         
         if left_wield and right_wield:
-            caller.msg(f"You are wielding {left_item} in your left hand and {right_item} in your right hand.")
+            caller.msg(f"You are wielding {left_hand} in your left hand and {right_hand} in your right hand.")
         elif left_wield:
-            caller.msg(f"You are wielding {left_item} in your left hand and holding {right_item} in your right hand.")
+            caller.msg(f"You are wielding {left_hand} in your left hand and holding {right_hand} in your right hand.")
         elif right_wield:
-            caller.msg(f"You are holding {left_item} in your left hand and wielding {right_item} in your right hand.")
+            caller.msg(f"You are holding {left_hand} in your left hand and wielding {right_hand} in your right hand.")
         elif both_wield:
-            caller.msg(f"You are wielding {right_item} in both hands.")
+            caller.msg(f"You are wielding {right_hand} in both hands.")
         else:
-            caller.msg(f"You are holding {left_item} in your left hand and {right_item} in your right hand.")
+            caller.msg(f"You are holding {left_hand} in your left hand and {right_hand} in your right hand.")
 
 class CmdGet(Command):
     """
@@ -307,16 +305,10 @@ class CmdGet(Command):
         args = self.args.strip()
 
         left_wield, right_wield, both_wield  = caller.db.wielding.values()
-        left_hand, right_hand = get_hands(caller)
-        left_cont, right_cont = left_hand.contents, right_hand.contents
-
-        if left_cont:
-            left_item  = left_cont[0]
-        if right_cont:
-            right_item = right_cont[0]
+        left_hand, right_hand = caller.db.hands.values()
         
 
-        obj = caller.search(args, location=[caller.location, caller, left_hand, right_hand])
+        obj = caller.search(args, location=[caller.location, caller])
         if not obj:
             return
         if caller == obj:
@@ -328,6 +320,9 @@ class CmdGet(Command):
             else:
                 caller.msg("You can't get that.")
             return
+        if obj in [left_hand, right_hand]:
+            caller.msg(f"You are already carrying {obj.name}.")
+            return
 
         # calling at_before_get hook method
         if not obj.at_before_get(caller):
@@ -335,15 +330,15 @@ class CmdGet(Command):
         
         # Check if wielding a single weapon/shield in left hand and stow it.
         if left_wield:
-            caller.msg(f"You stop wielding {left_item.name} and stow it away.")
-            left_item.move_to(caller, quiet=True)
+            caller.msg(f"You stop wielding {left_hand.name} and stow it away.")
+            caller.db.hands['left'] = None
             caller.db.wielding['left'] = None
 
         # If both hands have objects, stow the dominate hand.
-        if right_cont and left_cont:
-            right_item.move_to(caller, quiet=True)
-            caller.msg(f"You stow away {right_item.name}.")
-            caller.location.msg_contents(f"{caller.name} stows away {right_item.name}.", exclude=caller)
+        if right_hand and left_hand:
+            caller.msg(f"You stow away {right_hand.name}.")
+            caller.location.msg_contents(f"{caller.name} stows away {right_hand.name}.", exclude=caller)
+            caller.db.hands['right'] = None
 
         # Wielding with both hands technically only holds the item in the right hand (for now).
         # So we already know the left hand is free to get items.
@@ -353,21 +348,20 @@ class CmdGet(Command):
             caller.db.wielding['both'] = None
 
         # Decide the location of the item and echo it.
-        if obj.location == caller:
+        elif obj.location == caller:
             caller.msg(f"You get {obj.name} from your inventory.")
             caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
         elif obj.location == caller.location:
             caller.msg(f"You pick up {obj.name}.")
             caller.location.msg_contents(f"{caller.name} picks up {obj.name}.", exclude=caller)
-        elif obj.location in (left_hand, right_hand):
-            caller.msg(f"You are already carrying {obj.name}.")
-            return
 
-        if right_cont and not left_cont:
-            obj.move_to(left_hand, quiet=True)
+        if right_hand and not left_hand:
+            caller.db.hands['left'] = obj
         else:
-            obj.move_to(right_hand, quiet=True)
+            caller.db.hands['right'] = obj
         
+        obj.move_to(caller, quiet=True)
+
         # calling at_get hook method
         obj.at_get(caller)
 
@@ -393,12 +387,12 @@ class CmdDrop(Command):
             return
         args = self.args.strip()
 
-        left_hand, right_hand = get_hands(caller)
+        left_hand, right_hand = caller.db.hands.values()
 
         wielding = caller.db.wielding
         left_wield, right_wield, both_wield  = wielding.values()
         
-        obj = caller.search(args, location=[left_hand, right_hand, caller, caller.location],
+        obj = caller.search(args, location=[caller, caller.location],
                             nofound_string=f"You can't find {args}.",
                             multimatch_string=f"There are more than one {args}.")
         if not obj:
@@ -408,11 +402,9 @@ class CmdDrop(Command):
         if not obj.at_before_drop(caller):
             return
 
-        if obj.location == caller:
-            caller.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
-            caller.location.msg_contents(f"{caller.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=caller)
-        elif obj.location in [left_hand, right_hand]:
-            # If the dropped object is currently wielded, stop wielding it and drop it.
+        
+        if obj in [left_hand, right_hand]:
+            # If the object is currently wielded, stop wielding it and drop it.
             if obj in [left_wield, right_wield, both_wield]:
                 caller.msg(f"You stop wielding {obj.name} and drop it.")
                 caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and drops it.", exclude=caller)
@@ -423,6 +415,13 @@ class CmdDrop(Command):
             else:
                 caller.msg(f"You drop {obj.name}.")
                 caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
+            if obj == left_hand:
+                caller.db.hands['left'] = None
+            else:
+                caller.db.hands['right'] = None
+        elif obj.location == caller:
+            caller.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
+            caller.location.msg_contents(f"{caller.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=caller)
         elif obj.location == caller.location:
             caller.msg(f"The {obj.name} is already on the ground.")
             return
@@ -453,11 +452,11 @@ class CmdStow(Command):
             return
         args = self.args.strip()
 
-        left_hand, right_hand = get_hands(caller)
+        left_hand, right_hand = caller.db.hands.values()
         wielding = caller.db.wielding
         left_wield, right_wield, both_wield  = wielding.values()
         
-        obj = caller.search(args, location=[left_hand, right_hand, caller.location, caller],
+        obj = caller.search(args, location=[caller.location, caller],
                             nofound_string=f"You can't find {args}.",
                             multimatch_string=f"There are more than one {args}.")
         if not obj:
@@ -476,7 +475,7 @@ class CmdStow(Command):
         if not obj.at_before_get(caller):
             return
         
-        if obj.location in [left_hand, right_hand]:
+        if obj in [left_hand, right_hand]:
             # If the stowed object is currently wielded, stop wielding it and stow it.
             if obj in [left_wield, right_wield, both_wield]:
                 caller.msg(f"You stop wielding {obj.name} and stow it away.")
@@ -485,6 +484,10 @@ class CmdStow(Command):
             else:
                 caller.msg(f"You stow away {obj.name}.")
                 caller.location.msg_contents(f"{caller.name} stows away {obj.name}.", exclude=caller)
+            if obj == left_hand:
+                caller.db.hands['left'] = None
+            else:
+                caller.db.hands['right'] = None
         elif obj.location == caller.location:
             caller.msg(f"You pick up {obj.name} and stow it away.")
             caller.location.msg_contents(f"{caller.name} picks up {obj.name} and stows it away.", exclude=caller)
@@ -511,8 +514,8 @@ class CmdWield(Command):
             caller.msg("Usage: wield <weapon>")
             return
         args = self.args.strip()
-        left_hand, right_hand = get_hands(caller)
-        obj = caller.search(args, location=[caller, left_hand, right_hand],
+        left_hand, right_hand = caller.db.hands.values()
+        obj = caller.search(args, location=[caller],
                             nofound_string="You must be holding a weapon to wield it.",
                             multimatch_string=f"There are more than one {args}.")
         if not obj:
@@ -525,64 +528,61 @@ class CmdWield(Command):
 
         hands_req = obj.attributes.get('wieldable')
 
-        left_cont = left_hand.contents
-        right_cont = right_hand.contents
-
-        if left_cont:
-            left_item = left_cont[0]
-        if right_cont:
-            right_item = right_cont[0]
-
         # Right hand is dominate.
 
-        if obj.location == caller: # Automagically get the object from the inventory.
-            if right_cont: #TODO Check for an item already wielded.
-                caller.msg(f"You stow away {right_item.name}.")
-                caller.location.msg_contents(f"{caller.name} stows away {right_item.name}.", exclude=caller)
-                right_item.move_to(caller, quiet=True)
+        if obj not in [left_hand, right_hand]: # Automagically get the object from the inventory.
+            if right_hand: #TODO: Check for an item already wielded.
+                caller.msg(f"You stow away {right_hand.name}.")
+                caller.location.msg_contents(f"{caller.name} stows away {right_hand.name}.", exclude=caller)
+                caller.db.hands['right'] = None
             caller.msg(f"You get {obj.name} from your inventory.")
             caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
-            obj.move_to(right_hand, quiet=True)
+            caller.db.hands['right'] = obj
+            # Refresh hand variables before the next check.
+            left_hand, right_hand = caller.db.hands.values()
             
-        if obj.location in [left_hand, right_hand]:
+        
+        if obj in [left_hand, right_hand]:
             if hands_req == 1:
                 if inherits_from(obj, 'typeclasses.objects.OffHand'): #For wielding shields.
-                    if obj.location == right_hand:
-                        if left_cont: # If theres any item in the left hand, stow it first.
-                            left_item.move_to(caller, quiet=True)
-                            caller.msg(f"You stow away {right_item.name}.")
-                            caller.location.msg_contents(f"{caller.name} stows away {right_item.name}.", exclude=caller)
+                    if obj == right_hand:
+                        if left_hand: # If theres any item in the left hand, stow it first.
+                            caller.db.hands['left'] = None
+                            caller.msg(f"You stow away {right_hand.name}.")
+                            caller.location.msg_contents(f"{caller.name} stows away {right_hand.name}.", exclude=caller)
                         # Send the offhand item to the left hand.
-                        right_item.move_to(left_hand, quiet=True)
+                        caller.db.hands['right'] = None
+                        caller.db.hands['left'] = obj
                         caller.msg(f"You swap {obj.name} to your left hand.")
                         caller.location.msg_contents(f"{caller.name} swaps {obj.name} to their left hand.", exclude=caller)
                     # Offhand item is certainly already in the left hand.
                     caller.msg(f"You wield {obj.name} in your left hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their left hand.", exclude=caller)
                     caller.db.wielding['left'] = obj
-                elif obj.location == left_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
+                elif obj == left_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You swap the contents of your hands and wield {obj.name} in your right hand.")
                     caller.location.msg_contents(f"{caller.name} swaps the content of their hands "
                                                     f"and wields {obj.name} in their right hand.", exclude=caller)
-                    obj.move_to(right_hand, quiet=True)
-                    if right_cont:
-                        right_item.move_to(left_hand, quiet=True)
+                    caller.db.hands['right'] = obj
+                    if right_hand:
+                        caller.db.hands['right'] = None
+                        caller.db.hands['left'] = obj
                     caller.db.wielding['right'] = obj
                 elif obj.location == right_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You wield {obj.name} in your right hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their right hand.", exclude=caller)
                     caller.db.wielding['right'] = obj
             elif hands_req == 2:
-                if obj.location == left_hand:
-                    if right_cont:
-                        caller.msg(f"You stow away {right_item.name}.")
-                        caller.location.msg_contents(f"{caller.name} stows away {right_cont}.", exclude=caller)
-                        right_item.move_to(caller, quiet=True)
-                elif obj.location == right_hand:
-                    if left_cont:
-                        caller.msg(f"You stow away {left_item.name}.")
-                        caller.location.msg_contents(f"{caller.name} stows away {left_cont}.", exclude=caller)
-                        left_item.move_to(caller, quiet=True)
+                if obj == left_hand:
+                    if right_hand:
+                        caller.msg(f"You stow away {right_hand.name}.")
+                        caller.location.msg_contents(f"{caller.name} stows away {right_hand}.", exclude=caller)
+                        caller.db.hands['right'] = None
+                elif obj == right_hand:
+                    if left_hand:
+                        caller.msg(f"You stow away {left_hand.name}.")
+                        caller.location.msg_contents(f"{caller.name} stows away {left_hand}.", exclude=caller)
+                        caller.db.hands['left'] = None
                 caller.msg(f"You wield {obj.name} in both hands.")
                 caller.location.msg_contents(f"{caller.name} wields {obj.name} in both hands.", exclude=caller)
                 caller.db.wielding['both'] = obj
@@ -605,9 +605,6 @@ class CmdUnwield(Command):
 
         for i in wielding.values():
             obj = i
-
-        # left_hand, right_hand = get_hands(caller)
-        # obj = caller.search(wielded_obj, location=[left_hand, right_hand])
 
         if obj:
             caller.msg(f"You stop wielding {obj.name}.")
@@ -632,7 +629,6 @@ class CmdLook(Command):
         Handle the looking.
         """
         caller = self.caller
-        left_hand, right_hand = get_hands(caller)
         if not self.args:
             target = caller.location
             if not target:
@@ -640,13 +636,13 @@ class CmdLook(Command):
                 return
         else:
             args = self.args.strip()
-            target = caller.search(args, location=[caller, caller.location, left_hand, right_hand])
+            target = caller.search(args, location=[caller, caller.location])
             if not target:
                 return
         self.msg((caller.at_look(target), {'type': 'look'}), options=None)
 
 
-class CmdMatch(Command): # NOT FINISHED
+class CmdMatch(Command): #TODO: NOT FINISHED
     """
     Matches object in location or inventory.
 
@@ -669,11 +665,3 @@ class CmdMatch(Command): # NOT FINISHED
         else:
             self.caller.msg(f"Object found {self.args}.")
     pass
-
-
-
-# Helper Functions
-def get_hands(caller):
-    left_hand = caller.search('left hand', location=caller)
-    right_hand = caller.search('right hand', location=caller)
-    return left_hand, right_hand
