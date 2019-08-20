@@ -12,7 +12,6 @@ from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
 from world import skillsets, attack_desc
 from world.generic_str import article
-from typeclasses.objects import ObjHands
 
 
 class Command(BaseCommand):
@@ -252,33 +251,31 @@ class CmdInhand(Command):
 
         left_hand, right_hand = caller.db.hands.values()
 
-        
-        
-
         if left_hand:
-            left_hand = left_hand.name
+            left_item = left_hand.name
         else:
-            left_hand = 'nothing'
+            left_item = 'nothing'
 
         if right_hand:
-            right_hand = right_hand.name
+            right_item = right_hand.name
         else:
-            right_hand = 'nothing'
+            right_item = 'nothing'
 
-        if left_hand and right_hand == 'nothing':
+        if not left_hand and right_hand:
             caller.msg(f"Your hands are empty.")
             return
         
-        if left_wield and right_wield:
-            caller.msg(f"You are wielding {left_hand} in your left hand and {right_hand} in your right hand.")
-        elif left_wield:
-            caller.msg(f"You are wielding {left_hand} in your left hand and holding {right_hand} in your right hand.")
-        elif right_wield:
-            caller.msg(f"You are holding {left_hand} in your left hand and wielding {right_hand} in your right hand.")
+        
+        if left_wield and not right_wield:
+            caller.msg(f"You are wielding {left_item} in your left hand and holding {right_item} in your right hand.")
+        elif right_wield and not left_wield:
+            caller.msg(f"You are holding {left_item} in your left hand and wielding {right_item} in your right hand.")
+        elif left_wield and right_wield:
+            caller.msg(f"You are wielding {left_item} in your left hand and {right_item} in your right hand.")
         elif both_wield:
-            caller.msg(f"You are wielding {right_hand} in both hands.")
+            caller.msg(f"You are wielding {right_item} in both hands.")
         else:
-            caller.msg(f"You are holding {left_hand} in your left hand and {right_hand} in your right hand.")
+            caller.msg(f"You are holding {left_item} in your left hand and {right_item} in your right hand.")
 
 class CmdGet(Command):
     """
@@ -480,7 +477,12 @@ class CmdStow(Command):
             if obj in [left_wield, right_wield, both_wield]:
                 caller.msg(f"You stop wielding {obj.name} and stow it away.")
                 caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and stows it away.", exclude=caller)
-                wielding['left'], wielding['right'], wielding['both'] = None, None, None
+                if obj == left_wield:
+                    wielding['left'] = None
+                elif obj == right_wield:
+                    wielding['right'] = None
+                else:
+                    wielding['both'] = None
             else:
                 caller.msg(f"You stow away {obj.name}.")
                 caller.location.msg_contents(f"{caller.name} stows away {obj.name}.", exclude=caller)
@@ -491,11 +493,10 @@ class CmdStow(Command):
         elif obj.location == caller.location:
             caller.msg(f"You pick up {obj.name} and stow it away.")
             caller.location.msg_contents(f"{caller.name} picks up {obj.name} and stows it away.", exclude=caller)
+            obj.move_to(caller, quiet=True)
         elif obj.location == caller:
             caller.msg(f"You already have {obj.name} in your inventory.")
             return
-
-        obj.move_to(caller, quiet=True)
 
         # calling at_get hook method
         obj.at_get(caller)
@@ -568,7 +569,7 @@ class CmdWield(Command):
                         caller.db.hands['right'] = None
                         caller.db.hands['left'] = obj
                     caller.db.wielding['right'] = obj
-                elif obj.location == right_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
+                elif obj == right_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You wield {obj.name} in your right hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their right hand.", exclude=caller)
                     caller.db.wielding['right'] = obj
