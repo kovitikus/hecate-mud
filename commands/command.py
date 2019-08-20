@@ -9,7 +9,7 @@ from evennia import Command as BaseCommand
 from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
-from evennia.utils import create
+from evennia.utils import create, inherits_from
 from world import skillsets, attack_desc
 from world.generic_str import article
 from typeclasses.objects import ObjHands
@@ -133,6 +133,79 @@ class CmdTest(Command):
         caller.msg(attacker_desc)
         caller.msg(target_desc)
 
+class CmdCreate(ObjManipCommand):
+    """
+    create new objects
+    Usage:
+      create[/drop] <objname>[;alias;alias...][:typeclass], <objname>...
+    switch:
+       drop - automatically drop the new object into your current
+              location (this is not echoed). This also sets the new
+              object's home to the current location rather than to you.
+    Creates one or more new objects. If typeclass is given, the object
+    is created as a child of this typeclass. The typeclass script is
+    assumed to be located under types/ and any further
+    directory structure is given in Python notation. So if you have a
+    correct typeclass 'RedButton' defined in
+    types/examples/red_button.py, you could create a new
+    object of this type like this:
+       create/drop button;red : examples.red_button.RedButton
+    """
+
+    key = "create"
+    switch_options = ("drop",)
+    locks = "cmd:perm(create) or perm(Builder)"
+    help_category = "Building"
+
+    # lockstring of newly created objects, for easy overloading.
+    # Will be formatted with the {id} of the creating object.
+    new_obj_lockstring = "control:id({id}) or perm(Admin);delete:id({id}) or perm(Admin)"
+
+    def func(self):
+        """
+        Creates the object.
+        """
+
+        caller = self.caller
+
+        if not self.args:
+            string = "Usage: create[/drop] <newname>[;alias;alias...] [:typeclass.path]"
+            caller.msg(string)
+            return
+
+        # create the objects
+        for objdef in self.lhs_objs:
+            string = ""
+            name = objdef['name']
+            art = article(name)
+            name = f"{art} {name}"
+            aliases = objdef['aliases']
+            typeclass = objdef['option']
+
+            # create object (if not a valid typeclass, the default
+            # object typeclass will automatically be used)
+            lockstring = self.new_obj_lockstring.format(id=caller.id)
+            obj = create.create_object(typeclass, name, caller,
+                                       home=caller, aliases=aliases,
+                                       locks=lockstring, report_to=caller)
+            if not obj:
+                continue
+            if aliases:
+                string = "You create a new %s: %s (aliases: %s)."
+                string = string % (obj.typename, obj.name, ", ".join(aliases))
+            else:
+                string = "You create a new %s: %s."
+                string = string % (obj.typename, obj.name)
+            # set a default desc
+            if not obj.db.desc:
+                obj.db.desc = "You see nothing special."
+            if 'drop' in self.switches:
+                if caller.location:
+                    obj.home = caller.location
+                    obj.move_to(caller.location, quiet=True)
+        if string:
+            caller.msg(string)
+
 class CmdInventory(Command):
     """
     Shows your inventory.
@@ -156,7 +229,7 @@ class CmdInventory(Command):
         # Remove hands and append all other items to a new list.
         filtered_items = []
         for i in items:
-            if not i.is_typeclass('typeclasses.objects.ObjHands'):
+            if not i.is_typeclass('objects.ObjHands'):
                 filtered_items.append(i)
 
         if not filtered_items:
@@ -200,6 +273,8 @@ class CmdInhand(Command):
         
         if left_wield and right_wield:
             caller.msg(f"You are wielding {left_item} in your left hand and {right_item} in your right hand.")
+        elif left_wield:
+            caller.msg(f"You are wielding {left_item} in your left hand and holding {right_item} in your right hand.")
         elif right_wield:
             caller.msg(f"You are holding {left_item} in your left hand and wielding {right_item} in your right hand.")
         elif both_wield:
@@ -341,7 +416,10 @@ class CmdDrop(Command):
             if obj in [left_wield, right_wield, both_wield]:
                 caller.msg(f"You stop wielding {obj.name} and drop it.")
                 caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and drops it.", exclude=caller)
-                wielding['left'], wielding['right'], wielding['both'] = None, None, None
+                if left_wield:
+                    wielding['left'] = None
+                else:
+                    wielding['right'], wielding['both'] = None, None
             else:
                 caller.msg(f"You drop {obj.name}.")
                 caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
@@ -455,10 +533,12 @@ class CmdWield(Command):
         if right_cont:
             right_item = right_cont[0]
 
+        # Right hand is dominate.
 
-        if obj.location == caller:
-            if right_cont:
+        if obj.location == caller: # Automagically get the object from the inventory.
+            if right_cont: #TODO Check for an item already wielded.
                 caller.msg(f"You stow away {right_item.name}.")
+                caller.location.msg_contents(f"{caller.name} stows away {right_item.name}.", exclude=caller)
                 right_item.move_to(caller, quiet=True)
             caller.msg(f"You get {obj.name} from your inventory.")
             caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
@@ -466,16 +546,32 @@ class CmdWield(Command):
             
         if obj.location in [left_hand, right_hand]:
             if hands_req == 1:
-                if obj.location == left_hand:
+                if inherits_from(obj, 'typeclasses.objects.OffHand'): #For wielding shields.
+                    if obj.location == right_hand:
+                        if left_cont: # If theres any item in the left hand, stow it first.
+                            left_item.move_to(caller, quiet=True)
+                            caller.msg(f"You stow away {right_item.name}.")
+                            caller.location.msg_contents(f"{caller.name} stows away {right_item.name}.", exclude=caller)
+                        # Send the offhand item to the left hand.
+                        right_item.move_to(left_hand, quiet=True)
+                        caller.msg(f"You swap {obj.name} to your left hand.")
+                        caller.location.msg_contents(f"{caller.name} swaps {obj.name} to their left hand.", exclude=caller)
+                    # Offhand item is certainly already in the left hand.
+                    caller.msg(f"You wield {obj.name} in your left hand.")
+                    caller.location.msg_contents(f"{caller.name} wields {obj.name} in their left hand.", exclude=caller)
+                    caller.db.wielding['left'] = obj
+                elif obj.location == left_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You swap the contents of your hands and wield {obj.name} in your right hand.")
-                    caller.location.msg_contents(f"{caller.name} swaps the content of their hands and wields {obj.name} in their right hand.", exclude=caller)
+                    caller.location.msg_contents(f"{caller.name} swaps the content of their hands "
+                                                    f"and wields {obj.name} in their right hand.", exclude=caller)
                     obj.move_to(right_hand, quiet=True)
                     if right_cont:
                         right_item.move_to(left_hand, quiet=True)
-                elif obj.location == right_hand:
+                    caller.db.wielding['right'] = obj
+                elif obj.location == right_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You wield {obj.name} in your right hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their right hand.", exclude=caller)
-                caller.db.wielding['right'] = obj
+                    caller.db.wielding['right'] = obj
             elif hands_req == 2:
                 if obj.location == left_hand:
                     if right_cont:
@@ -543,7 +639,8 @@ class CmdLook(Command):
                 caller.msg("You have no location to look at!")
                 return
         else:
-            target = caller.search(self.args, location=[caller, caller.location, left_hand, right_hand])
+            args = self.args.strip()
+            target = caller.search(args, location=[caller, caller.location, left_hand, right_hand])
             if not target:
                 return
         self.msg((caller.at_look(target), {'type': 'look'}), options=None)
