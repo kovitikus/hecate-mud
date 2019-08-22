@@ -261,7 +261,7 @@ class CmdInhand(Command):
         else:
             right_item = 'nothing'
 
-        if not left_hand and right_hand:
+        if not left_hand and not right_hand:
             caller.msg(f"Your hands are empty.")
             return
         
@@ -516,6 +516,8 @@ class CmdWield(Command):
             return
         args = self.args.strip()
         left_hand, right_hand = caller.db.hands.values()
+        left_wield, right_wield, both_wield = caller.db.wielding.values()
+
         obj = caller.search(args, location=[caller],
                             nofound_string="You must be holding a weapon to wield it.",
                             multimatch_string=f"There are more than one {args}.")
@@ -526,13 +528,17 @@ class CmdWield(Command):
             return
         if not obj.attributes.get('wieldable'):
             caller.msg("That's not a wieldable item.")
+        if obj in [left_wield, right_wield, both_wield]: # Check for an item already wielded.
+            caller.msg(f"You are already wielding {obj.name}.")
+            return
 
         hands_req = obj.attributes.get('wieldable')
 
         # Right hand is dominate.
 
+
         if obj not in [left_hand, right_hand]: # Automagically get the object from the inventory.
-            if right_hand: #TODO: Check for an item already wielded.
+            if right_hand and not right_wield:
                 caller.msg(f"You stow away {right_hand.name}.")
                 caller.location.msg_contents(f"{caller.name} stows away {right_hand.name}.", exclude=caller)
                 caller.db.hands['right'] = None
@@ -546,7 +552,7 @@ class CmdWield(Command):
         if obj in [left_hand, right_hand]:
             if hands_req == 1:
                 if inherits_from(obj, 'typeclasses.objects.OffHand'): #For wielding shields.
-                    if obj == right_hand:
+                    if obj == right_hand and not right_wield:
                         if left_hand: # If theres any item in the left hand, stow it first.
                             caller.db.hands['left'] = None
                             caller.msg(f"You stow away {right_hand.name}.")
@@ -602,15 +608,20 @@ class CmdUnwield(Command):
     def func(self):
         caller = self.caller
         wielding = caller.db.wielding
-        obj = None
-
-        for i in wielding.values():
-            obj = i
-
-        if obj:
-            caller.msg(f"You stop wielding {obj.name}.")
-            caller.location.msg_contents(f"{caller.name} stops wielding {obj.name}.", exclude=caller)
-            wielding['left'], wielding['right'], wielding['both'] = None, None, None
+        left_wield, right_wield, both_wield  = wielding.values()
+        
+        if left_wield:
+            caller.msg(f"You stop wielding {left_wield.name} in your offhand.")
+            caller.location.msg_contents(f"{caller.name} stops wielding {left_wield.name} in their offhand.", exclude=caller)
+            wielding['left'] = None
+        elif right_wield and not left_wield:
+            caller.msg(f"You stop wielding {right_wield.name}.")
+            caller.location.msg_contents(f"{caller.name} stops wielding {right_wield.name}.", exclude=caller)
+            wielding['right'] = None
+        else:
+            caller.msg(f"You stop wielding {both_wield.name}.")
+            caller.location.msg_contents(f"{caller.name} stops wielding {both_wield.name}.", exclude=caller)
+            wielding['both'] = None
 
 class CmdLook(Command):
     """
