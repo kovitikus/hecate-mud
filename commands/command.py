@@ -555,9 +555,9 @@ class CmdWield(Command):
                     if obj == right_hand and not right_wield:
                         if left_hand: # If theres any item in the left hand, stow it first.
                             caller.db.hands['left'] = None
-                            caller.msg(f"You stow away {right_hand.name}.")
-                            caller.location.msg_contents(f"{caller.name} stows away {right_hand.name}.", exclude=caller)
-                        # Send the offhand item to the left hand.
+                            caller.msg(f"You stow away {left_hand.name}.")
+                            caller.location.msg_contents(f"{caller.name} stows away {left_hand.name}.", exclude=caller)
+                        # Send the offhand weapon to the left hand.
                         caller.db.hands['right'] = None
                         caller.db.hands['left'] = obj
                         caller.msg(f"You swap {obj.name} to your left hand.")
