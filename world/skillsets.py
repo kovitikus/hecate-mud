@@ -62,7 +62,7 @@ def skill_level(rank, difficulty):
         return rb # Return if any rank.
     return None # Return if no rank.
 
-def defense_calc(self, target, skillset, skill):
+def defense_layer_calc(char, skillset):
         """
         Defensive rank bonus includes up to 3 layers of defense.
         The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
@@ -82,9 +82,145 @@ def defense_calc(self, target, skillset, skill):
         Total Mid Defensive Rank Bonus = 308
 
         Floats are used to determine the highest RB priority, but only rounded down integers are used to determine the total RB.
+
+        TODO: Add a round down for the final RB.
+
+        High, Mid, and Low always refer to the area 
+        of the body that the attack targets and not the numerical value.
         """
 
-        pass
+        """Weapon Rank Bonus"""
+        weap_dic = char.db.def_skills.get('weapon')
+        weap_high_def = weap_dic.get('high')
+        weap_mid_def = weap_dic.get('mid')
+        weap_low_def = weap_dic.get('low')
+        weap_high_rb = 0.0
+        weap_mid_rb = 0.0
+        weap_low_rb = 0.0
+
+        if weap_high_def.get(skillset):
+            weap_high_dic = weap_high_def.get(skillset)
+            weap_high_dic_values = weap_high_dic.values()
+            for rb in weap_high_dic_values:
+                if rb > weap_high_rb:
+                    weap_high_rb = rb
+
+        if weap_mid_def.get(skillset):
+            weap_mid_dic = weap_mid_def.get(skillset)
+            weap_mid_dic_values = weap_mid_dic.values()
+            for rb in weap_mid_dic_values:
+                if rb > weap_mid_rb:
+                    weap_mid_rb = rb
+
+        if weap_low_def.get(skillset):
+            weap_low_dic = weap_low_def.get(skillset)
+            weap_low_dic_values = weap_low_dic.values()
+            for rb in weap_low_dic_values:
+                if rb > weap_low_rb:
+                    weap_low_rb = rb
+        
+
+        """Dodge Rank Bonus"""
+        dodge_dic = char.db.def_skills.get('dodge')
+        dodge_high_def = dodge_dic.get('high')
+        dodge_mid_def = dodge_dic.get('mid')
+        dodge_low_def = dodge_dic.get('low')
+        dodge_high_rb = 0.0
+        dodge_mid_rb = 0.0
+        dodge_low_rb = 0.0
+
+        if dodge_high_def.get('cms'):
+            dodge_high_dic = dodge_high_def.get('cms')
+            dodge_high_dic_values = dodge_high_dic.values()
+            for rb in dodge_high_dic_values:
+                if rb > dodge_high_rb:
+                    dodge_high_rb = rb
+
+        if dodge_mid_def.get('cms'):
+            dodge_mid_dic = dodge_mid_def.get('cms')
+            dodge_mid_dic_values = dodge_mid_dic.values()
+            for rb in dodge_mid_dic_values:
+                if rb > dodge_mid_rb:
+                    dodge_mid_rb = rb
+
+        if dodge_low_def.get('cms'):
+            dodge_low_dic = dodge_low_def.get('cms')
+            dodge_low_dic_values = dodge_low_dic.values()
+            for rb in dodge_low_dic_values:
+                if rb > dodge_low_rb:
+                    dodge_low_rb = rb
+
+    
+        """Shield Rank Bonus"""
+        shield_dic = char.db.def_skills.get('shield')
+        shield_high_def = shield_dic.get('high')
+        shield_mid_def = shield_dic.get('mid')
+        shield_low_def = shield_dic.get('low')
+        shield_high_rb = 0.0
+        shield_mid_rb = 0.0
+        shield_low_rb = 0.0
+
+        if shield_high_def.get('shield'):
+            shield_high_dic = shield_high_def.get('shield')
+            shield_high_dic_values = shield_high_dic.values()
+            for rb in shield_high_dic_values:
+                if rb > shield_high_rb:
+                    shield_high_rb = rb
+
+        if shield_mid_def.get('shield'):
+            shield_mid_dic = shield_mid_def.get('shield')
+            shield_mid_dic_values = shield_mid_dic.values()
+            for rb in shield_mid_dic_values:
+                if rb > shield_mid_rb:
+                    shield_mid_rb = rb
+
+        if shield_low_def.get('shield'):
+            shield_low_dic = shield_low_def.get('shield')
+            shield_low_dic_values = shield_low_dic.values()
+            for rb in shield_low_dic_values:
+                if rb > shield_low_rb:
+                    shield_low_rb = rb
+
+
+        """
+        Calculate Layering
+        First Highest RB gets 100%
+        Second Highest RB gets 50%
+        Third Highest RB gets 33%
+        """
+
+        """High Layer"""
+        # weap_high_rb, dodge_high_rb, shield_high_rb
+        h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
+        h_rb.sort(reverse=True)
+        h_layer1 = h_rb[0] * 1
+        h_layer2 = h_rb[1] * 0.5
+        h_layer3 = h_rb[2] * 0.33
+        high_def_rb = (h_layer1 + h_layer2 + h_layer3)
+
+        """Mid Layer"""
+        # weap_mid_rb, dodge_mid_rb, shield_mid_rb
+        m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
+        m_rb.sort(reverse=True)
+        m_layer1 = m_rb[0] * 1
+        m_layer2 = m_rb[1] * 0.5
+        m_layer3 = m_rb[2] * 0.33
+        mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
+
+        """Low Layer"""
+        # weap_low_rb, dodge_low_rb, shield_low_rb
+        l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
+        l_rb.sort(reverse=True)
+        l_layer1 = l_rb[0] * 1
+        l_layer2 = l_rb[1] * 0.5
+        l_layer3 = l_rb[2] * 0.33
+        low_def_rb = (l_layer1 + l_layer2 + l_layer3)
+
+        # Assign the values to the character.
+        def_rb = char.db.def_rb
+        def_rb['high'] = high_def_rb
+        def_rb['mid'] = mid_def_rb
+        def_rb['low'] = low_def_rb
 
 def rb_stance(self, o_rb, d_rb, stance):
     '''
@@ -259,7 +395,7 @@ def learn_skill(char, skillset, skill):
 
 
 
-    # Setup the defensive skill attributes for future High, Mid, Low defensive layering calculations.
+    # Setup the defensive skill attributes for High, Mid, Low defensive layering calculations.
     d_skill = skillsets[skillset][skill]
     def_a = d_skill.get('default_aim')
     damage_type = d_skill['damage_type']
@@ -286,3 +422,5 @@ def learn_skill(char, skillset, skill):
                 if not skill in def_skills:
                     def_skills['weapon'][d_a][skillset] = {skill: None}
             def_skills['weapon'][d_a][skillset][skill] = rb
+
+    defense_layer_calc(char, skillset)
