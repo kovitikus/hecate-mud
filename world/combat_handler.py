@@ -46,8 +46,8 @@ class CombatHandler:
     
     def success_calc(self, target, skillset, skill):
         """
-        Only whole numbers rounded down are used to determine the offensive RB.
-        TO DO: ADD A ROUND DOWN!!
+        Only whole numbers (rounded down) are used to determine the offensive RB.
+        TODO: ADD A ROUND DOWN!!
         """
         a_skillset = self.owner.attributes.get(skillset)
         a_skill = a_skillset.get(skill)
@@ -65,6 +65,142 @@ class CombatHandler:
             success = 50
 
         return success
+    
+    def defense_rb(self, skillset):
+        owner = self.owner
+
+        """Weapon Rank Bonus"""
+        weap_dic = owner.db.def_skills.get('weapon')
+        weap_high_def = weap_dic.get('high')
+        weap_mid_def = weap_dic.get('mid')
+        weap_low_def = weap_dic.get('low')
+        weap_high_rb = 0.0
+        weap_mid_rb = 0.0
+        weap_low_rb = 0.0
+
+        if weap_high_def.get(skillset):
+            weap_high_dic = weap_high_def.get(skillset)
+            weap_high_dic_values = weap_high_dic.values()
+            for rb in weap_high_dic_values:
+                if rb > weap_high_rb:
+                    weap_high_rb = rb
+
+        if weap_mid_def.get(skillset):
+            weap_mid_dic = weap_mid_def.get(skillset)
+            weap_mid_dic_values = weap_mid_dic.values()
+            for rb in weap_mid_dic_values:
+                if rb > weap_mid_rb:
+                    weap_mid_rb = rb
+
+        if weap_low_def.get(skillset):
+            weap_low_dic = weap_low_def.get(skillset)
+            weap_low_dic_values = weap_low_dic.values()
+            for rb in weap_low_dic_values:
+                if rb > weap_low_rb:
+                    weap_low_rb = rb
+        
+
+        """Dodge Rank Bonus"""
+        dodge_dic = owner.db.def_skills.get('dodge')
+        dodge_high_def = dodge_dic.get('high')
+        dodge_mid_def = dodge_dic.get('mid')
+        dodge_low_def = dodge_dic.get('low')
+        dodge_high_rb = 0.0
+        dodge_mid_rb = 0.0
+        dodge_low_rb = 0.0
+
+        if dodge_high_def.get(skillset):
+            dodge_high_dic = dodge_high_def.get(skillset)
+            dodge_high_dic_values = dodge_high_dic.values()
+            for rb in dodge_high_dic_values:
+                if rb > dodge_high_rb:
+                    dodge_high_rb = rb
+
+        if dodge_mid_def.get(skillset):
+            dodge_mid_dic = dodge_mid_def.get(skillset)
+            dodge_mid_dic_values = dodge_mid_dic.values()
+            for rb in dodge_mid_dic_values:
+                if rb > dodge_mid_rb:
+                    dodge_mid_rb = rb
+
+        if dodge_low_def.get(skillset):
+            dodge_low_dic = dodge_low_def.get(skillset)
+            dodge_low_dic_values = dodge_low_dic.values()
+            for rb in dodge_low_dic_values:
+                if rb > dodge_low_rb:
+                    dodge_low_rb = rb
+
+    
+        """Shield Rank Bonus"""
+        shield_dic = owner.db.def_skills.get('shield')
+        shield_high_def = shield_dic.get('high')
+        shield_mid_def = shield_dic.get('mid')
+        shield_low_def = shield_dic.get('low')
+        shield_high_rb = 0.0
+        shield_mid_rb = 0.0
+        shield_low_rb = 0.0
+
+        if shield_high_def.get(skillset):
+            shield_high_dic = shield_high_def.get(skillset)
+            shield_high_dic_values = shield_high_dic.values()
+            for rb in shield_high_dic_values:
+                if rb > shield_high_rb:
+                    shield_high_rb = rb
+
+        if shield_mid_def.get(skillset):
+            shield_mid_dic = shield_mid_def.get(skillset)
+            shield_mid_dic_values = shield_mid_dic.values()
+            for rb in shield_mid_dic_values:
+                if rb > shield_mid_rb:
+                    shield_mid_rb = rb
+
+        if shield_low_def.get(skillset):
+            shield_low_dic = shield_low_def.get(skillset)
+            shield_low_dic_values = shield_low_dic.values()
+            for rb in shield_low_dic_values:
+                if rb > shield_low_rb:
+                    shield_low_rb = rb
+
+
+        """
+        Calculate Layering
+        First Highest RB gets 100%
+        Second Highest RB gets 50%
+        Third Highest RB gets 33%
+        """
+
+        """High Layer"""
+        # weap_high_rb, dodge_high_rb, shield_high_rb
+        h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
+        h_rb.sort(reverse=True)
+        h_layer1 = h_rb[0] * 1
+        h_layer2 = h_rb[1] * 0.5
+        h_layer3 = h_rb[2] * 0.33
+        high_def_rb = (h_layer1 + h_layer2 + h_layer3)
+
+        """Mid Layer"""
+        # weap_mid_rb, dodge_mid_rb, shield_mid_rb
+        m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
+        m_rb.sort(reverse=True)
+        m_layer1 = m_rb[0] * 1
+        m_layer2 = m_rb[1] * 0.5
+        m_layer3 = m_rb[2] * 0.33
+        mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
+
+        """Low Layer"""
+        # weap_low_rb, dodge_low_rb, shield_low_rb
+        l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
+        l_rb.sort(reverse=True)
+        l_layer1 = l_rb[0] * 1
+        l_layer2 = l_rb[1] * 0.5
+        l_layer3 = l_rb[2] * 0.33
+        low_def_rb = (l_layer1 + l_layer2 + l_layer3)
+
+        # Assign the values to the character.
+        def_rb = owner.db.def_rb
+        def_rb['high'] = high_def_rb
+        def_rb['mid'] = mid_def_rb
+        def_rb['low'] = low_def_rb
 
     def attack(self, target, skillset, skill, weapon, damage_type):
         attacker = self.owner
