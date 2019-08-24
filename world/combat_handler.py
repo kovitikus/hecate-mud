@@ -92,14 +92,36 @@ class CombatHandler:
 
         return body_part
 
+    def damage_tier(self, success, roll):
+        if roll > success:
+            difference = roll - success
+            if 1 <= difference <= 10:
+                damage_tier = 0
+                damage = random.randrange(1, 4)
+            elif 11 <= difference <= 30:
+                damage_tier = 1
+                damage = random.randrange(5, 8)
+            elif 31 <= difference <= 50:
+                damage_tier = 2
+                damage = random.randrange(9, 12)
+            elif 51 <= difference <= 70:
+                damage_tier = 3
+                damage = random.randrange(13, 16)
+            elif 71 <= difference <= 90:
+                damage_tier = 4
+                damage = random.randrange(17, 20)
+        elif roll <= success:
+            damage_tier = 0
+            damage = 0
+        print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier} Damage: {damage}")
+        return damage_tier, damage
+
     def attack(self, target, skillset, skill, weapon, damage_type, aim):
         attacker = self.owner
 
         if self.owner.db.ko == True:
             self.owner.msg("You can't do that while unconscious!")
             return
-
-        damage = 20
 
         # Create cooldown attribute if non-existent.
         if not self.owner.attributes.has('attack_cd'):
@@ -122,17 +144,20 @@ class CombatHandler:
             self.owner.msg(message)
             return
 
+        # This is where the fun begins.
+
         roll = random.randint(1, 100)
         success = self.success_calc(target, skillset, skill, aim)
 
-        # Make sure that the success is never below 5 or above 95 and always 5 if the target is unconscious.
+        # Make sure that the success is never below 5 or above 95, and always 5 if the target is unconscious.
         if success < 5 or target.db.ko == True:
             success = 5
         elif success > 95:
             success = 95
         
-        damage_tier = 0 #temp value
+        damage_tier, damage = self.damage_tier(success, roll)
 
+        # Randomly choose the body part hit, based on where the attack is aimed.
         body_part = self.body_part_choice(aim)
 
         if roll > success:
