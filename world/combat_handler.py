@@ -44,17 +44,28 @@ class CombatHandler:
         
         a_app.clear()
     
-    def success_calc(self, target, skillset, skill):
+    def success_calc(self, target, skillset, skill, aim):
         """
         Only whole numbers (rounded down) are used to determine the offensive RB.
-        
+
         TODO: Add a round down for the final RB. Integers only!
         """
-        a_skillset = self.owner.attributes.get(skillset)
+        owner = self.owner
+        a_skillset = owner.attributes.get(skillset)
         a_skill = a_skillset.get(skill)
         a_rb = a_skill.get('rb')
 
-        t_rb = 0
+        defen_high = target.db.def_rb['high']
+        defen_mid = target.db.def_rb['mid']
+        defen_low = target.db.def_rb['low']
+
+
+        if aim == 'high':
+            t_rb = defen_high
+        elif aim == 'mid':
+            t_rb = defen_mid
+        elif aim == 'low':
+            t_rb == defen_low
 
         if a_rb > t_rb:
             bonus = a_rb - t_rb
@@ -67,7 +78,7 @@ class CombatHandler:
 
         return success
 
-    def attack(self, target, skillset, skill, weapon, damage_type):
+    def attack(self, target, skillset, skill, weapon, damage_type, aim):
         attacker = self.owner
 
         if self.owner.db.ko == True:
@@ -98,7 +109,7 @@ class CombatHandler:
             return
 
         roll = random.randint(1, 100)
-        success = self.success_calc(target, skillset, skill)
+        success = self.success_calc(target, skillset, skill, aim)
 
         # Make sure that the success is never below 5 or above 95 and always 5 if the target is unconscious.
         if success < 5 or target.db.ko == True:
@@ -109,10 +120,6 @@ class CombatHandler:
         #temp values
         damage_tier = 0
         body_part = 'head'
-
-        # a_desc, t_desc = build_skill_str.create_attack_desc(self.owner, target, damage_type, damage_tier, body_part)
-        # outcome = a_desc
-        # weapon = 'quarterstave'
 
         if roll > success:
             hit = True

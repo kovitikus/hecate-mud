@@ -129,21 +129,21 @@ def defense_layer_calc(char, skillset):
         dodge_mid_rb = 0.0
         dodge_low_rb = 0.0
 
-        if dodge_high_def.get('cms'):
+        if dodge_high_def.get('cm'):
             dodge_high_dic = dodge_high_def.get('cms')
             dodge_high_dic_values = dodge_high_dic.values()
             for rb in dodge_high_dic_values:
                 if rb > dodge_high_rb:
                     dodge_high_rb = rb
 
-        if dodge_mid_def.get('cms'):
+        if dodge_mid_def.get('cm'):
             dodge_mid_dic = dodge_mid_def.get('cms')
             dodge_mid_dic_values = dodge_mid_dic.values()
             for rb in dodge_mid_dic_values:
                 if rb > dodge_mid_rb:
                     dodge_mid_rb = rb
 
-        if dodge_low_def.get('cms'):
+        if dodge_low_def.get('cm'):
             dodge_low_dic = dodge_low_def.get('cms')
             dodge_low_dic_values = dodge_low_dic.values()
             for rb in dodge_low_dic_values:

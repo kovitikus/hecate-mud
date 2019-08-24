@@ -22,7 +22,12 @@ def create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, d
     c_t_name = cap(target.key)
 
     # Weapon's article. 'a' or 'an'
-    art_weap = article(weapon.name)
+    if attacker.attributes.has('wielding'):
+        art_weap = article(weapon.name)
+    else: #TODO:Temp values, eventually fix it so non-weapon-wielding enemies can use this module!
+        art_weap = 'a'
+        weapon = 'claw'
+
     if hit:
         a_outcome = f"{cap(t_sin_sub)} suffers {article(attack_wound)} {attack_wound} to {t_poss} {body_part}."
         t_outcome = f"You suffer {article(attack_wound)} {attack_wound} to your {body_part}."

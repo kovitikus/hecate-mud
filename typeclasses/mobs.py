@@ -74,8 +74,10 @@ class Rat(DefaultMob):
         damage_type = self.rat_skills['claw']['damage_type']
         skillset = 'rat'
         skill = 'claw'
+        weapon = 'claw' #TODO:Fix the weapon requirement for attackers.
+        aim = self.rat_skills['claw']['default_aim']
         if target:
-            self.combat.attack(target, damage_type, skillset, skill)
+            self.combat.attack(target, skillset, skill, weapon, damage_type, aim)
 
     def bite(self):
         pass

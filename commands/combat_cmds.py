@@ -77,5 +77,7 @@ class CmdStaveBash(BaseCommand):
         if not target.attributes.has('hp'):
             caller.msg('You cannot attack that target!')
             return
+
+        aim = skillsets.skillsets['staves']['swat']['default_aim']
         damage_type = skillsets.skillsets['staves']['swat']['damage_type']
-        caller.combat.attack(target, 'staves', 'swat', weapon, damage_type)
+        caller.combat.attack(target, 'staves', 'swat', weapon, damage_type, aim)
