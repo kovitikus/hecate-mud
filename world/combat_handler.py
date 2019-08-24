@@ -78,6 +78,20 @@ class CombatHandler:
 
         return success
 
+    def body_part_choice(self, aim):
+        high_body = ['head', 'face', 'neck', 'left shoulder', 'right shoulder']
+        mid_body = ['chest', 'back', 'left arm', 'left hand', 'right arm', 'right hand', 'waist']
+        low_body = ['left thigh', 'left leg', 'left foot', 'right thigh', 'right leg', 'right foot']
+        
+        if aim == 'high':
+            body_part = random.choice(high_body)
+        elif aim == 'mid':
+            body_part = random.choice(mid_body)
+        elif aim == 'low':
+            body_part = random.choice(low_body)
+
+        return body_part
+
     def attack(self, target, skillset, skill, weapon, damage_type, aim):
         attacker = self.owner
 
@@ -117,9 +131,9 @@ class CombatHandler:
         elif success > 95:
             success = 95
         
-        #temp values
-        damage_tier = 0
-        body_part = 'head'
+        damage_tier = 0 #temp value
+
+        body_part = self.body_part_choice(aim)
 
         if roll > success:
             hit = True
