@@ -53,6 +53,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(combat_cmds.Approach())
         self.add(combat_cmds.Retreat())
         self.add(combat_cmds.CmdStaveBash())
+        self.add(combat_cmds.CmdHeal())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """

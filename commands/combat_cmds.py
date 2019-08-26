@@ -45,6 +45,17 @@ class Retreat(BaseCommand):
         attacker = self.caller
         self.caller.combat.retreat(attacker)
 
+class CmdHeal(BaseCommand):
+    key = 'heal'
+    def parse(self):
+        if not self.args:
+            self.target = self.caller
+        else:
+            self.args = self.args.strip()
+            self.target = self.caller.search(self.args)
+    def func(self):
+        target = self.target
+        self.caller.combat.heal(target)
 
 class CmdStaveBash(BaseCommand):
     '''

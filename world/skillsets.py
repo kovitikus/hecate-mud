@@ -318,6 +318,10 @@ skillsets = {'staves':
                     {'damage_type': 'weapon_block', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['high']},
                 'pivoting longarm': 
                     {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'}
+                },
+            'holy':
+                {'heal':
+                    {'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
                 }
             }
 

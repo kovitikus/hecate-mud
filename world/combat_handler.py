@@ -219,6 +219,32 @@ class CombatHandler:
                 location.msg_contents(f"{t_name} dies and is resurrected to max HP.", exclude=target)
                 target.msg("You die and are resurrected to full HP.")
                 target.db.ko = False
+
+    def heal(self, target):
+        owner = self.owner
+        heal_rank = owner.db.holy['heal']['rank']
+        max_hp = target.db.hp['max_hp']
+        current_hp = target.db.hp['current_hp']
+
+        if current_hp == max_hp:
+            if target == self.owner:
+                owner.msg(f"|cYou are already at full health!|n")
+            else:
+                owner.msg(f"|c{target.name} is already at full health!|n")
+            return
+
+        heal_amount = heal_rank * 2
+        current_hp += heal_amount
+        if current_hp > max_hp:
+            current_hp = max_hp
+        target.db.hp['current_hp'] = current_hp
+        if target == self.owner:
+            owner.msg(f"|cYou heal yourself for {heal_amount} health.|n")
+        else:
+            owner.msg(f"|cYou heal {target.name} for {heal_amount} health.|n")
+
+
+
     
     def unbusy(self):
             self.owner.msg('|yYou are no longer busy.|n')

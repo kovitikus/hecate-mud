@@ -83,15 +83,15 @@ class CmdLearnSkill(Command):
 class CmdGrantSP(Command):
     key = '@grant-sp'
     '''
-    Usage: @grant-sp <person> <number> <skill>
+    Usage: @grant-sp <person> <number> <skillset>
     '''
     def parse(self):
         caller = self.caller
         args = self.args.lstrip()
         try:
-            self.person, self.number, self.skill = args.split(" ", 2)
+            self.person, self.number, self.skillset = args.split(" ", 2)
         except ValueError:
-            caller.msg("Requires 3 arguments. Usage: @grant-sp <person> <number> <skill>")
+            caller.msg("Requires 3 arguments. Usage: @grant-sp <person> <number> <skillset>")
             raise InterruptCommand
 
         self.char = caller.search(self.person)
@@ -103,20 +103,19 @@ class CmdGrantSP(Command):
         except ValueError:
             caller.msg("The number must be an integer.")
             raise InterruptCommand
-
-        for i in skillsets.VIABLE_SKILLSETS:
-            if not self.skill == i:
-                caller.msg(f"{self.skill} is not a viable skillset!")
-                raise InterruptCommand
+        print(f"Viable Skillsets: {skillsets.VIABLE_SKILLSETS}")
+        if self.skillset not in skillsets.VIABLE_SKILLSETS:
+            caller.msg(f"{self.skillset} is not a viable skillset!")
+            raise InterruptCommand
     
     def func(self):
         caller = self.caller
         char = self.char
         num = self.number
-        skill = self.skill
-        skill = char.attributes.get(skill)
-        skill['total_sp'] += num
-        caller.msg(f'Granted {char} {num} skillpoints in {self.skill}.')
+        skillset = self.skillset
+        skillset = char.attributes.get(skillset)
+        skillset['total_sp'] += num
+        caller.msg(f'Granted {char} {num} skillpoints in {self.skillset}.')
 
 class CmdTest(Command):
     key = 'testy'
