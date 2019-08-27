@@ -114,20 +114,20 @@ class CombatHandler:
             damage_tier = 0
             damage = 0
         print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier} Damage: {damage}")
-        """
-        TODO: FIX THIS TRACEBACK. DOESN'T ALWAYS HAPPEN, BUT STILL LURKS ABOUT
-        Traceback (most recent call last):
-        File "d:\muddev\evennia\evennia\commands\cmdhandler.py", line 591, in _run_command
-            ret = cmd.func()
-        File ".\commands\combat_cmds.py", line 94, in func
-            caller.combat.attack(target, 'staves', 'swat', weapon, damage_type, aim)
-        File "d:\muddev\hecate\world\combat_handler.py", line 136, in attack
-            damage_tier, damage = self.damage_tier(success, roll)
-        File "d:\muddev\hecate\world\combat_handler.py", line 116, in damage_tier
-            print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier}
-        Damage: {damage}")
-        UnboundLocalError: local variable 'damage_tier' referenced before assignment
-        """
+
+        ## TODO: FIX THIS TRACEBACK. DOESN'T ALWAYS HAPPEN, BUT STILL LURKS ABOUT
+        # Traceback (most recent call last):
+        # File "d:\muddev\evennia\evennia\commands\cmdhandler.py", line 591, in _run_command
+        #     ret = cmd.func()
+        # File ".\commands\combat_cmds.py", line 94, in func
+        #     caller.combat.attack(target, 'staves', 'swat', weapon, damage_type, aim)
+        # File "d:\muddev\hecate\world\combat_handler.py", line 136, in attack
+        #     damage_tier, damage = self.damage_tier(success, roll)
+        # File "d:\muddev\hecate\world\combat_handler.py", line 116, in damage_tier
+        #     print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier}
+        # Damage: {damage}")
+        # UnboundLocalError: local variable 'damage_tier' referenced before assignment
+
         return damage_tier, damage
 
     def attack(self, target, skillset, skill, weapon, damage_type, aim):
