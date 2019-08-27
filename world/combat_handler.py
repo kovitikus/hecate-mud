@@ -1,7 +1,7 @@
 from evennia import utils
 from world import skillsets
 from world import build_skill_str
-import time
+from world import general_mechanics as gen_mec
 import random
 
 class CombatHandler:
@@ -114,34 +114,26 @@ class CombatHandler:
             damage_tier = 0
             damage = 0
         print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier} Damage: {damage}")
+        """
+        TODO: FIX THIS TRACEBACK. DOESN'T ALWAYS HAPPEN, BUT STILL LURKS ABOUT
+        Traceback (most recent call last):
+        File "d:\muddev\evennia\evennia\commands\cmdhandler.py", line 591, in _run_command
+            ret = cmd.func()
+        File ".\commands\combat_cmds.py", line 94, in func
+            caller.combat.attack(target, 'staves', 'swat', weapon, damage_type, aim)
+        File "d:\muddev\hecate\world\combat_handler.py", line 136, in attack
+            damage_tier, damage = self.damage_tier(success, roll)
+        File "d:\muddev\hecate\world\combat_handler.py", line 116, in damage_tier
+            print(f"Attacker: {self.owner.name} Success: {success} Roll: {roll} Damage Tier: {damage_tier}
+        Damage: {damage}")
+        UnboundLocalError: local variable 'damage_tier' referenced before assignment
+        """
         return damage_tier, damage
 
     def attack(self, target, skillset, skill, weapon, damage_type, aim):
         attacker = self.owner
 
-        if self.owner.db.ko == True:
-            self.owner.msg("You can't do that while unconscious!")
-            return
-
-        # Create cooldown attribute if non-existent.
-        if not self.owner.attributes.has('attack_cd'):
-            self.owner.db.attack_cd = 0
-
-        # Calculate current time, total cooldown, and remaining time.
-        now = time.time()
-        lastcast = self.owner.attributes.get('attack_cd')
-        cooldown = lastcast + 3
-        time_remaining = cooldown - now
-
-        # Inform the attacker that they are in cooldown and exit the function.
-        if time_remaining > 0 or self.owner.db.busy == True:
-            if time_remaining >= 2:
-                message = f"You need to wait {int(time_remaining)} more seconds."
-            elif time_remaining >= 1 and time_remaining < 2:
-                message = f"You need to wait {int(time_remaining)} more second."
-            elif time_remaining < 1:
-                message = f"You are in the middle of something."
-            self.owner.msg(message)
+        if not gen_mec.check_roundtime(attacker):
             return
 
         # This is where the fun begins.
@@ -176,10 +168,8 @@ class CombatHandler:
             self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
             self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
-
-        utils.delay(3, self.unbusy)
-        self.owner.db.busy = True
-        self.owner.db.attack_cd = now
+        
+        gen_mec.set_roundtime(attacker)
 
     def take_damage(self, target, damage):
         t_name = target.key
@@ -242,10 +232,3 @@ class CombatHandler:
             owner.msg(f"|cYou heal yourself for {heal_amount} health.|n")
         else:
             owner.msg(f"|cYou heal {target.name} for {heal_amount} health.|n")
-
-
-
-    
-    def unbusy(self):
-            self.owner.msg('|yYou are no longer busy.|n')
-            self.owner.db.busy = False
