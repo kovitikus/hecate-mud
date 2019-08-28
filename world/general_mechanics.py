@@ -13,10 +13,10 @@ def check_roundtime(owner):
     # Calculate current time, total cooldown, and remaining time.
     now = time.time()
     lastcast = owner.attributes.get('roundtime')
-    cooldown = lastcast + 0.1
+    cooldown = lastcast + 2
     time_remaining = cooldown - now
 
-    # Inform the attacker that they are in cooldown and exit the function.
+    # Inform the owner that they are in cooldown and exit the function.
     if time_remaining > 0 or owner.db.busy == True:
         if time_remaining >= 2:
             message = f"You need to wait {int(time_remaining)} more seconds."
@@ -30,7 +30,7 @@ def check_roundtime(owner):
 
 def set_roundtime(owner):
     now = time.time()
-    utils.delay(0.1, unbusy, owner, persistent=True)
+    utils.delay(2, unbusy, owner, persistent=True)
     owner.db.busy = True
     owner.db.roundtime = now
 

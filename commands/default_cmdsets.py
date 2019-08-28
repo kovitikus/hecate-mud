@@ -46,13 +46,17 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdInventory())
         self.add(command.CmdGet())
         self.add(command.CmdInhand())
+        self.add(command.CmdStand())
+        self.add(command.CmdKneel())
+        self.add(command.CmdSit())
+        self.add(command.CmdLie())
         self.add(command.CmdDrop())
         self.add(command.CmdStow())
         self.add(command.CmdWield())
         self.add(command.CmdUnwield())
         self.add(combat_cmds.Approach())
         self.add(combat_cmds.Retreat())
-        self.add(combat_cmds.CmdStaveBash())
+        self.add(combat_cmds.CmdStaveSwat())
         self.add(combat_cmds.CmdHeal())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

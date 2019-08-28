@@ -21,21 +21,35 @@ class Player_Character(DefaultCharacter):
             self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
 
         # Statuses
-        self.attributes.add('approached', [])
-        self.attributes.add('ko', False)
-        self.attributes.add('feinted', None)
-        self.attributes.add('busy', False)
-        self.attributes.add('wielding', {'left': None, 'right': None, 'both': None})
-        self.attributes.add('stance', None)
+        if not self.attributes.has('approached'):
+            self.attributes.add('approached', [])
+        if not self.attributes.has('ko'):
+            self.attributes.add('ko', False)
+        if not self.attributes.has('feinted'):
+            self.attributes.add('feinted', None)
+        if not self.attributes.has('busy'):
+            self.attributes.add('busy', False)
+        if not self.attributes.has('hands'):
+            self.attributes.add('hands', {'left': None, 'right': None})
+        if not self.attributes.has('wielding'):
+            self.attributes.add('wielding', {'left': None, 'right': None, 'both': None})
+        if not self.attributes.has('stance'):
+            self.attributes.add('stance', None)
+        if not self.attributes.has('standing'):
+            self.attributes.add('standing', True)
+        if not self.attributes.has('kneeling'):
+            self.attributes.add('kneeling', False)
+        if not self.attributes.has('sitting'):
+            self.attributes.add('sitting', False)
+        if not self.attributes.has('lying'):
+            self.attributes.add('lying', False)
 
         # Skills
-        if not self.attributes.get('def_skills'):
+        if not self.attributes.has('def_skills'):
             self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low': {}}, 'dodge': {'high': {}, 'mid': {}, 'low': {}}, 'shield': {'high': {}, 'mid': {}, 'low': {}}})
-        if not self.attributes.get('def_rb'):
+        if not self.attributes.has('def_rb'):
             self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 
-        # Hands
-        self.attributes.add('hands', {'left': None, 'right': None})
         
         
 

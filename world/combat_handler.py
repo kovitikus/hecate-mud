@@ -197,12 +197,16 @@ class CombatHandler:
 
     def heal(self, target):
         owner = self.owner
+
+        if not gen_mec.check_roundtime(owner):
+            return 
+
         heal_rank = owner.db.holy['heal']['rank']
         max_hp = target.db.hp['max_hp']
         current_hp = target.db.hp['current_hp']
 
         if current_hp == max_hp:
-            if target == self.owner:
+            if target == owner:
                 owner.msg(f"|cYou are already at full health!|n")
             else:
                 owner.msg(f"|c{target.name} is already at full health!|n")
@@ -213,7 +217,8 @@ class CombatHandler:
         if current_hp > max_hp:
             current_hp = max_hp
         target.db.hp['current_hp'] = current_hp
-        if target == self.owner:
+        if target == owner:
             owner.msg(f"|cYou heal yourself for {heal_amount} health.|n")
         else:
             owner.msg(f"|cYou heal {target.name} for {heal_amount} health.|n")
+        gen_mec.set_roundtime(owner)

@@ -276,6 +276,65 @@ class CmdInhand(Command):
         else:
             caller.msg(f"You are holding {left_item} in your left hand and {right_item} in your right hand.")
 
+class CmdStand(Command):
+    key = 'stand'
+    def func(self):
+        caller = self.caller
+        db = caller.db
+        if db.standing:
+            caller.msg("You are already standing.")
+            return
+        else:
+            db.standing = True
+            db.kneeling = False
+            db.sitting = False
+            db.lying = False
+            caller.msg("You stand up.")
+
+class CmdSit(Command):
+    key = 'sit'
+    def func(self):
+        caller = self.caller
+        db = caller.db
+        if db.sitting:
+            caller.msg("You are already sitting.")
+        else:
+            db.standing = False
+            db.kneeling = False
+            db.sitting = True
+            db.lying = False
+            caller.msg("You sit down.")
+
+class CmdKneel(Command):
+    key = 'kneel'
+    def func(self):
+        caller = self.caller
+        db = caller.db
+        if db.kneeling:
+            caller.msg("You are already kneeling.")
+        else:
+            db.standing = False
+            db.kneeling = True
+            db.sitting = False
+            db.lying = False
+            caller.msg("You kneel.")
+
+class CmdLie(Command):
+    key = 'lie'
+    aliases = ['lay',]
+    def func(self):
+        caller = self.caller
+        db = caller.db
+        if db.lying:
+            caller.msg("You are already lying down.")
+        else:
+            db.standing = False
+            db.kneeling = False
+            db.sitting = False
+            db.lying = True
+            caller.msg("You lie down.")
+
+
 class CmdGet(Command):
     """
     Pick up something.

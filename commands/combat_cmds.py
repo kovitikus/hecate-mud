@@ -57,7 +57,7 @@ class CmdHeal(BaseCommand):
         target = self.target
         self.caller.combat.heal(target)
 
-class CmdStaveBash(BaseCommand):
+class CmdStaveSwat(BaseCommand):
     '''
     Use your staff to swat an enemy.
 
@@ -76,15 +76,19 @@ class CmdStaveBash(BaseCommand):
     def func(self):
         caller = self.caller
         both_wield = caller.db.wielding['both']
+        if not caller.db.standing:
+            caller.msg("You must be standing to attack!")
+            return
         if not both_wield or not both_wield.is_typeclass('typeclasses.objects.Staves'):
             caller.msg("You must be wielding a stave to do that!")
             return
         else:
             weapon = both_wield
-        target = caller.search(self.args)
+        target = caller.search(self.args, quiet=True)
         if not target:
             caller.msg('That target does not exist!')
             return
+        target = target[0]
         if not target.attributes.has('hp'):
             caller.msg('You cannot attack that target!')
             return
