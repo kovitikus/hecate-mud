@@ -15,9 +15,9 @@ class Player_Character(DefaultCharacter):
 
     def at_object_creation(self):
         # Stats
-        if not self.attributes.get('def_skills'):
+        if not self.attributes.get('gsp'):
             self.attributes.add('gsp', 10)
-        if not self.attributes.get('def_skills'):
+        if not self.attributes.get('hp'):
             self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
 
         # Statuses
