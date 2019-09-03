@@ -3,11 +3,7 @@ from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 from world.combat_handler import CombatHandler
 
-
 class Character(DefaultCharacter):
-    pass
-
-class Player_Character(DefaultCharacter):
 
     @lazy_property
     def combat(self):

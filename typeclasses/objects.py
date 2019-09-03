@@ -90,13 +90,17 @@ class Object(DefaultObject):
 class Staves(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 2)
+        self.tags.add('stave')
 
 class Swords(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 1)
+        self.tags.add('sword')
 
 class OffHand(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 1)
+
 class Shields(OffHand):
-    pass
+    def at_object_creation(self):
+        self.tags.add('shield')

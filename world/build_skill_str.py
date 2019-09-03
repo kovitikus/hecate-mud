@@ -166,3 +166,36 @@ def create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, d
     others_desc = skillsets[skillset][skill]['attack_desc']['others']
 
     return attacker_desc, target_desc, others_desc
+
+def create_defense_desc(target):
+    t_wield = target.attributes.get('wielding')
+    l_wield = t_wield.get('left')
+    r_wield = t_wield.get('right')
+    b_wield = t_wield.get('both')
+
+   
+
+
+
+
+    def_skills = target.attributes.get('def_skills')
+
+    weap_def = def_skills.get('weapon')
+
+    weap_high = weap_def.get('high')
+    weap_mid = weap_def.get('mid')
+    weap_low = weap_def.get('low')
+
+
+    dodge_def = def_skills.get('dodge')
+
+    dodge_high = dodge_def.get('high')
+    dodge_mid = dodge_def.get('mid')
+    dodge_low = dodge_def.get('low')
+
+    if l_wield.is_typeclass('objects.Shields'):
+        shield_def = def_skills.get('shield')
+
+        shield_high = shield_def.get('high')
+        shield_mid = shield_def.get('mid')
+        shield_low = shield_def.get('low')
