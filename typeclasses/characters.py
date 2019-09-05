@@ -52,6 +52,8 @@ class Character(DefaultCharacter):
         This hook's default behavior is to look at the room after it moves to it.
         """
         # Force the character to be greeted with the room's short description.
+        if not source_location:
+            return
         self.msg(f"{self.location.short_desc(self)}")
 
 
