@@ -57,14 +57,14 @@ class Room(DefaultRoom):
             exits_len = len(exits)
             exits_string = f"You see "
             for x in exits:
-                if inherits_from(x, "typeclasses.exits.ExitDoor"):
+                if inherits_from(x, "typeclasses.exits.Door"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     elif exits_len == num:
                         exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     else:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
-                elif inherits_from(x, "typeclasses.exits.ExitStairs"):
+                elif inherits_from(x, "typeclasses.exits.Stair"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n leading |350{exit_name[num - 1]}|n."
                     elif exits_len == num:
