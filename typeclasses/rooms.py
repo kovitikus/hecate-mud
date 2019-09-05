@@ -79,14 +79,14 @@ class Room(DefaultRoom):
         # get and identify all objects
         visible = (con for con in self.contents if con != looker and
                    con.access(looker, "view"))
-        exits, users, destinations, things = [], [], [], defaultdict(list)
+        exits, characters, destinations, things = [], [], [], defaultdict(list)
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
                 exits.append(key)
                 destinations.append(con.destination.name)
-            elif con.has_account:
-                users.append(f"|c{key}|n")
+            elif inherits_from(con, "typeclasses.characters.Character"):
+                characters.append(f"|c{key}|n")
             else:
                 # things can be pluralized
                 things[key].append(con)
@@ -106,8 +106,8 @@ class Room(DefaultRoom):
                 else:
                     exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n, "
                 num += 1
-        if users or things:
-            # handle pluralization of things (never pluralize users)
+        if characters or things:
+            # handle pluralization of things (never pluralize characters)
             thing_strings = []
             for key, itemlist in sorted(things.items()):
                 nitem = len(itemlist)
@@ -124,7 +124,7 @@ class Room(DefaultRoom):
             string = f"{string}\n{exits_string}"
         if things:
             string = f"{string}\n    {list_to_string(thing_strings)} |nlies upon the ground."
-        if users:
-            string = f"{string}\n    {list_to_string(users)} is here."
+        if characters:
+            string = f"{string}\n    {list_to_string(characters)} {'is' if len(characters) == 1 else 'are'} here."
 
         return string
