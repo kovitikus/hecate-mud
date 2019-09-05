@@ -46,6 +46,90 @@ class Character(DefaultCharacter):
         if not self.attributes.has('def_rb'):
             self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 
+    def announce_move_from(self, destination, msg=None, mapping=None, **kwargs):
+        """
+        Called if the move is to be announced. This is
+        called while we are still standing in the old
+        location.
+        Args:
+            destination (Object): The place we are going to.
+            msg (str, optional): a replacement message.
+            mapping (dict, optional): additional mapping objects.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+        You can override this method and call its parent with a
+        message to simply change the default message.  In the string,
+        you can use the following as mappings (between braces):
+            object: the object which is moving.
+            exit: the exit from which the object is moving (if found).
+            origin: the location of the object before the move.
+            destination: the location of the object after moving.
+        """
+        if not self.location:
+            return
+        location = self.location
+        origin = location or "nowhere"
+        exits = [o for o in location.contents if o.location is location and o.destination is destination]
+        var_exit = exits[0] if exits else "somewhere"
+
+        if inherits_from(var_exit, "typeclasses.exits.Door"):
+            self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
+            others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
+        elif inherits_from(var_exit, "typeclasses.exits.Stair"):
+            self_str = f"You you climb {var_exit.db.desc}, leading {var_exit.name}."
+            others_str = f"{self.name} climbs {var_exit.db.desc}, leading {var_exit.name}."
+        else:
+            self_str = f"You walk away to {var_exit.destination.name}, to the {var_exit.name}."
+            others_str = f"{self.name} walks away to {var_exit.destination.name}, to the {var_exit.name}."
+
+        self.msg(self_str)
+        location.msg_contents(others_str, exclude=(self, ))
+
+    def announce_move_to(self, source_location, msg=None, mapping=None, **kwargs):
+        """
+        Called after the move if the move was not quiet. At this point
+        we are standing in the new location.
+        Args:
+            source_location (Object): The place we came from
+            msg (str, optional): the replacement message if location.
+            mapping (dict, optional): additional mapping objects.
+            **kwargs (dict): Arbitrary, optional arguments for users
+                overriding the call (unused by default).
+        Notes:
+            You can override this method and call its parent with a
+            message to simply change the default message.  In the string,
+            you can use the following as mappings (between braces):
+                object: the object which is moving.
+                exit: the exit from which the object is moving (if found).
+                origin: the location of the object before the move.
+                destination: the location of the object after moving.
+        """
+
+        if not source_location and self.location.has_account:
+            # This was created from nowhere and added to an account's
+            # inventory; it's probably the result of a create command.
+            string = f"You now have {self.get_display_name(self.location)} in your possession." 
+            self.location.msg(string)
+            return
+
+        origin = source_location
+        destination = self.location
+        exits = []
+        if origin:
+            exits = [o for o in destination.contents if o.location is destination and o.destination is origin]
+            origin_exit = exits[0] if exits else "somewhere"
+
+        if origin:
+            if inherits_from(origin_exit, "typeclasses.exits.Door"):
+                others_str = f"{self.name} walks in through {origin_exit.db.desc}, from the {origin_exit.name}."
+            elif inherits_from(origin_exit, "typeclasses.exits.Stair"):
+                others_str = f"{self.name} arrives climbing {'down' if origin_exit.name == 'up' else 'up'} {origin_exit.db.desc}."
+            else:
+                others_str = f"{self.name} walks in from {origin.name}, from the {origin_exit.name}."
+        else:
+            others_str = f"{self.name} arrives."
+
+        destination.msg_contents(others_str, exclude=(self, ))
         
     def at_after_move(self, source_location):
         """
