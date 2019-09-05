@@ -76,8 +76,8 @@ class Character(DefaultCharacter):
             self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
             others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
         elif inherits_from(var_exit, "typeclasses.exits.Stair"):
-            self_str = f"You depart, climbing {'down' if var_exit.name == 'up' else 'up'} {var_exit.db.desc}."
-            others_str = f"{self.name} departs, climbing {'down' if var_exit.name == 'up' else 'up'} {var_exit.db.desc}."
+            self_str = f"You depart, climbing {var_exit.name} {var_exit.db.desc}."
+            others_str = f"{self.name} departs, climbing {var_exit.name} {var_exit.db.desc}."
         else:
             self_str = f"You walk away to {var_exit.destination.name}, to the {var_exit.name}."
             others_str = f"{self.name} walks away to {var_exit.destination.name}, to the {var_exit.name}."
