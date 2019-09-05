@@ -42,7 +42,7 @@ class Room(DefaultRoom):
                 exits.append(key)
                 destinations.append(con.destination.get_display_name(looker))
             elif inherits_from(con, "typeclasses.characters.Character"):
-                characters.append(key)
+                characters.append(f"|c{key}|n")
 
         short_desc = f"You arrive at {self.get_display_name(looker)}."
         if characters:
