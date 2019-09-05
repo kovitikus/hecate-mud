@@ -76,8 +76,12 @@ class Character(DefaultCharacter):
             self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
             others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
         elif inherits_from(var_exit, "typeclasses.exits.Stair"):
-            self_str = f"You depart, climbing {var_exit.name} {var_exit.db.desc}."
-            others_str = f"{self.name} departs, climbing {var_exit.name} {var_exit.db.desc}."
+            if var_exit.name in ['up', 'down']:
+                self_str = f"You depart, climbing {var_exit.name} {var_exit.db.desc}."
+                others_str = f"{self.name} departs, climbing {var_exit.name} {var_exit.db.desc}."
+            else:
+                self_str = f"You depart, climbing {var_exit.name} to the {var_exit.db.desc}."
+                others_str = f"{self.name} departs, climbing {var_exit.name} to the {var_exit.db.desc}."
         else:
             self_str = f"You walk away to {var_exit.destination.name}, to the {var_exit.name}."
             others_str = f"{self.name} walks away to {var_exit.destination.name}, to the {var_exit.name}."
@@ -104,6 +108,7 @@ class Character(DefaultCharacter):
                 origin: the location of the object before the move.
                 destination: the location of the object after moving.
         """
+        #TODO: Add contents of hands and wielding description for arriving characters.
 
         if not source_location and self.location.has_account:
             # This was created from nowhere and added to an account's
@@ -123,7 +128,10 @@ class Character(DefaultCharacter):
             if inherits_from(origin_exit, "typeclasses.exits.Door"):
                 others_str = f"{self.name} walks in through {origin_exit.db.desc}, from the {origin_exit.name}."
             elif inherits_from(origin_exit, "typeclasses.exits.Stair"):
-                others_str = f"{self.name} arrives, climbing {'down' if origin_exit.name == 'up' else 'up'} {origin_exit.db.desc}."
+                if origin_exit.name in ['up', 'down']:
+                    others_str = f"{self.name} arrives, climbing {'down' if origin_exit.name == 'up' else 'up'} {origin_exit.db.desc}."
+                else:
+                    others_str = f"{self.name} arrives, climbing {origin_exit.db.desc} from the {origin_exit.name}."
             else:
                 others_str = f"{self.name} walks in from {origin.name}, from the {origin_exit.name}."
         else:
