@@ -42,7 +42,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdGrantSP())
         self.add(command.CmdTest())
         self.add(command.CmdLook())
-        self.add(command.CmdCreate())
         self.add(command.CmdInventory())
         self.add(command.CmdGet())
         self.add(command.CmdInhand())
