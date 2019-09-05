@@ -37,11 +37,12 @@ class Room(DefaultRoom):
         # Get and identify all visible objects.
         visible = (con for con in self.contents if con != looker and
                    con.access(looker, "view"))
-        exits, destinations, characters = [], [], []
+        exits, exit_name, destinations, characters = [], [], [], []
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
-                exits.append(key)
+                exits.append(con)
+                exit_name.append(key)
                 destinations.append(con.destination.get_display_name(looker))
             elif inherits_from(con, "typeclasses.characters.Character"):
                 characters.append(f"|c{key}|n")
@@ -55,13 +56,28 @@ class Room(DefaultRoom):
             num = 1
             exits_len = len(exits)
             exits_string = f"You see "
-            for _ in exits:
-                if exits_len == 1:
-                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
-                elif exits_len == num:
-                    exits_string += f"and |045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
+            for x in exits:
+                if inherits_from(x, "typeclasses.exits.ExitDoor"):
+                    if exits_len == 1:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
+                elif inherits_from(x, "typeclasses.exits.ExitStairs"):
+                    if exits_len == 1:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
                 else:
-                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n, "
+                    if exits_len == 1:
+                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n, "
                 num += 1
             short_desc = f"{short_desc} {exits_string}"
         return short_desc
@@ -81,11 +97,12 @@ class Room(DefaultRoom):
         # get and identify all objects
         visible = (con for con in self.contents if con != looker and
                    con.access(looker, "view"))
-        exits, characters, destinations, things = [], [], [], defaultdict(list)
+        exits, exit_name, characters, destinations, things = [], [], [], [], defaultdict(list)
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
-                exits.append(key)
+                exits.append(con)
+                exit_name.append(key)
                 destinations.append(con.destination.name)
             elif inherits_from(con, "typeclasses.characters.Character"):
                 characters.append(f"|c{key}|n")
@@ -100,13 +117,28 @@ class Room(DefaultRoom):
             num = 1
             exits_len = len(exits)
             exits_string = "    You see "
-            for _ in exits:
-                if exits_len == 1:
-                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
-                elif exits_len == num:
-                    exits_string += f"and |045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
+            for x in exits:
+                if inherits_from(x, "typeclasses.exits.ExitDoor"):
+                    if exits_len == 1:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
+                elif inherits_from(x, "typeclasses.exits.ExitStairs"):
+                    if exits_len == 1:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
                 else:
-                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n, "
+                    if exits_len == 1:
+                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                    elif exits_len == num:
+                        exits_string += f"and |045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                    else:
+                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n, "
                 num += 1
         if characters or things:
             # handle pluralization of things (never pluralize characters)

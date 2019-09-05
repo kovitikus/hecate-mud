@@ -35,3 +35,15 @@ class Exit(DefaultExit):
                                         defined, in which case that will simply be echoed.
     """
     pass
+
+class ExitDoor(Exit):
+    def at_object_creation(self):
+        if not self.attributes.has('open'):
+            self.attributes.add('open', True)
+        if not self.attributes.has('desc'):
+            self.attributes.add('desc', 'a door')
+
+class ExitStairs(Exit):
+    def at_object_creation(self):
+        if not self.attributes.has('desc'):
+            self.attributes.add('desc', 'a stairway')
