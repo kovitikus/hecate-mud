@@ -47,7 +47,13 @@ class Character(DefaultCharacter):
             self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 
         
-        
+    def at_after_move(self, source_location):
+        """
+        This hook's default behavior is to look at the room after it moves to it.
+        """
+        # Force the character to be greeted with the room's short description.
+        self.msg(f"{self.location.short_desc(self)}")
+
 
     def return_appearance(self, looker, **kwargs):
         if not looker:
