@@ -30,6 +30,8 @@ class Room(DefaultRoom):
         You arrive at <destination name>. <Person/NPC> <is/are> here. You see <exit name> to the 
         <exit direction>, and <exit name> to the <exit direction>.
         """
+        #TODO: Group together exits with the same <exit name>
+        #       You see <exit name> to the west, south, and north.
         if not looker:
             return
         # Get and identify all visible objects.
@@ -55,11 +57,11 @@ class Room(DefaultRoom):
             exits_string = f"You see "
             for _ in exits:
                 if exits_len == 1:
-                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
                 elif exits_len == num:
-                    exits_string += f"and |c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                    exits_string += f"and |045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
                 else:
-                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n, "
+                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n, "
                 num += 1
             short_desc = f"{short_desc} {exits_string}"
         return short_desc
@@ -100,11 +102,11 @@ class Room(DefaultRoom):
             exits_string = "    You see "
             for _ in exits:
                 if exits_len == 1:
-                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
                 elif exits_len == num:
-                    exits_string += f"and |c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                    exits_string += f"and |045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n."
                 else:
-                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n, "
+                    exits_string += f"|045{destinations[num - 1]}|n to the |350{exits[num - 1]}|n, "
                 num += 1
         if characters or things:
             # handle pluralization of things (never pluralize characters)
