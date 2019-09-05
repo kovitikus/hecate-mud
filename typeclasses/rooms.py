@@ -7,6 +7,7 @@ Rooms are simple containers that has no location of their own.
 from collections import defaultdict
 
 from evennia import DefaultRoom
+from evennia.utils import inherits_from
 from evennia.utils.utils import list_to_string
 
 
@@ -26,29 +27,41 @@ class Room(DefaultRoom):
 
     def short_desc(self, looker, **kwargs):
         """
-        You arrive at <destination name>. You see <exit name> to the <exit direction>, and
-        <exit name> to the <exit direction>.
+        You arrive at <destination name>. <Person/NPC> <is/are> here. You see <exit name> to the 
+        <exit direction>, and <exit name> to the <exit direction>.
         """
-        exits, destinations = [], []
-        for con in self.contents:
-            if con != self and con.access(self, "view") and con.destination:
-                    exits.append(con.get_display_name(looker))
-                    destinations.append(con.destination.get_display_name(looker))
+        if not looker:
+            return
+        # Get and identify all visible objects.
+        visible = (con for con in self.contents if con != looker and
+                   con.access(looker, "view"))
+        exits, destinations, characters = [], [], []
+        for con in visible:
+            key = con.get_display_name(looker)
+            if con.destination:
+                exits.append(key)
+                destinations.append(con.destination.get_display_name(looker))
+            elif inherits_from(con, "typeclasses.characters.Character"):
+                characters.append(key)
 
         short_desc = f"You arrive at {self.get_display_name(looker)}."
+        if characters:
+            short_desc = f"{short_desc} {list_to_string(characters)} {'is' if len(characters) == 1 else 'are'} here."
         
         if exits:
+            print(f"Exits: {exits}")
             num = 1
-            exit_len = len(exits)
-            short_desc = f"{short_desc} You see "
+            exits_len = len(exits)
+            exits_string = f"You see "
             for _ in exits:
-                if exit_len == 1:
-                    short_desc += f"|c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n."
-                elif exit_len == num:
-                    short_desc += f"and |c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n."
+                if exits_len == 1:
+                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                elif exits_len == num:
+                    exits_string += f"and |c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
                 else:
-                    short_desc += f"|c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n, "
+                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n, "
                 num += 1
+            short_desc = f"{short_desc} {exits_string}"
         return short_desc
 
 
@@ -66,7 +79,7 @@ class Room(DefaultRoom):
         # get and identify all objects
         visible = (con for con in self.contents if con != looker and
                    con.access(looker, "view"))
-        exits, users, things, destinations = [], [], defaultdict(list), []
+        exits, users, destinations, things = [], [], [], defaultdict(list)
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
@@ -83,15 +96,15 @@ class Room(DefaultRoom):
         #     location_desc = self.db.desc
         if exits:
             num = 1
-            exit_len = len(exits)
+            exits_len = len(exits)
             exits_string = "    You see "
             for _ in exits:
-                if exit_len == 1:
-                    exits_string += f"|c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n."
-                elif exit_len == num:
-                    exits_string += f"and |c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n."
+                if exits_len == 1:
+                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
+                elif exits_len == num:
+                    exits_string += f"and |c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n."
                 else:
-                    exits_string += f"|c{destinations[exit_len - 1]}|n to the |c{exits[exit_len - 1]}|n, "
+                    exits_string += f"|c{destinations[num - 1]}|n to the |c{exits[num - 1]}|n, "
                 num += 1
         if users or things:
             # handle pluralization of things (never pluralize users)
