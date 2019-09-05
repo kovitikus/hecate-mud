@@ -127,11 +127,11 @@ class Room(DefaultRoom):
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
                 elif inherits_from(x, "typeclasses.exits.Stair"):
                     if exits_len == 1:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += f"|045{x.db.desc}|n leading |350{exit_name[num - 1]}|n."
                     elif exits_len == num:
-                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += f"and |045{x.db.desc}|n leading |350{exit_name[num - 1]}|n."
                     else:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
+                        exits_string += f"|045{x.db.desc}|n leading |350{exit_name[num - 1]}|n, "
                 else:
                     if exits_len == 1:
                         exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
