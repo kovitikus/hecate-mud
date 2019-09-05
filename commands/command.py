@@ -131,79 +131,78 @@ class CmdTest(Command):
         caller.msg(attacker_desc)
         caller.msg(target_desc)
 
-class CmdCreate(ObjManipCommand):
-    """
-    create new objects
-    Usage:
-      create[/drop] <objname>[;alias;alias...][:typeclass], <objname>...
-    switch:
-       drop - automatically drop the new object into your current
-              location (this is not echoed). This also sets the new
-              object's home to the current location rather than to you.
-    Creates one or more new objects. If typeclass is given, the object
-    is created as a child of this typeclass. The typeclass script is
-    assumed to be located under types/ and any further
-    directory structure is given in Python notation. So if you have a
-    correct typeclass 'RedButton' defined in
-    types/examples/red_button.py, you could create a new
-    object of this type like this:
-       create/drop button;red : examples.red_button.RedButton
-    """
+# class CmdCreate(ObjManipCommand):
+#     """
+#     create new objects
+#     Usage:
+#       create[/drop] <objname>[;alias;alias...][:typeclass], <objname>...
+#     switch:
+#        drop - automatically drop the new object into your current
+#               location (this is not echoed). This also sets the new
+#               object's home to the current location rather than to you.
+#     Creates one or more new objects. If typeclass is given, the object
+#     is created as a child of this typeclass. The typeclass script is
+#     assumed to be located under types/ and any further
+#     directory structure is given in Python notation. So if you have a
+#     correct typeclass 'RedButton' defined in
+#     types/examples/red_button.py, you could create a new
+#     object of this type like this:
+#        create/drop button;red : examples.red_button.RedButton
+#     """
 
-    key = "create"
-    switch_options = ("drop",)
-    locks = "cmd:perm(create) or perm(Builder)"
-    help_category = "Building"
+#     key = "create"
+#     switch_options = ("drop",)
+#     locks = "cmd:perm(create) or perm(Builder)"
+#     help_category = "Building"
 
-    # lockstring of newly created objects, for easy overloading.
-    # Will be formatted with the {id} of the creating object.
-    new_obj_lockstring = "control:id({id}) or perm(Admin);delete:id({id}) or perm(Admin)"
+#     # lockstring of newly created objects, for easy overloading.
+#     # Will be formatted with the {id} of the creating object.
+#     new_obj_lockstring = "control:id({id}) or perm(Admin);delete:id({id}) or perm(Admin)"
 
-    def func(self):
-        """
-        Creates the object.
-        """
+#     def func(self):
+#         """
+#         Creates the object.
+#         """
 
-        caller = self.caller
+#         caller = self.caller
 
-        if not self.args:
-            string = "Usage: create[/drop] <newname>[;alias;alias...] [:typeclass.path]"
-            caller.msg(string)
-            return
+#         if not self.args:
+#             string = "Usage: create[/drop] <newname>[;alias;alias...] [:typeclass.path]"
+#             caller.msg(string)
+#             return
 
-        # create the objects
-        for objdef in self.lhs_objs:
-            string = ""
-            name = objdef['name']
-            art = article(name)
-            name = f"{art} {name}"
-            aliases = objdef['aliases']
-            typeclass = objdef['option']
+#         # create the objects
+#         for objdef in self.lhs_objs:
+#             string = ""
+#             name = objdef['name']
+#             art = article(name)
+#             name = f"{art} {name}"
+#             aliases = objdef['aliases']
+#             typeclass = objdef['option']
 
-            # create object (if not a valid typeclass, the default
-            # object typeclass will automatically be used)
-            lockstring = self.new_obj_lockstring.format(id=caller.id)
-            obj = create.create_object(typeclass, name, caller,
-                                       home=caller, aliases=aliases,
-                                       locks=lockstring, report_to=caller)
-            if not obj:
-                continue
-            if aliases:
-                string = "You create a new %s: %s (aliases: %s)."
-                string = string % (obj.typename, obj.name, ", ".join(aliases))
-            else:
-                string = "You create a new %s: %s."
-                string = string % (obj.typename, obj.name)
-            # set a default desc
-            if not obj.db.desc:
-                obj.db.desc = "You see nothing special."
-            if 'drop' in self.switches:
-                if caller.location:
-                    obj.home = caller.location
-                    obj.move_to(caller.location, quiet=True)
-        if string:
-            caller.msg(string)
-    pass
+#             # create object (if not a valid typeclass, the default
+#             # object typeclass will automatically be used)
+#             lockstring = self.new_obj_lockstring.format(id=caller.id)
+#             obj = create.create_object(typeclass, name, caller,
+#                                        home=caller, aliases=aliases,
+#                                        locks=lockstring, report_to=caller)
+#             if not obj:
+#                 continue
+#             if aliases:
+#                 string = "You create a new %s: %s (aliases: %s)."
+#                 string = string % (obj.typename, obj.name, ", ".join(aliases))
+#             else:
+#                 string = "You create a new %s: %s."
+#                 string = string % (obj.typename, obj.name)
+#             # set a default desc
+#             if not obj.db.desc:
+#                 obj.db.desc = "You see nothing special."
+#             if 'drop' in self.switches:
+#                 if caller.location:
+#                     obj.home = caller.location
+#                     obj.move_to(caller.location, quiet=True)
+#         if string:
+#             caller.msg(string)
 
 class CmdInventory(Command):
     """
