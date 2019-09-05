@@ -203,6 +203,7 @@ class CmdCreate(ObjManipCommand):
                     obj.move_to(caller.location, quiet=True)
         if string:
             caller.msg(string)
+    pass
 
 class CmdInventory(Command):
     """

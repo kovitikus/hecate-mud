@@ -84,7 +84,6 @@ class Object(DefaultObject):
             logger.log_err(e)
 
         return obj, errors
-
     pass
 
 class Staves(Object):
