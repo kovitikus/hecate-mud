@@ -33,6 +33,32 @@ from evennia.settings_default import *
 
 # This is the name of your game. Make it catchy!
 SERVERNAME = "Hecate"
+GAME_SLOGAN = "This is where the fun begins."
+SEARCH_MULTIMATCH_REGEX = r"(?P<number>[0-9]+) (?P<name>.*)"
+SEARCH_MULTIMATCH_TEMPLATE = " {number} {name}{aliases}{info}\n"
+
+######################################################################
+# Game Time setup
+######################################################################
+
+# You don't actually have to use this, but it affects the routines in
+# evennia.utils.gametime.py and allows for a convenient measure to
+# determine the current in-game time. You can of course interpret
+# "week", "month" etc as your own in-game time units as desired.
+
+# The time factor dictates if the game world runs faster (timefactor>1)
+# or slower (timefactor<1) than the real world.
+TIME_FACTOR = 1.0
+# The starting point of your game time (the epoch), in seconds.
+# In Python a value of 0 means Jan 1 1970 (use negatives for earlier
+# start date). This will affect the returns from the utils.gametime
+# module. If None, the server's first start-time is used as the epoch.
+TIME_GAME_EPOCH = None
+# Normally, game time will only increase when the server runs. If this is True,
+# game time will not pause when the server reloads or goes offline. This setting
+# together with a time factor of 1 should keep the game in sync with
+# the real time (add a different epoch to shift time)
+TIME_IGNORE_DOWNTIMES = True
 
 WEBCLIENT_OPTIONS = {
     "gagprompt": True,  # Gags prompt from the output window and keep them

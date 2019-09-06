@@ -122,14 +122,8 @@ class CmdTest(Command):
 
     def func(self):
         caller = self.caller
-        attacker = caller
-        target = 'rat'
-        damage_type = 'bruise'
-        damage_tier = 2
-        body_part = 'head'
-        attacker_desc, target_desc = attack_desc.create_attack_desc(attacker, target, damage_type, damage_tier, body_part)
-        caller.msg(attacker_desc)
-        caller.msg(target_desc)
+        caller.msg(img="https://i.imgur.com/2Wo1BpT.png")
+    pass
 
 # class CmdCreate(ObjManipCommand):
 #     """
@@ -351,8 +345,9 @@ class CmdGet(Command):
     
 
     def func(self):
-        """implements the command."""
-
+        """Implements the command."""
+        #TODO: Fix the missing echo when picking up an item while wielding in both hands.
+        #TODO: Allow auto-stow of items in hand and continue to pick up obj if more than one exists in location.
         caller = self.caller
         if not self.args:
             caller.msg("Get what?")
@@ -363,9 +358,12 @@ class CmdGet(Command):
         left_hand, right_hand = caller.db.hands.values()
         
 
-        obj = caller.search(args, location=[caller.location, caller])
+        obj = caller.search(args, location=[caller.location, caller], quiet=True)
         if not obj:
+            self.caller.msg(f"|r{args} cannot be found.|n")
             return
+        if len(obj) > 1:
+            obj = obj[0]
         if caller == obj:
             caller.msg("You can't get yourself.")
             return
@@ -447,11 +445,13 @@ class CmdDrop(Command):
         wielding = caller.db.wielding
         left_wield, right_wield, both_wield  = wielding.values()
         
-        obj = caller.search(args, location=[caller, caller.location],
-                            nofound_string=f"You can't find {args}.",
-                            multimatch_string=f"There are more than one {args}.")
+        obj = caller.search(args, location=[caller, caller.location], quiet=True)
         if not obj:
+            caller.msg(f"|rYou are not in possession of {args}.|n")
             return
+
+        if len(obj):
+            obj = obj[0]
 
         # Call the object script's at_before_drop() method.
         if not obj.at_before_drop(caller):

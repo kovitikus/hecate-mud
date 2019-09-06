@@ -36,3 +36,18 @@ CONNECTION_SCREEN = """
  Enter |whelp|n for more info. |wlook|n will re-show this screen.
 |b==============================================================|n""" \
     .format(settings.SERVERNAME, utils.get_evennia_version("short"))
+
+def connection_screen():
+     string = f"""\
+     |b==============================================================|n
+     Welcome to |g{settings.SERVERNAME}|n!
+
+     If you have an existing account, connect to it by typing:
+          |wconnect <username> <password>|n
+     If you need to create an account, type (without the <>'s):
+          |wcreate <username> <password>|n
+
+     If you have spaces in your username, enclose it in quotes.
+     Enter |whelp|n for more info. |wlook|n will re-show this screen.
+     |b==============================================================|n"""
+     return string
