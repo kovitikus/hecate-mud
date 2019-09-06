@@ -24,6 +24,8 @@ class Room(DefaultRoom):
     def at_object_creation(self):
         if not self.attributes.has('short_desc'):
             self.attributes.add('short_desc', '|rShort Description Not Set!|n')
+        if not self.attributes.has('crowd'):
+            self.attributes.add('crowd', False)
 
     def short_desc(self, looker, **kwargs):
         """
@@ -159,8 +161,17 @@ class Room(DefaultRoom):
         if exits:
             string = f"{string}\n{exits_string}"
         if things:
-            string = f"{string}\n    {list_to_string(thing_strings)} |nlies upon the ground."
+            string = f"{string}\n    {list_to_string(thing_strings)} |nlie upon the ground."
         if characters:
             string = f"{string}\n    {list_to_string(characters)} {'is' if len(characters) == 1 else 'are'} here."
+        if self.db.crowd and not characters:
+            string = f"{string}\n    {self.db.crowd_short_desc}"
+        if self.db.crowd and characters:
+            string = f"{string} {self.db.crowd_short_desc}"
 
         return string
+
+    def crowd(self, looker):
+        people = ['a merchant', 'a priest', 'a soldier', 'a prostitute', 'a fisherman']
+        if self.db.crowd:
+            looker.msg(f"You look over the crowd and spot {list_to_string(people)}.")

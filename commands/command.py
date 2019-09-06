@@ -706,9 +706,13 @@ class CmdLook(Command):
                 return
         else:
             args = self.args.strip()
-            target = caller.search(args, location=[caller, caller.location])
-            if not target:
+            if args == 'crowd':
+                self.caller.location.crowd(self.caller)
                 return
+            else:
+                target = caller.search(args, location=[caller, caller.location])
+                if not target:
+                    return
         self.msg((caller.at_look(target), {'type': 'look'}), options=None)
 
 
