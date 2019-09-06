@@ -103,3 +103,7 @@ class OffHand(Object):
 class Shields(OffHand):
     def at_object_creation(self):
         self.tags.add('shield')
+
+class Crowd(Object):
+    pass
+
