@@ -172,6 +172,6 @@ class Room(DefaultRoom):
         return string
 
     def crowd(self, looker):
-        people = ['a merchant', 'a priest', 'a soldier', 'a prostitute', 'a fisherman']
+        people = ['dock laborers', 'a few beggars', 'boatmen', 'cats', 'ragged dogs', 'children', 'citizens', 'drovers', 'peddlers', 'priests', 'prostitutes', 'refugees', 'sailors', 'servants', 'traders', 'urchins', 'workers', 'fishermen', 'large brown rats', 'constables']
         if self.db.crowd:
-            looker.msg(f"You look over the crowd and spot {list_to_string(people)}.")
+            looker.msg(f"You find yourself at the periphery of a terribly thick crowd. You note a moderate number of {list_to_string(people)}.")
