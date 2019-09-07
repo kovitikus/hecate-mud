@@ -5,7 +5,7 @@ from typeclasses.rooms import Room
 
 class TimeCycle(Script):
     def at_script_creation(self):
-        self.key = "time_cycle"
+        self.key = 'time_cycle'
         self.desc = "Tracks global timed events."
         self.interval = 1
         self.persistent = True

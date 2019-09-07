@@ -70,6 +70,29 @@ WEBCLIENT_OPTIONS = {
     # messages
 }
 
+######################################################################
+# Global Scripts
+######################################################################
+
+# Global scripts started here will be available through
+# 'evennia.GLOBAL_SCRIPTS.key'. The scripts will survive a reload and be
+# recreated automatically if deleted. Each entry must have the script keys,
+# whereas all other fields in the specification are optional. If 'typeclass' is
+# not given, BASE_SCRIPT_TYPECLASS will be assumed.  Note that if you change
+# typeclass for the same key, a new Script will replace the old one on
+# `evennia.GLOBAL_SCRIPTS`.
+GLOBAL_SCRIPTS = {
+    # 'key': {'typeclass': 'typeclass.path.here',
+    #         'repeats': -1, 'interval': 50, 'desc': 'Example script'},
+    'time_cycle': {
+        'typeclass': 'time_cycle.TimeCycle',
+        'repeats': -1,
+        'interval': 1,
+        'desc': 'Tracks global timed events.',
+        'persistent': True
+    }
+}
+
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
