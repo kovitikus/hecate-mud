@@ -85,7 +85,7 @@ GLOBAL_SCRIPTS = {
     # 'key': {'typeclass': 'typeclass.path.here',
     #         'repeats': -1, 'interval': 50, 'desc': 'Example script'},
     'time_cycle': {
-        'typeclass': 'time_cycle.TimeCycle',
+        'typeclass': 'typeclasses.time_cycle.TimeCycle',
         'repeats': -1,
         'interval': 1,
         'desc': 'Tracks global timed events.',
