@@ -82,6 +82,7 @@ class Account(DefaultAccount):
                 except RuntimeError:
                     self.msg("The Character does not exist.")
                     return
+        pass
 
     def intro(self):
         self.msg("Welcome to Hecate! I see this is your first time.\n"
