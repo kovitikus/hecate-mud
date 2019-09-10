@@ -93,6 +93,27 @@ GLOBAL_SCRIPTS = {
     }
 }
 
+######################################################################
+# Default Account setup and access
+######################################################################
+
+# Different Multisession modes allow a player (=account) to connect to the
+# game simultaneously with multiple clients (=sessions). In modes 0,1 there is
+# only one character created to the same name as the account at first login.
+# In modes 2,3 no default character will be created and the MAX_NR_CHARACTERS
+# value (below) defines how many characters the default char_create command
+# allow per account.
+#  0 - single session, one account, one character, when a new session is
+#      connected, the old one is disconnected
+#  1 - multiple sessions, one account, one character, each session getting
+#      the same data
+#  2 - multiple sessions, one account, many characters, one session per
+#      character (disconnects multiplets)
+#  3 - like mode 2, except multiple sessions can puppet one character, each
+#      session getting the same data.
+MULTISESSION_MODE = 1
+# The maximum number of characters allowed by the default ooc char-creation command
+MAX_NR_CHARACTERS = 1
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
