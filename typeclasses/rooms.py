@@ -7,7 +7,9 @@ Rooms are simple containers that has no location of their own.
 from collections import defaultdict
 
 from evennia import DefaultRoom
+from evennia import search_object
 from evennia.utils import inherits_from
+from evennia.utils.create import create_object
 from evennia.utils.utils import list_to_string
 
 
@@ -175,3 +177,30 @@ class Room(DefaultRoom):
         people = ['dock laborers', 'a few beggars', 'boatmen', 'cats', 'ragged dogs', 'children', 'citizens', 'drovers', 'peddlers', 'priests', 'prostitutes', 'refugees', 'sailors', 'servants', 'traders', 'urchins', 'workers', 'fishermen', 'large brown rats', 'constables']
         if self.db.crowd:
             looker.msg(f"You find yourself at the periphery of a terribly thick crowd. You note a moderate number of {list_to_string(people)}.")
+
+    
+class OOC_Room(Room):
+    def at_object_creation(self):
+        self.tags.add('ooc_room')
+
+class OOC_Workshop(Room):
+    def at_object_creation(self):
+        self.db.desc = ("This small workshop has all the basic amenities required "
+                        "for creating a fresh body.")
+        portal_room = create_object(typeclass="typeclasses.rooms.OOC_Room",
+                                    key="Portal Room")
+        # Make exits connecting the Portal Room with the Workshop
+        exit_to_portal_room = create_object(typeclass="typeclasses.exits.Exit",
+                                            key="north", aliases="n", destination=portal_room,
+                                            location=self, home=self)
+        exit_to_workshop = create_object(typeclass="typeclasses.exits.Exit",
+                                            key="south", aliases="s", destination=self,
+                                            location=portal_room, home=portal_room)
+
+        # Connect the portal room to the Common Room
+        common_room = search_object("Common Room")
+        print(f"{'Common Room found!' if common_room else 'Common Room NOT found!'}")
+        exit_to_common_room = create_object(typeclass="typeclasses.exits.Exit",
+                                            key="north", aliases="n", destination=common_room[0],
+                                            location=portal_room, home=portal_room)
+        print(f"{'Exit to common room created!' if exit_to_common_room else 'Exit to common room NOT created!'}")

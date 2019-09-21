@@ -72,6 +72,12 @@ class Character(DefaultCharacter):
         exits = [o for o in location.contents if o.location is location and o.destination is destination]
         var_exit = exits[0] if exits else "somewhere"
 
+        # If the player is teleported or travels through a 1 way exit, give a generic announcement.
+        if not hasattr(var_exit, 'destination'):
+            location.msg_contents(f"{self.name} departs to {var_exit}.", exclude=(self, ))
+            return
+        
+        # Determine which traversal string will be generated.
         if inherits_from(var_exit, "typeclasses.exits.Door"):
             self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
             others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
@@ -124,6 +130,13 @@ class Character(DefaultCharacter):
             exits = [o for o in destination.contents if o.location is destination and o.destination is origin]
             origin_exit = exits[0] if exits else "somewhere"
 
+        # If the player is teleported or travels through a 1 way exit, give a generic announcement.
+        if not hasattr(origin_exit, 'destination'):
+            if origin:
+                destination.msg_contents(f"{self.name} arrives from {origin_exit}.", exclude=(self, ))
+            return
+        
+        # Determine which traversal string will be generated.
         if origin:
             if inherits_from(origin_exit, "typeclasses.exits.Door"):
                 others_str = f"{self.name} walks in through {origin_exit.db.desc}, from the {origin_exit.name}."

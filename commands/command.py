@@ -122,8 +122,10 @@ class CmdTest(Command):
 
     def func(self):
         caller = self.caller
-        caller.msg(img="https://i.imgur.com/2Wo1BpT.png")
-    pass
+        caller.msg("This should be an image!")
+        caller.msg(image="https://i.imgur.com/2Wo1BpT.png")
+        caller.msg(video="https://youtu.be/YUOxwynb9UU")
+        caller.msg(video="https://vimeo.com/358147193")
 
 # class CmdCreate(ObjManipCommand):
 #     """
