@@ -150,8 +150,8 @@ class Account(DefaultAccount):
                 Character = class_from_module(character_typeclass)
                 name = account.key
                 possessive = '\'' if name[-1] == 's' else '\'s'
-                homeroom = create_object(typeclass='typeclasses.rooms.OOC_Workshop',
-                                key=f"{name}{possessive} Home")
+                homeroom = create_object(typeclass='typeclasses.rooms.OOC_Quarters',
+                                key=f"{name}{possessive} Quarters")
                 # Create the character
                 character, errs = Character.create(
                     account.key, account, ip=ip, typeclass=character_typeclass,

@@ -183,10 +183,9 @@ class OOC_Room(Room):
     def at_object_creation(self):
         self.tags.add('ooc_room')
 
-class OOC_Workshop(Room):
+class OOC_Quarters(Room):
     def at_object_creation(self):
-        self.db.desc = ("This small workshop has all the basic amenities required "
-                        "for creating a fresh body.")
+        self.db.desc = "This compact room leaves much to be desired. It has a bunk large enough for one  person and an adjoining basic bathroom facility."
         portal_room = create_object(typeclass="typeclasses.rooms.OOC_Room",
                                     key="Portal Room")
         # Make exits connecting the Portal Room with the Workshop
