@@ -45,8 +45,9 @@ class Account(DefaultAccount):
         configuration values etc.
         """
         # set an (empty) attribute holding the characters this account has
-        lockstring = "attrread:perm(Admins);attredit:perm(Admins);" \
-                     "attrcreate:perm(Admins);"
+        lockstring = (
+            "attrread:perm(Admins);attredit:perm(Admins);" "attrcreate:perm(Admins);"
+        )
         self.attributes.add("_playable_characters", [], lockstring=lockstring)
         self.attributes.add("_saved_protocol_flags", {}, lockstring=lockstring)
         self.tags.add("new_account")
@@ -75,17 +76,19 @@ class Account(DefaultAccount):
         account = None
         errors = []
 
-        username = kwargs.get('username')
-        password = kwargs.get('password')
-        email = kwargs.get('email', '').strip()
-        guest = kwargs.get('guest', False)
+        username = kwargs.get("username")
+        password = kwargs.get("password")
+        email = kwargs.get("email", "").strip()
+        guest = kwargs.get("guest", False)
 
-        permissions = kwargs.get('permissions', settings.PERMISSION_ACCOUNT_DEFAULT)
-        typeclass = kwargs.get('typeclass', cls)
+        permissions = kwargs.get("permissions", settings.PERMISSION_ACCOUNT_DEFAULT)
+        typeclass = kwargs.get("typeclass", cls)
 
-        ip = kwargs.get('ip', '')
+        ip = kwargs.get("ip", "")
         if ip and CREATION_THROTTLE.check(ip):
-            errors.append("You are creating too many accounts. Please log into an existing account.")
+            errors.append(
+                "You are creating too many accounts. Please log into an existing account."
+            )
             return None, errors
 
         # Normalize username
@@ -112,19 +115,29 @@ class Account(DefaultAccount):
         banned = cls.is_banned(username=username, ip=ip)
         if banned:
             # this is a banned IP or name!
-            string = "|rYou have been banned and cannot continue from here." \
-                     "\nIf you feel this ban is in error, please email an admin.|x"
+            string = (
+                "|rYou have been banned and cannot continue from here."
+                "\nIf you feel this ban is in error, please email an admin.|x"
+            )
             errors.append(string)
             return None, errors
 
         # everything's ok. Create the new account.
         try:
             try:
-                account = create.create_account(username, email, password, permissions=permissions, typeclass=typeclass)
-                logger.log_sec(f'Account Created: {account} (IP: {ip}).')
+                account = create.create_account(
+                    username,
+                    email,
+                    password,
+                    permissions=permissions,
+                    typeclass=typeclass,
+                )
+                logger.log_sec(f"Account Created: {account} (IP: {ip}).")
 
             except Exception as e:
-                errors.append("There was an error creating the Account. If this problem persists, contact an admin.")
+                errors.append(
+                    "There was an error creating the Account. If this problem persists, contact an admin."
+                )
                 logger.log_trace()
                 return None, errors
 
@@ -138,24 +151,39 @@ class Account(DefaultAccount):
                 account.db.creator_ip = ip
 
             # join the new account to the public channel
-            pchannel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
+            pchannel = ChannelDB.objects.get_channel(
+                settings.DEFAULT_CHANNELS[0]["key"]
+            )
             if not pchannel or not pchannel.connect(account):
-                string = f"New account '{account.key}' could not connect to public channel!"
+                string = (
+                    f"New account '{account.key}' could not connect to public channel!"
+                )
                 errors.append(string)
                 logger.log_err(string)
 
             if account and settings.MULTISESSION_MODE < 2:
                 # Load the appropriate Character class
-                character_typeclass = kwargs.get('character_typeclass', settings.BASE_CHARACTER_TYPECLASS)
+                character_typeclass = kwargs.get(
+                    "character_typeclass", settings.BASE_CHARACTER_TYPECLASS
+                )
+                character_home = kwargs.get("home")
                 Character = class_from_module(character_typeclass)
                 name = account.key
                 possessive = '\'' if name[-1] == 's' else '\'s'
-                homeroom = create_object(typeclass='typeclasses.rooms.OOC_Quarters',
-                                key=f"{name}{possessive} Quarters")
+                homeroom = create_object(
+                    typeclass='typeclasses.rooms.OOC_Quarters',
+                    key=f"{name}{possessive} Quarters"
+                )
+
                 # Create the character
                 character, errs = Character.create(
-                    account.key, account, ip=ip, typeclass=character_typeclass,
-                    permissions=permissions)
+                    account.key,
+                    account,
+                    ip=ip,
+                    typeclass=character_typeclass,
+                    permissions=permissions,
+                    home=homeroom,
+                )
                 errors.extend(errs)
 
                 if character:
@@ -165,18 +193,19 @@ class Account(DefaultAccount):
 
                     # We need to set this to have @ic auto-connect to this character
                     account.db._last_puppet = character
-                    character.home = homeroom
 
         except Exception:
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.
-            errors.append("An error occurred. Please e-mail an admin if the problem persists.")
+            errors.append(
+                "An error occurred. Please e-mail an admin if the problem persists."
+            )
             logger.log_trace()
 
         # Update the throttle to indicate a new account was created from this IP
         if ip and not guest:
-            CREATION_THROTTLE.update(ip, 'Too many accounts being created.')
+            CREATION_THROTTLE.update(ip, "Too many accounts being created.")
         SIGNAL_ACCOUNT_POST_CREATE.send(sender=account, ip=ip)
         return account, errors
 
