@@ -126,11 +126,7 @@ class Account(DefaultAccount):
         try:
             try:
                 account = create.create_account(
-                    username,
-                    email,
-                    password,
-                    permissions=permissions,
-                    typeclass=typeclass,
+                    username, email, password, permissions=permissions, typeclass=typeclass
                 )
                 logger.log_sec(f"Account Created: {account} (IP: {ip}).")
 
@@ -151,13 +147,9 @@ class Account(DefaultAccount):
                 account.db.creator_ip = ip
 
             # join the new account to the public channel
-            pchannel = ChannelDB.objects.get_channel(
-                settings.DEFAULT_CHANNELS[0]["key"]
-            )
+            pchannel = ChannelDB.objects.get_channel(settings.DEFAULT_CHANNELS[0]["key"])
             if not pchannel or not pchannel.connect(account):
-                string = (
-                    f"New account '{account.key}' could not connect to public channel!"
-                )
+                string = f"New account '{account.key}' could not connect to public channel!"
                 errors.append(string)
                 logger.log_err(string)
 
@@ -198,9 +190,7 @@ class Account(DefaultAccount):
             # We are in the middle between logged in and -not, so we have
             # to handle tracebacks ourselves at this point. If we don't,
             # we won't see any errors at all.
-            errors.append(
-                "An error occurred. Please e-mail an admin if the problem persists."
-            )
+            errors.append("An error occurred. Please e-mail an admin if the problem persists.")
             logger.log_trace()
 
         # Update the throttle to indicate a new account was created from this IP
