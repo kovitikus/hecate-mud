@@ -158,7 +158,7 @@ class Account(DefaultAccount):
                 character_typeclass = kwargs.get(
                     "character_typeclass", settings.BASE_CHARACTER_TYPECLASS
                 )
-                character_home = kwargs.get("home")
+                # character_home = kwargs.get("home")
                 Character = class_from_module(character_typeclass)
                 name = account.key
                 possessive = '\'' if name[-1] == 's' else '\'s'
