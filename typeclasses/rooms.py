@@ -198,7 +198,8 @@ class OOC_Quarters(Room):
 
         # Connect the portal room to the Common Room
         common_room = search_object("Common Room")
-        print(f"{'Common Room found!' if common_room else 'Common Room NOT found!'}")
+        if not common_room:
+            common_room = create_object(typeclass="typeclasses.rooms.OOC_Room", key='Common Room')
         exit_to_common_room = create_object(typeclass="typeclasses.exits.Exit",
                                             key="north", aliases="n", destination=common_room[0],
                                             location=portal_room, home=portal_room)
