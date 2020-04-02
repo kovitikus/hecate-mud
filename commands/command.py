@@ -342,19 +342,22 @@ class CmdTakeFrom(Command):
  
     def parse(self):
         # get args into 2 variables
-        self.arg1, self.arg2 = self.args.split("from")
-        self.arg1 = self.arg1.strip()
-        self.arg2 = self.arg2.strip()
+        self.item_arg, self.container_arg = self.args.split("from")
+        self.item_arg = self.item_arg.strip()
+        self.container_arg = self.container_arg.strip()
      
            
  
     def func(self):
         caller = self.caller
-        container = caller.search(self.arg2, location=caller.location) # Check if container is in the room.
+        container_arg = self.container_arg
+        item_arg = self.item_arg
+
+        container = caller.search(container_arg, location=caller.location) # Check if container is in the room.
         if container:
-            item = caller.search(self.arg1, location=container) # Check if the item is in the container.
+            item = caller.search(item_arg, location=container) # Check if the item is in the container.
         else:
-            caller.msg(f"{self.arg2} doesn't exist!")
+            caller.msg(f"{container_arg} doesn't exist!")
             return
  
         if item:
@@ -362,7 +365,7 @@ class CmdTakeFrom(Command):
             caller.msg(f"You take {item} from {container}")
             caller.location.msg_contents(f"{caller.name} takes {item} from {container}.", exclude=caller)
         else:
-            caller.msg(f"{self.arg1} isn't in {self.arg2}!")
+            caller.msg(f"{item_arg} isn't in {container}!")
 
 class CmdGet(Command):
     """
