@@ -353,9 +353,9 @@ class CmdTakeFrom(Command):
         container_arg = self.container_arg
         item_arg = self.item_arg
 
-        container = caller.search(container_arg, location=caller.location) # Check if container is in the room.
+        container = caller.search(container_arg, location=caller.location, quiet=True) # Check if container is in the room.
         if container:
-            item = caller.search(item_arg, location=container) # Check if the item is in the container.
+            item = caller.search(item_arg, location=container, quiet=True) # Check if the item is in the container.
         else:
             caller.msg(f"{container_arg} doesn't exist!")
             return
