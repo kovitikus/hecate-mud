@@ -330,6 +330,39 @@ class CmdLie(Command):
             db.lying = True
             caller.msg("You lie down.")
 
+class CmdTakeFrom(Command):
+    """
+    Usage:
+ 
+    Take <item> from <container>
+    
+    Gets an item from the container, if it's in there.
+    """
+    key = "take"
+ 
+    def parse(self):
+        # get args into 2 variables
+        self.arg1, self.arg2 = self.args.split("from")
+        self.arg1 = self.arg1.strip()
+        self.arg2 = self.arg2.strip()
+     
+           
+ 
+    def func(self):
+        caller = self.caller
+        container = caller.search(self.arg2, location=caller.location) # Check if container is in the room.
+        if container:
+            item = caller.search(self.arg1, location=container) # Check if the item is in the container.
+        else:
+            caller.msg(f"{self.arg2} doesn't exist!")
+            return
+ 
+        if item:
+            item.move_to(caller, quiet=True) #move the item to the caller inventory
+            caller.msg(f"You take {item} from {container}")
+            caller.location.msg_contents(f"{caller.name} takes {item} from {container}.", exclude=caller)
+        else:
+            caller.msg(f"{self.arg1} isn't in {self.arg2}!")
 
 class CmdGet(Command):
     """
@@ -342,7 +375,7 @@ class CmdGet(Command):
     Gets an object from your inventory or location and places it in your hands.
     """
     key = "get"
-    aliases = ["take",]
+    # aliases = ["take",]
     locks = "cmd:all()"
     
 
