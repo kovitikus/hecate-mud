@@ -6,6 +6,7 @@ Commands describe the input the account can do to the game.
 """
 
 from evennia import Command as BaseCommand
+from evennia import logger
 from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
@@ -122,10 +123,13 @@ class CmdTest(Command):
 
     def func(self):
         caller = self.caller
-        caller.msg("This should be an image!")
-        caller.msg(image="https://i.imgur.com/2Wo1BpT.png")
-        caller.msg(video="https://youtu.be/YUOxwynb9UU")
-        caller.msg(video="https://vimeo.com/358147193")
+        # caller.msg("This should be an image!")
+        # caller.msg(image="https://i.imgur.com/2Wo1BpT.png")
+        # caller.msg(video="https://youtu.be/YUOxwynb9UU")
+        # caller.msg(video="https://vimeo.com/358147193")
+        caller.msg("Printing something to the log file!")
+        logger.log_msg("Something to the log file!!")
+        print("printing to the log file too!")
 
 # class CmdCreate(ObjManipCommand):
 #     """
@@ -334,11 +338,11 @@ class CmdTakeFrom(Command):
     """
     Usage:
  
-    Take <item> from <container>
+        take <item> from <container>
     
     Gets an item from the container, if it's in there.
     """
-    key = "take"
+    key = 'take'
  
     def parse(self):
         # get args into 2 variables
@@ -355,17 +359,64 @@ class CmdTakeFrom(Command):
 
         container = caller.search(container_arg, location=caller.location, quiet=True) # Check if container is in the room.
         if container:
+            if len(container):
+                container = container[0]
             item = caller.search(item_arg, location=container, quiet=True) # Check if the item is in the container.
+            if item:
+                if len(item):
+                    item = item[0]
+                item.move_to(caller, quiet=True) #move the item to the caller inventory
+                caller.msg(f"You take {item} from {container}.")
+                caller.location.msg_contents(f"{caller.name} takes {item} from {container}.", exclude=caller)
+            else:
+                caller.msg(f"{item_arg} isn't in {container}!")
         else:
             caller.msg(f"{container_arg} doesn't exist!")
             return
  
+
+
+class CmdPut(Command):
+    """
+    Usage: 
+        put <item> in <container>
+    
+    Finds an item around the character and puts it in a container.
+    """
+    key = 'put'
+
+    def parse(self):
+        self.item_arg, self.container_arg = self.args.split('in')
+        self.item_arg = self.item_arg.strip()
+        self.container_arg = self.container_arg.strip()
+
+    def func(self):
+        caller = self.caller
+        item_arg = self.item_arg
+        container_arg = self.container_arg
+
+        # Find the item.
+        # Location unset, search conducted within the character and its location.
+        item = caller.search(item_arg, quiet=True)
         if item:
-            item.move_to(caller, quiet=True) #move the item to the caller inventory
-            caller.msg(f"You take {item} from {container}")
-            caller.location.msg_contents(f"{caller.name} takes {item} from {container}.", exclude=caller)
+            if len(item):
+                item = item[0]
+            container = caller.search(container_arg, quiet=True)
+            if container:
+                if len(container):
+                    container = container[0]
+                if item.location == caller:
+                    caller.msg(f"You place {item.name} in {container.name}.")
+                    caller.msg_contents(f"{caller.name} places {item.name} in {container.name}.", exclude=caller)
+                elif item.location == caller.location:
+                    caller.msg(f"You pick up {item.name} and place it in {container.name}.")
+                    caller.msg_contents(f"{caller.name} picks up {item.name} and places it in {container.name}.", exclude=caller)
+                item.move_to(container, quiet=True)
+            else:
+                caller.msg(f"Could not find {container_arg}!")
         else:
-            caller.msg(f"{item_arg} isn't in {container}!")
+            caller.msg(f"Could not find {item_arg}!")
+
 
 class CmdGet(Command):
     """
@@ -528,7 +579,7 @@ class CmdStow(Command):
     """
     pick up something
     Usage:
-      get <obj>
+      stow <obj>
     Picks up an object from your location and puts it in
     your inventory.
     """

@@ -58,6 +58,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(combat_cmds.CmdStaveSwat())
         self.add(combat_cmds.CmdHeal())
         self.add(command.CmdTakeFrom())
+        self.add(command.CmdPut())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
