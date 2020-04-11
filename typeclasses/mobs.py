@@ -81,3 +81,11 @@ class Rat(DefaultMob):
 
     def bite(self):
         pass
+
+class Dummy(DefaultMob):
+    def revive(self):
+        hp = self.attributes.get('hp')
+        cur_hp = hp['current_hp']
+        max_hp = hp['max_hp']
+        if cur_hp <= 0:
+            cur_hp = max_hp
