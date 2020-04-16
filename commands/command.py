@@ -424,7 +424,6 @@ class CmdGet(Command):
 
     Usage:
       get <obj>
-      take <obj>
 
     Gets an object from your inventory or location and places it in your hands.
     """
@@ -451,7 +450,7 @@ class CmdGet(Command):
         if not obj:
             self.caller.msg(f"|r{args} cannot be found.|n")
             return
-        if len(obj) > 1:
+        if len(obj):
             obj = obj[0]
         if caller == obj:
             caller.msg("You can't get yourself.")
