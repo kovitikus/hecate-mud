@@ -180,137 +180,165 @@ def best_shield_def(char, skillset):
     return shield_high_rb, shield_mid_rb, shield_low_rb
 
 def defense_layer_calc(char):
-        """
-        Defensive rank bonus includes up to 3 layers of defense.
-        The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
-        The second highest RB will supply 50% and the third will only be worth 33%.
-        Each layer can only consist of a single defensive manuever from each of the following categories:
-            Weapon Blocks, Combat Manuever Dodges, and Shield Blocks.
-            Weapons that require 2 hands can only ever gain 2 defensive layers. Shields are the only way to gain all 3 layers.
+    """
+    Defensive rank bonus includes up to 3 layers of defense.
+    The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
+    The second highest RB will supply 50% and the third will only be worth 33%.
+    Each layer can only consist of a single defensive manuever from each of the following categories:
+        Weapon Blocks, Combat Manuever Dodges, and Shield Blocks.
+        Weapons that require 2 hands can only ever gain 2 defensive layers. Shields are the only way to gain all 3 layers.
 
-        For Example:
-        Staves Mid Block with 100 Rank Bonus * 1 = 100
-        CM Mid Dodge with 80 Rank Bonus * 0.5 = 40
-        Total Mid Defensive Rank Bonus = 140
+    For Example:
+    Staves Mid Block with 100 Rank Bonus * 1 = 100
+    CM Mid Dodge with 80 Rank Bonus * 0.5 = 40
+    Total Mid Defensive Rank Bonus = 140
 
-        Swords Mid Block with 100 Rank Bonus * 0.33 = 33
-        CM Mid Dodge with 150 Rank Bonus * 0.5 = 75
-        Shield Mid Block with 200 Rank Bonus * 1 = 200
-        Total Mid Defensive Rank Bonus = 308
+    Swords Mid Block with 100 Rank Bonus * 0.33 = 33
+    CM Mid Dodge with 150 Rank Bonus * 0.5 = 75
+    Shield Mid Block with 200 Rank Bonus * 1 = 200
+    Total Mid Defensive Rank Bonus = 308
 
-        Floats are used to determine the highest RB priority, but only rounded down integers are used to determine the total RB.
+    Floats are used to determine the highest RB priority, but only rounded down integers are used to determine the total RB.
 
-        TODO: Add a round down for the final RB.
+    TODO: Add a round down for the final RB.
 
-        High, Mid, and Low always refer to the area 
-        of the body that the attack targets and not the numerical value.
-        """
+    High, Mid, and Low always refer to the area 
+    of the body that the attack targets and not the numerical value.
+    """
+    b_defense_skill_list = []
+    r_defense_skill_list = []
+    l_defense_skill_list = []
 
-        # weap_high_rb, weap_mid_rb, weap_low_rb = best_weap_def(char, skillset)
-        # dodge_high_rb, dodge_mid_rb, dodge_low_rb = best_dodge_def(char, skillset)
-        # shield_high_rb, shield_mid_rb, shield_low_rb = best_shield_def(char, skillset)
+    # Initialize rankbonus values.
+    weap_high_rb, weap_mid_rb, weap_low_rb = 0, 0, 0
+    shield_high_rb, shield_mid_rb, shield_low_rb = 0, 0 ,0
+    dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0, 0, 0
 
-        # Initialize rankbonus values.
-        weap_high_rb, weap_mid_rb, weap_low_rb = 0, 0, 0
-        shield_high_rb, shield_mid_rb, shield_low_rb = 0, 0 ,0
-        dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0, 0, 0
-
-        # Decide how many layers, based on if wielding.
-        wielding = char.attributes.get('wielding')
-        l_wield = wielding.get('left')
-        r_wield = wielding.get('right')
-        b_wield = wielding.get('both')
-
-
-        if b_wield:
-            if b_wield.attributes.get('skillset'):
-                b_weapon_skillset = char.b_wield.attributes.get('skillset') # Grab weapon skillset dictionary from char.
-                dic_defense = b_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
-                skills = dic_defense.keys() # Create a list of the defensive skill names.
-    
-                for i in skills:
-                    if skillsets[b_weapon_skillset][i]['default_aim'] == 'high':
-                        weap_high_rb += dic_defense.get(i)
-                    elif skillsets[b_weapon_skillset][i]['default_aim'] == 'mid':
-                        weap_mid_rb += dic_defense.get(i)
-                    elif skillsets[b_weapon_skillset][i]['default_aim'] == 'low':
-                        weap_low_rb += dic_defense.get(i)
+    # Decide how many layers, based on if wielding.
+    wielding = char.attributes.get('wielding')
+    l_wield = wielding.get('left')
+    r_wield = wielding.get('right')
+    b_wield = wielding.get('both')
 
 
-        if r_wield:
-            if r_wield.attributes.get('skillset'):
-                r_weapon_skillset = r_wield.attributes.get('skillset')
-                dic_defense = r_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
-                skills = dic_defense.keys() # Create a list of the defensive skill names.
-    
-                for i in skills:
-                    if skillsets[r_weapon_skillset][i]['default_aim'] == 'high':
-                        weap_high_rb += dic_defense.get(i)
-                    elif skillsets[r_weapon_skillset][i]['default_aim'] == 'mid':
-                        weap_mid_rb += dic_defense.get(i)
-                    elif skillsets[r_weapon_skillset][i]['default_aim'] == 'low':
-                        weap_low_rb += dic_defense.get(i)
+    if b_wield:
+        if b_wield.attributes.has('skillset'):
+            b_wield_skillset = b_wield.attributes.get('skillset')
+            char_b_weapon_skillset = char.attributes.get(b_wield_skillset) # Grab weapon skillset dictionary from char.
+            skills = [*char_b_weapon_skillset] # Create a list of the skill names.
 
+            # Check each key in the dictionary against all viable skills.
+            for i in skills:
+                if skillsets[b_wield_skillset].get(i):
+                    if skillsets[b_wield_skillset][i]['skill_type'] == 'defense':
+                        b_defense_skill_list.append(i)
+
+            # Sort 
+            for i in b_defense_skill_list:
+                if skillsets[b_wield_skillset][i]['default_aim'] == 'high':
+                    weap_high_rb += char_b_weapon_skillset[i].get('rank_bonus')
+                elif skillsets[b_wield_skillset][i]['default_aim'] == 'mid':
+                    weap_mid_rb += char_b_weapon_skillset[i].get('rank_bonus')
+                elif skillsets[b_wield_skillset][i]['default_aim'] == 'low':
+                    weap_low_rb += char_b_weapon_skillset[i].get('rank_bonus')
+
+
+    if r_wield:
+        if r_wield.attributes.has('skillset'):
+            r_wield_skillset = r_wield.attributes.get('skillset')
+            char_r_weapon_skillset = char.attributes.get(r_wield_skillset) # Grab weapon skillset dictionary from char.
+            skills = [*char_r_weapon_skillset] # Create a list of the skill names.
+
+            # Check each key in the dictionary against all viable skills.
+            for i in skills:
+                if skillsets[r_wield_skillset].get(i):
+                    if skillsets[r_wield_skillset][i]['skill_type'] == 'defense':
+                        r_defense_skill_list.append(i)
+
+            for i in r_defense_skill_list:
+                if skillsets[r_wield_skillset][i]['default_aim'] == 'high':
+                    weap_high_rb += char_r_weapon_skillset[i].get('rank_bonus')
+                elif skillsets[r_wield_skillset][i]['default_aim'] == 'mid':
+                    weap_mid_rb += char_r_weapon_skillset[i].get('rank_bonus')
+                elif skillsets[r_wield_skillset][i]['default_aim'] == 'low':
+                    weap_low_rb += char_r_weapon_skillset[i].get('rank_bonus')
+
+    if l_wield:
         if l_wield.is_typeclass('typeclasses.objects.Shields'):
-            if l_wield.attributes.get('skillset'):
-                shield_skillset = l_wield.attributes.get('skillset')
-                dic_defense = shield_skillset.get('defense') # Grab defensive skills dictioanry.
-                skills = dic_defense.keys() # Create a list of the defensive skill names.
-    
+            if l_wield.attributes.has('skillset'):
+                l_wield_skillset = l_wield.attributes.get('skillset')
+                char_l_weapon_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
+                skills = [*char_l_weapon_skillset] # Create a list of the skill names.
+
+                # Check each key in the dictionary against all viable skills.
                 for i in skills:
-                    if skillsets[shield_skillset][i]['default_aim'] == 'high':
-                        weap_high_rb += dic_defense.get(i)
-                    elif skillsets[shield_skillset][i]['default_aim'] == 'mid':
-                        weap_mid_rb += dic_defense.get(i)
-                    elif skillsets[shield_skillset][i]['default_aim'] == 'low':
-                        weap_low_rb += dic_defense.get(i)
-        elif l_wield:
-            if l_wield.attributes.get('skillset'):
-                l_weapon_skillset = l_wield.attributes.get('skillset')
-                dic_defense = l_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
-                skills = dic_defense.keys() # Create a list of the defensive skill names.
-    
+                    if skillsets[l_wield_skillset].get(i):
+                        if skillsets[l_wield_skillset][i]['skill_type'] == 'defense':
+                            l_defense_skill_list.append(i)
+
+                for i in l_defense_skill_list:
+                    if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
+                        shield_high_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
+                        shield_mid_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
+                        shield_low_rb += char_l_weapon_skillset[i].get('rank_bonus')
+        else:
+            if l_wield.attributes.has('skillset'):
+                l_wield_skillset = l_wield.attributes.get('skillset')
+                char_l_weapon_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
+                skills = [*char_l_weapon_skillset] # Create a list of the skill names.
+
+                # Check each key in the dictionary against all viable skills.
                 for i in skills:
-                    if skillsets[l_weapon_skillset][i]['default_aim'] == 'high':
-                        weap_high_rb += dic_defense.get(i)
-                    elif skillsets[l_weapon_skillset][i]['default_aim'] == 'mid':
-                        weap_mid_rb += dic_defense.get(i)
-                    elif skillsets[l_weapon_skillset][i]['default_aim'] == 'low':
-                        weap_low_rb += dic_defense.get(i)
+                    if skillsets[l_wield_skillset].get(i):
+                        if skillsets[l_wield_skillset][i]['skill_type'] == 'defense':
+                            l_defense_skill_list.append(i)
 
-        
-        
-        
+                for i in l_defense_skill_list:
+                    if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
+                        shield_high_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
+                        shield_mid_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
+                        shield_low_rb += char_l_weapon_skillset[i].get('rank_bonus')
 
-        # High Layer
-        h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
-        h_rb.sort(reverse=True)
-        h_layer1 = h_rb[0] * 1
-        h_layer2 = h_rb[1] * 0.5
-        h_layer3 = h_rb[2] * 0.33
-        high_def_rb = (h_layer1 + h_layer2 + h_layer3)
+    # Get all dodge rank bonuses
+    # !!! NO DODGES EXIST YET !!!
+    
+    
 
-        # Mid Layer
-        m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
-        m_rb.sort(reverse=True)
-        m_layer1 = m_rb[0] * 1
-        m_layer2 = m_rb[1] * 0.5
-        m_layer3 = m_rb[2] * 0.33
-        mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
+    # High Layer
+    h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
+    h_rb.sort(reverse=True)
+    h_layer1 = h_rb[0] * 1
+    h_layer2 = h_rb[1] * 0.5
+    h_layer3 = h_rb[2] * 0.33
+    high_def_rb = (h_layer1 + h_layer2 + h_layer3)
 
-        # Low Layer
-        l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
-        l_rb.sort(reverse=True)
-        l_layer1 = l_rb[0] * 1
-        l_layer2 = l_rb[1] * 0.5
-        l_layer3 = l_rb[2] * 0.33
-        low_def_rb = (l_layer1 + l_layer2 + l_layer3)
+    # Mid Layer
+    m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
+    m_rb.sort(reverse=True)
+    m_layer1 = m_rb[0] * 1
+    m_layer2 = m_rb[1] * 0.5
+    m_layer3 = m_rb[2] * 0.33
+    mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
 
-        # Assign the values to the character.
-        def_rb = char.db.def_rb
-        def_rb['high'] = high_def_rb
-        def_rb['mid'] = mid_def_rb
-        def_rb['low'] = low_def_rb
+    # Low Layer
+    l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
+    l_rb.sort(reverse=True)
+    l_layer1 = l_rb[0] * 1
+    l_layer2 = l_rb[1] * 0.5
+    l_layer3 = l_rb[2] * 0.33
+    low_def_rb = (l_layer1 + l_layer2 + l_layer3)
+
+    # Assign the values to the character.
+    def_rb = char.db.def_rb
+    def_rb['high'] = high_def_rb
+    def_rb['mid'] = mid_def_rb
+    def_rb['low'] = low_def_rb
+
+    return high_def_rb, mid_def_rb, low_def_rb
 
 def rb_stance(self, o_rb, d_rb, stance):
     '''
@@ -648,5 +676,10 @@ def generate_skill_list(char):
 
     # Now we compile the final list.
     full_skillsets_string = ''.join(skillset_string_list)
-    result = f"{header}{full_skillsets_string}\n{footer}"
+
+    # Current total defensive rank bonuses.
+    high_def_rb, mid_def_rb, low_def_rb = defense_layer_calc(char)
+    def_rb = f"\n\nCurrent total defensive RB - High: {high_def_rb}    Mid: {mid_def_rb}    Low: {low_def_rb}\n"
+
+    result = f"{header}{full_skillsets_string}{def_rb}\n{footer}"
     return result

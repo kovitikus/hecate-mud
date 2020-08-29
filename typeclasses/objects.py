@@ -32,13 +32,13 @@ class Staves(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 2)
         self.attributes.add('skillset', 'staves')
-        self.tags.add('staves')
+        self.tags.add('staves', category='skillset')
 
 class Swords(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 1)
-        self.attributes.add('skillset', 'staves')
-        self.tags.add('swords')
+        self.attributes.add('skillset', 'swords')
+        self.tags.add('swords', category='skillset')
 
 class OffHand(Object):
     def at_object_creation(self):
@@ -47,5 +47,5 @@ class OffHand(Object):
 class Shields(OffHand):
     def at_object_creation(self):
         self.attributes.add('skillset', 'shields')
-        self.tags.add('shields')
+        self.tags.add('shields', category='skillset')
 
