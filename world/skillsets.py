@@ -201,6 +201,9 @@ def defense_layer_calc(char):
     Floats are used to determine the highest RB priority, but only rounded down integers are used to determine the total RB.
 
     TODO: Add a round down for the final RB.
+    TODO: Remove rank bonuses from character attributes and only ever dynamically produce them 
+            based on the character's ranks, so that RB formula can always be changed later 
+            without editing character attributes.
 
     High, Mid, and Low always refer to the area 
     of the body that the attack targets and not the numerical value.
