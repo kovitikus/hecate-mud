@@ -625,30 +625,21 @@ def generate_skill_list(char):
                         "--------------------------------------------------")
             num = 0
             for v in offense_skill_list:
-                if num%2 == 0:
-                    offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RB: |G{offense_rank_bonus_list[num]}|n\n")
-                else:
-                    offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RB: |G{offense_rank_bonus_list[num]}|n\n")
+                offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RB: |G{offense_rank_bonus_list[num]}|n\n")
                 num += 1
             if len(offense_skill_string_list) > 0:
                 offense_skill_string = f"\nOffense:\n{''.join(offense_skill_string_list)}"
 
             num = 0
             for v in defense_skill_list:
-                if num%2 == 0:
-                    defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RB: |G{defense_rank_bonus_list[num]}|n\n")
-                else:
-                    defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RB: |G{defense_rank_bonus_list[num]}|n\n")
+                defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RB: |G{defense_rank_bonus_list[num]}|n\n")
                 num += 1
             if len(defense_skill_string_list) > 0:
                 defense_skill_string = f"\nDefense:\n{''.join(defense_skill_string_list)}"
 
             num = 0
             for v in utility_skill_list:
-                if num%2 == 0:
-                    utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RB: |G{utility_rank_bonus_list[num]}|n\n")
-                else:
-                    utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RB: |G{utility_rank_bonus_list[num]}|n\n")
+                utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RB: |G{utility_rank_bonus_list[num]}|n\n")
                 num += 1
             if len(utility_skill_string_list) > 0:
                 utility_skill_string = f"\nUtility:\n{''.join(utility_skill_string_list)}"
