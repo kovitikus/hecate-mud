@@ -620,23 +620,23 @@ def generate_skill_list(char):
             for v in offense_skill_list:
                 offense_skill_string_list.append(f"{v}            Rank: {offense_rank_list[num]}        Rank Bonus: {offense_rank_bonus_list[num]}\n")
                 num += 1
-            offense_skill_string = list_to_string(offense_skill_string_list)
+            offense_skill_string = f"\nOffense:\n{''.join(offense_skill_string_list)}"
 
             num = 0
             for v in defense_skill_list:
                 defense_skill_string_list.append(f"{v}            Rank: {defense_rank_list[num]}        Rank Bonus: {defense_rank_bonus_list[num]}\n")
                 num += 1
-            defense_skill_string = list_to_string(defense_skill_string_list)
+            defense_skill_string = f"\nDefense:\n{''.join(defense_skill_string_list)}"
 
             num = 0
             for v in utility_skill_list:
                 utility_skill_string_list.append(f"{v}            Rank: {utility_rank_list[num]}        Rank Bonus: {utility_rank_bonus_list[num]}\n")
                 num += 1
-            utility_skill_string = list_to_string(utility_skill_string_list)
+            utility_skill_string = f"\nUtility:\n{''.join(utility_skill_string_list)}"
             
             skillset_string_list.append(f"{skillset_title}{offense_skill_string}{defense_skill_string}{utility_skill_string}")
 
     # Now we compile the final list.
-    full_skillsets_string = list_to_string(skillset_string_list)
+    full_skillsets_string = ''.join(skillset_string_list)
     result = f"{header}\n\n{full_skillsets_string}\n{footer}"
     return result
