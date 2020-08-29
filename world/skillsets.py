@@ -539,6 +539,7 @@ def generate_skill_list(char):
 
     ==================================================
     """
+    cap = str.capitalize
 
     offense_skill_list = []
     defense_skill_list = []
@@ -560,13 +561,16 @@ def generate_skill_list(char):
 
     skillset_dic = None
     skill_dic = None
+
+    total_ranks = 0
+    skill_points = 0.0
     num = 0
     offense_skill_string = ""
     defense_skill_string = ""
     utility_skill_string = ""
     full_skillsets_string = ""
 
-    header = "=====[Skills]====================================="
+    header = "=====[|gSkills|n]====================================="
     footer = "=================================================="
 
   
@@ -588,16 +592,19 @@ def generate_skill_list(char):
         defense_skill_string_list = []
         utility_skill_string_list = []
 
+        offense_skill_string = ''
+        defense_skill_string = ''
+        utility_skill_string = ''
+
         if char.attributes.get(i): # If the skillset exists on the character.
             skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
-            print(skillset_dic)
+            total_ranks = skillset_dic.get('total_ranks')
+            skill_points = skillset_dic.get('total_sp')
 
             # Build skill lists
             for x in VIABLE_SKILLS:
                 if skillset_dic.get(x): # If the skill exists on the character.
-                    print("Found skill in skillset!") # !!! FAILED HERE !!!
                     skill_dic = skillset_dic.get(x) # Store that skill's dictionary.
-                    print(f"Got the skill dictionary: {skill_dic}")
 
                     # Store the skill's name in a list, sorted by skill type.
                     if skillsets[i][x]['skill_type'] == 'offense':
@@ -614,29 +621,41 @@ def generate_skill_list(char):
                         utility_rank_bonus_list.append(skill_dic['rank_bonus'])
 
             # Build this skillset's string.
-            skillset_title = (f"{i}\n"
-                        "-------------------------------\n")
+            skillset_title = (f"\n\n|g{cap(i)}|n - Skill Points: |g{skill_points}|n    Total Ranks: |g{total_ranks}|n\n"
+                        "--------------------------------------------------")
             num = 0
             for v in offense_skill_list:
-                offense_skill_string_list.append(f"{v}            Rank: {offense_rank_list[num]}        Rank Bonus: {offense_rank_bonus_list[num]}\n")
+                if num%2 == 0:
+                    offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RB: |G{offense_rank_bonus_list[num]}|n\n")
+                else:
+                    offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RB: |G{offense_rank_bonus_list[num]}|n\n")
                 num += 1
-            offense_skill_string = f"\nOffense:\n{''.join(offense_skill_string_list)}"
+            if len(offense_skill_string_list) > 0:
+                offense_skill_string = f"\nOffense:\n{''.join(offense_skill_string_list)}"
 
             num = 0
             for v in defense_skill_list:
-                defense_skill_string_list.append(f"{v}            Rank: {defense_rank_list[num]}        Rank Bonus: {defense_rank_bonus_list[num]}\n")
+                if num%2 == 0:
+                    defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RB: |G{defense_rank_bonus_list[num]}|n\n")
+                else:
+                    defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RB: |G{defense_rank_bonus_list[num]}|n\n")
                 num += 1
-            defense_skill_string = f"\nDefense:\n{''.join(defense_skill_string_list)}"
+            if len(defense_skill_string_list) > 0:
+                defense_skill_string = f"\nDefense:\n{''.join(defense_skill_string_list)}"
 
             num = 0
             for v in utility_skill_list:
-                utility_skill_string_list.append(f"{v}            Rank: {utility_rank_list[num]}        Rank Bonus: {utility_rank_bonus_list[num]}\n")
+                if num%2 == 0:
+                    utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RB: |G{utility_rank_bonus_list[num]}|n\n")
+                else:
+                    utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RB: |G{utility_rank_bonus_list[num]}|n\n")
                 num += 1
-            utility_skill_string = f"\nUtility:\n{''.join(utility_skill_string_list)}"
+            if len(utility_skill_string_list) > 0:
+                utility_skill_string = f"\nUtility:\n{''.join(utility_skill_string_list)}"
             
             skillset_string_list.append(f"{skillset_title}{offense_skill_string}{defense_skill_string}{utility_skill_string}")
 
     # Now we compile the final list.
     full_skillsets_string = ''.join(skillset_string_list)
-    result = f"{header}\n\n{full_skillsets_string}\n{footer}"
+    result = f"{header}{full_skillsets_string}\n{footer}"
     return result
