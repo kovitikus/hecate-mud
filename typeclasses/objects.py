@@ -26,75 +26,19 @@ class Object(DefaultObject):
         singular = key
         plural = key
         return singular, plural
-
-    @classmethod
-    def create(cls, key, account=None, **kwargs):
-        """
-        Creates a basic object with default parameters, unless otherwise
-        specified or extended.
-        Provides a friendlier interface to the utils.create_object() function.
-        Args:
-            key (str): Name of the new object.
-            account (Account): Account to attribute this object to.
-        Kwargs:
-            description (str): Brief description for this object.
-            ip (str): IP address of creator (for object auditing).
-        Returns:
-            object (Object): A newly created object of the given typeclass.
-            errors (list): A list of errors in string form, if any.
-        """
-        errors = []
-        obj = None
-
-        # Get IP address of creator, if available
-        ip = kwargs.pop('ip', '')
-
-        # If no typeclass supplied, use this class
-        kwargs['typeclass'] = kwargs.pop('typeclass', cls)
-
-        # Set the supplied key as the name of the intended object
-        art = article(key)
-        key = f"{art} {key}"
-        kwargs['key'] = key
-
-        # Get a supplied description, if any
-        description = kwargs.pop('description', '')
-
-        # Create a sane lockstring if one wasn't supplied
-        lockstring = kwargs.get('locks')
-        if account and not lockstring:
-            lockstring = cls.lockstring.format(account_id=account.id)
-            kwargs['locks'] = lockstring
-
-        # Create object
-        try:
-            obj = create.create_object(**kwargs)
-
-            # Record creator id and creation IP
-            if ip: obj.db.creator_ip = ip
-            if account: obj.db.creator_id = account.id
-
-            # Set description if there is none, or update it if provided
-            if description or not obj.db.desc:
-                desc = description if description else "You see nothing special."
-                obj.db.desc = desc
-
-        except Exception as e:
-            errors.append("An error occurred while creating this '%s' object." % key)
-            logger.log_err(e)
-
-        return obj, errors
     pass
 
 class Staves(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 2)
-        self.tags.add('stave')
+        self.attributes.add('skillset', 'staves')
+        self.tags.add('staves')
 
 class Swords(Object):
     def at_object_creation(self):
         self.attributes.add('wieldable', 1)
-        self.tags.add('sword')
+        self.attributes.add('skillset', 'staves')
+        self.tags.add('swords')
 
 class OffHand(Object):
     def at_object_creation(self):
@@ -102,5 +46,6 @@ class OffHand(Object):
 
 class Shields(OffHand):
     def at_object_creation(self):
-        self.tags.add('shield')
+        self.attributes.add('skillset', 'shields')
+        self.tags.add('shields')
 

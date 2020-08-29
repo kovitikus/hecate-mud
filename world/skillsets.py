@@ -1,3 +1,5 @@
+from evennia.utils.utils import list_to_string
+
 
 def skill_level(rank, difficulty):
     '''
@@ -62,7 +64,122 @@ def skill_level(rank, difficulty):
         return rb # Return if any rank.
     return None # Return if no rank.
 
-def defense_layer_calc(char, skillset):
+def best_weap_def(char, skillset):
+    weap_dic = char.db.def_skills.get('weapon')
+    weap_high_def = weap_dic.get('high')
+    weap_mid_def = weap_dic.get('mid')
+    weap_low_def = weap_dic.get('low')
+    weap_high_rb = 0.0
+    weap_mid_rb = 0.0
+    weap_low_rb = 0.0
+    best_weap_high_skill = None
+    best_weap_mid_skill = None
+    best_weap_low_skill = None
+
+    if weap_high_def.get(skillset):
+        weap_high_dic = weap_high_def.get(skillset)
+        print(weap_high_dic)
+        for k, v in weap_high_dic.items():
+            if v > weap_high_rb:
+                best_weap_high_skill = k
+                weap_high_rb = v
+        weap_high_dic['best_weap_high_skill'] = best_weap_high_skill
+
+    if weap_mid_def.get(skillset):
+        weap_mid_dic = weap_mid_def.get(skillset)
+        for k, v in weap_mid_dic.items():
+            if v > weap_mid_rb:
+                best_weap_mid_skill = k
+                weap_mid_rb = v
+        weap_mid_dic['best_weap_mid_skill'] = best_weap_mid_skill
+
+    if weap_low_def.get(skillset):
+        weap_low_dic = weap_low_def.get(skillset)
+        for k, v in weap_low_dic.items():
+            if v > weap_low_rb:
+                best_weap_low_skill = k
+                weap_low_rb = v
+        weap_low_dic['best_weap_low_skill'] = best_weap_low_skill
+
+    return weap_high_rb, weap_mid_rb, weap_low_rb
+
+def best_dodge_def(char, skillset):
+    dodge_dic = char.db.def_skills.get('dodge')
+    dodge_high_def = dodge_dic.get('high')
+    dodge_mid_def = dodge_dic.get('mid')
+    dodge_low_def = dodge_dic.get('low')
+    dodge_high_rb = 0.0
+    dodge_mid_rb = 0.0
+    dodge_low_rb = 0.0
+    best_dodge_high_skill = None
+    best_dodge_mid_skill = None
+    best_dodge_low_skill = None
+
+    if dodge_high_def.get('cm'):
+        dodge_high_dic = dodge_high_def.get('cms')
+        for k, v in dodge_high_dic.items():
+            if v > dodge_high_rb:
+                best_dodge_high_skill = k
+                dodge_high_rb = v
+        dodge_high_dic['best_dodge_high_skill'] = best_dodge_high_skill
+
+    if dodge_mid_def.get('cm'):
+        dodge_mid_dic = dodge_mid_def.get('cms')
+        for k, v in dodge_mid_dic.items():
+            if v > dodge_mid_rb:
+                best_dodge_mid_skill = k
+                dodge_mid_rb = v
+        dodge_mid_dic['best_dodge_mid_skill'] = best_dodge_mid_skill
+
+    if dodge_low_def.get('cm'):
+        dodge_low_dic = dodge_low_def.get('cms')
+        for k, v in dodge_low_dic.items():
+            if v > dodge_low_rb:
+                best_dodge_low_skill = k
+                dodge_low_rb = v
+        dodge_low_dic['best_dodge_low_skill'] = best_dodge_low_skill
+
+    return dodge_high_rb, dodge_mid_rb, dodge_low_rb
+
+def best_shield_def(char, skillset):
+    shield_dic = char.db.def_skills.get('shield')
+    shield_high_def = shield_dic.get('high')
+    shield_mid_def = shield_dic.get('mid')
+    shield_low_def = shield_dic.get('low')
+    shield_high_rb = 0.0
+    shield_mid_rb = 0.0
+    shield_low_rb = 0.0
+    best_shield_high_skill = None
+    best_shield_mid_skill = None
+    best_shield_low_skill = None
+
+    if shield_high_def.get('shield'):
+        shield_high_dic = shield_high_def.get('shield')
+        for k, v in shield_high_dic.items():
+            if v > shield_high_rb:
+                best_shield_high_skill = k
+                shield_high_rb = v
+        shield_high_dic['best_shield_high_skill'] = best_shield_high_skill
+
+    if shield_mid_def.get('shield'):
+        shield_mid_dic = shield_mid_def.get('shield')
+        for k, v in shield_mid_dic.items():
+            if v > shield_mid_rb:
+                best_shield_mid_skill = k
+                shield_mid_rb = v
+        shield_mid_dic['best_shield_mid_skill'] = best_shield_mid_skill
+
+    if shield_low_def.get('shield'):
+        shield_low_dic = shield_low_def.get('shield')
+        for k, v in shield_low_dic.items():
+            if v > shield_low_rb:
+                best_shield_low_skill = k
+                shield_low_rb = v
+        shield_low_dic['best_shield_low_skill'] = best_shield_low_skill
+
+    return shield_high_rb, shield_mid_rb, shield_low_rb
+
+def defense_layer_calc(char):
         """
         Defensive rank bonus includes up to 3 layers of defense.
         The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
@@ -89,108 +206,83 @@ def defense_layer_calc(char, skillset):
         of the body that the attack targets and not the numerical value.
         """
 
-        """Weapon Rank Bonus"""
-        weap_dic = char.db.def_skills.get('weapon')
-        weap_high_def = weap_dic.get('high')
-        weap_mid_def = weap_dic.get('mid')
-        weap_low_def = weap_dic.get('low')
-        weap_high_rb = 0.0
-        weap_mid_rb = 0.0
-        weap_low_rb = 0.0
+        # weap_high_rb, weap_mid_rb, weap_low_rb = best_weap_def(char, skillset)
+        # dodge_high_rb, dodge_mid_rb, dodge_low_rb = best_dodge_def(char, skillset)
+        # shield_high_rb, shield_mid_rb, shield_low_rb = best_shield_def(char, skillset)
 
-        if weap_high_def.get(skillset):
-            weap_high_dic = weap_high_def.get(skillset)
-            weap_high_dic_values = weap_high_dic.values()
-            for rb in weap_high_dic_values:
-                if rb > weap_high_rb:
-                    weap_high_rb = rb
+        # Initialize rankbonus values.
+        weap_high_rb, weap_mid_rb, weap_low_rb = 0, 0, 0
+        shield_high_rb, shield_mid_rb, shield_low_rb = 0, 0 ,0
+        dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0, 0, 0
 
-        if weap_mid_def.get(skillset):
-            weap_mid_dic = weap_mid_def.get(skillset)
-            weap_mid_dic_values = weap_mid_dic.values()
-            for rb in weap_mid_dic_values:
-                if rb > weap_mid_rb:
-                    weap_mid_rb = rb
+        # Decide how many layers, based on if wielding.
+        wielding = char.attributes.get('wielding')
+        l_wield = wielding.get('left')
+        r_wield = wielding.get('right')
+        b_wield = wielding.get('both')
 
-        if weap_low_def.get(skillset):
-            weap_low_dic = weap_low_def.get(skillset)
-            weap_low_dic_values = weap_low_dic.values()
-            for rb in weap_low_dic_values:
-                if rb > weap_low_rb:
-                    weap_low_rb = rb
+
+        if b_wield:
+            if b_wield.attributes.get('skillset'):
+                b_weapon_skillset = char.b_wield.attributes.get('skillset') # Grab weapon skillset dictionary from char.
+                dic_defense = b_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
+                skills = dic_defense.keys() # Create a list of the defensive skill names.
+    
+                for i in skills:
+                    if skillsets[b_weapon_skillset][i]['default_aim'] == 'high':
+                        weap_high_rb += dic_defense.get(i)
+                    elif skillsets[b_weapon_skillset][i]['default_aim'] == 'mid':
+                        weap_mid_rb += dic_defense.get(i)
+                    elif skillsets[b_weapon_skillset][i]['default_aim'] == 'low':
+                        weap_low_rb += dic_defense.get(i)
+
+
+        if r_wield:
+            if r_wield.attributes.get('skillset'):
+                r_weapon_skillset = r_wield.attributes.get('skillset')
+                dic_defense = r_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
+                skills = dic_defense.keys() # Create a list of the defensive skill names.
+    
+                for i in skills:
+                    if skillsets[r_weapon_skillset][i]['default_aim'] == 'high':
+                        weap_high_rb += dic_defense.get(i)
+                    elif skillsets[r_weapon_skillset][i]['default_aim'] == 'mid':
+                        weap_mid_rb += dic_defense.get(i)
+                    elif skillsets[r_weapon_skillset][i]['default_aim'] == 'low':
+                        weap_low_rb += dic_defense.get(i)
+
+        if l_wield.is_typeclass('typeclasses.objects.Shields'):
+            if l_wield.attributes.get('skillset'):
+                shield_skillset = l_wield.attributes.get('skillset')
+                dic_defense = shield_skillset.get('defense') # Grab defensive skills dictioanry.
+                skills = dic_defense.keys() # Create a list of the defensive skill names.
+    
+                for i in skills:
+                    if skillsets[shield_skillset][i]['default_aim'] == 'high':
+                        weap_high_rb += dic_defense.get(i)
+                    elif skillsets[shield_skillset][i]['default_aim'] == 'mid':
+                        weap_mid_rb += dic_defense.get(i)
+                    elif skillsets[shield_skillset][i]['default_aim'] == 'low':
+                        weap_low_rb += dic_defense.get(i)
+        elif l_wield:
+            if l_wield.attributes.get('skillset'):
+                l_weapon_skillset = l_wield.attributes.get('skillset')
+                dic_defense = l_weapon_skillset.get('defense') # Grab defensive skills dictioanry.
+                skills = dic_defense.keys() # Create a list of the defensive skill names.
+    
+                for i in skills:
+                    if skillsets[l_weapon_skillset][i]['default_aim'] == 'high':
+                        weap_high_rb += dic_defense.get(i)
+                    elif skillsets[l_weapon_skillset][i]['default_aim'] == 'mid':
+                        weap_mid_rb += dic_defense.get(i)
+                    elif skillsets[l_weapon_skillset][i]['default_aim'] == 'low':
+                        weap_low_rb += dic_defense.get(i)
+
+        
+        
         
 
-        """Dodge Rank Bonus"""
-        dodge_dic = char.db.def_skills.get('dodge')
-        dodge_high_def = dodge_dic.get('high')
-        dodge_mid_def = dodge_dic.get('mid')
-        dodge_low_def = dodge_dic.get('low')
-        dodge_high_rb = 0.0
-        dodge_mid_rb = 0.0
-        dodge_low_rb = 0.0
-
-        if dodge_high_def.get('cm'):
-            dodge_high_dic = dodge_high_def.get('cms')
-            dodge_high_dic_values = dodge_high_dic.values()
-            for rb in dodge_high_dic_values:
-                if rb > dodge_high_rb:
-                    dodge_high_rb = rb
-
-        if dodge_mid_def.get('cm'):
-            dodge_mid_dic = dodge_mid_def.get('cms')
-            dodge_mid_dic_values = dodge_mid_dic.values()
-            for rb in dodge_mid_dic_values:
-                if rb > dodge_mid_rb:
-                    dodge_mid_rb = rb
-
-        if dodge_low_def.get('cm'):
-            dodge_low_dic = dodge_low_def.get('cms')
-            dodge_low_dic_values = dodge_low_dic.values()
-            for rb in dodge_low_dic_values:
-                if rb > dodge_low_rb:
-                    dodge_low_rb = rb
-
-    
-        """Shield Rank Bonus"""
-        shield_dic = char.db.def_skills.get('shield')
-        shield_high_def = shield_dic.get('high')
-        shield_mid_def = shield_dic.get('mid')
-        shield_low_def = shield_dic.get('low')
-        shield_high_rb = 0.0
-        shield_mid_rb = 0.0
-        shield_low_rb = 0.0
-
-        if shield_high_def.get('shield'):
-            shield_high_dic = shield_high_def.get('shield')
-            shield_high_dic_values = shield_high_dic.values()
-            for rb in shield_high_dic_values:
-                if rb > shield_high_rb:
-                    shield_high_rb = rb
-
-        if shield_mid_def.get('shield'):
-            shield_mid_dic = shield_mid_def.get('shield')
-            shield_mid_dic_values = shield_mid_dic.values()
-            for rb in shield_mid_dic_values:
-                if rb > shield_mid_rb:
-                    shield_mid_rb = rb
-
-        if shield_low_def.get('shield'):
-            shield_low_dic = shield_low_def.get('shield')
-            shield_low_dic_values = shield_low_dic.values()
-            for rb in shield_low_dic_values:
-                if rb > shield_low_rb:
-                    shield_low_rb = rb
-
-
-        """
-        Calculate Layering
-        First Highest RB gets 100%
-        Second Highest RB gets 50%
-        Third Highest RB gets 33%
-        """
-
-        """High Layer"""
-        # weap_high_rb, dodge_high_rb, shield_high_rb
+        # High Layer
         h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
         h_rb.sort(reverse=True)
         h_layer1 = h_rb[0] * 1
@@ -198,8 +290,7 @@ def defense_layer_calc(char, skillset):
         h_layer3 = h_rb[2] * 0.33
         high_def_rb = (h_layer1 + h_layer2 + h_layer3)
 
-        """Mid Layer"""
-        # weap_mid_rb, dodge_mid_rb, shield_mid_rb
+        # Mid Layer
         m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
         m_rb.sort(reverse=True)
         m_layer1 = m_rb[0] * 1
@@ -207,8 +298,7 @@ def defense_layer_calc(char, skillset):
         m_layer3 = m_rb[2] * 0.33
         mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
 
-        """Low Layer"""
-        # weap_low_rb, dodge_low_rb, shield_low_rb
+        # Low Layer
         l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
         l_rb.sort(reverse=True)
         l_layer1 = l_rb[0] * 1
@@ -272,56 +362,55 @@ for i in range(1, 1_001):
     rb = skill_level(i, 'impossible')
     impossible_rb.append(rb)
 
-# Skillsets
+# Skillset Order: Alphabetically
+# Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
 skillsets = {'staves': 
-                {'leg sweep': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'feint': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'end jab': 
-                    {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'swat': 
-                    {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'simple strike': 
-                    {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'side strike': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'pivot smash': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'longarm strike': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'simple block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': ['mid', 'low']},
-                'cross block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ['mid', 'low']},
-                'overhead block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': ['high']},
+                {'end jab': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
                 'parting jab': 
-                    {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
                 'parting swat': 
-                    {'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'simple strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'swat': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
                 'parting smash':
-                     {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'defensive sweep': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'stepping spin': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                     {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'pivot smash': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'side strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
                 'snapstrike': 
-                    {'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'sweep strike': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
-                'spinstrike': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'tbash': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'whirling block': 
-                    {'damage_type': 'weapon_block', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['high']},
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'stepping spin': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'longarm strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
                 'pivoting longarm': 
-                    {'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'}
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'spinstrike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'sweep strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
+                'tbash': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'mid block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'low block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'overhead block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'defensive sweep': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'feint': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'leg sweep': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'}
                 },
             'holy':
                 {'heal':
-                    {'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
+                    {'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
                 }
             }
 
@@ -349,13 +438,11 @@ def learn_skill(char, skillset, skill):
 
     Example Skillset Saved Attribute
     ---------------------------------
-    staves = {'total_sp': 125, 'total_ranks': 500, 'leg_sweep': {'rank': 100, 'rb': 115}, 'feint': {'rank': 100', 'rb': 115}, 'end_jab': {'rank':100, rb: }}
-
+    staves = {'total_sp': 125, 'total_ranks': 500, 'offense': {'leg_sweep': {'rank': 100, 'rank_bonus': 115}, 'end_jab': {'rank': 100, 'rank_bonus': }, 'defense': {'high_block': etc, etc}}
     '''
     # Return the data of the skill.
-    gsp = char.attributes.get('gsp')
-
     difficulty = skillsets[skillset][skill]['difficulty']
+    skill_type = skillsets[skillset][skill]['skill_type']
     
     # Set the per rank SP cost and rank bonus dictionary of the skill.
     sp_cost = 0
@@ -374,57 +461,182 @@ def learn_skill(char, skillset, skill):
     
     # Check if the skillset is not already learned and if not, create it.
     if not char.attributes.has(skillset):
-        #Check for general skill points required to learn.
-        if not gsp >= sp_cost:
-            char.msg('You do not have enough general skill points to learn this skillset.')
-            return
         char.attributes.add(skillset, {'total_sp': sp_cost, 'total_ranks': 0})
-        char.db.gsp -= sp_cost
 
-    d_skillset = char.attributes.get(skillset)
-    total_sp = d_skillset['total_sp']
-    if not total_sp >= sp_cost:
+    dic_skillset = char.attributes.get(skillset)
+    total_sp = dic_skillset['total_sp']
+    if total_sp < sp_cost:
         char.msg('You do not have enough skill points to learn this skill.')
         return
-    if not d_skillset.get(skill):
-        d_skillset[skill] = {'rank': 0, 'rb': 0}
-    rank = d_skillset[skill]['rank']
-    rank += 1
-    d_skillset[skill]['rank'] = rank
-    d_skillset['total_sp'] -= sp_cost
-    rb = rb[rank - 1]
-    d_skillset[skill]['rb'] = rb
-    d_skillset['total_ranks'] += 1
-    char.msg(f"You have spent {sp_cost} SP to learn rank {rank} of {skillset} {skill}, earning the rank bonus of {d_skillset[skill]['rb']}.")
-
-
-
-    # Setup the defensive skill attributes for High, Mid, Low defensive layering calculations.
-    d_skill = skillsets[skillset][skill]
-    def_a = d_skill.get('default_aim')
-    damage_type = d_skill['damage_type']
-    def_skills = char.attributes.get('def_skills')
-
-    for d_a in def_a:
-        if damage_type == 'weapon_block':
-            if not skillset in def_skills:
-                def_skills['weapon'][d_a] = {skillset: None}
-                if not skill in def_skills:
-                    def_skills['weapon'][d_a][skillset] = {skill: None}
-            def_skills['weapon'][d_a][skillset][skill] = rb
     
-        elif damage_type == 'dodge':
-            if not skillset in def_skills:
-                def_skills['weapon'][d_a] = {skillset: None}
-                if not skill in def_skills:
-                    def_skills['weapon'][d_a][skillset] = {skill: None}
-            def_skills['weapon'][d_a][skillset][skill] = rb
+    # # Place skill in either attack or defense dictionary, based on damage type.
+    # if skill_type == 'defense':
+    #     #place skill in defense category
+    #     dic_type = dic_skillset.get('defense')
+    # elif skill_type == 'offense':
+    #     #place skill in attack category
+    #     dic_type = dic_skillset.get('offense')
 
-        elif damage_type == 'shield_block':
-            if not skillset in def_skills:
-                def_skills['weapon'][d_a] = {skillset: None}
-                if not skill in def_skills:
-                    def_skills['weapon'][d_a][skillset] = {skill: None}
-            def_skills['weapon'][d_a][skillset][skill] = rb
+    # Check if the skill already exists. Create it otherwise. 
+    if not dic_skillset.get(skill):
+        dic_skillset[skill] = {'rank': 0, 'rank_bonus': 0}
+    rank = dic_skillset[skill]['rank']
+    rank += 1
+    dic_skillset[skill]['rank'] = rank
+    dic_skillset['total_sp'] -= sp_cost
+    rb = rb[rank - 1]
+    dic_skillset[skill]['rank_bonus'] = rb
+    dic_skillset['total_ranks'] += 1
+    char.msg(f"You have spent {sp_cost} SP to learn rank {rank} of {skillset} {skill}, earning the rank bonus of {dic_skillset[skill]['rank_bonus']}.")
 
-    defense_layer_calc(char, skillset)
+
+
+    # # Setup the defensive skill attributes for High, Mid, Low defensive layering calculations.
+    # d_skill = skillsets[skillset][skill]
+    # def_a = d_skill.get('default_aim')
+    # damage_type = d_skill['damage_type']
+    # if not char.attributes.has('def_skills'):
+    #         char.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low': {}}, 'dodge': {'high': {}, 'mid': {}, 'low': {}}, 'shield': {'high': {}, 'mid': {}, 'low': {}}})
+    # def_skills = char.attributes.get('def_skills')
+
+    # for d_a in def_a:
+    #     if damage_type == 'weapon_block':
+    #         if not skillset in def_skills:
+    #             def_skills['weapon'][d_a] = {skillset: None}
+    #             if not skill in def_skills:
+    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
+    #         def_skills['weapon'][d_a][skillset][skill] = rb
+    
+    #     elif damage_type == 'dodge':
+    #         if not skillset in def_skills:
+    #             def_skills['weapon'][d_a] = {skillset: None}
+    #             if not skill in def_skills:
+    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
+    #         def_skills['weapon'][d_a][skillset][skill] = rb
+
+    #     elif damage_type == 'shield_block':
+    #         if not skillset in def_skills:
+    #             def_skills['weapon'][d_a] = {skillset: None}
+    #             if not skill in def_skills:
+    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
+    #         def_skills['weapon'][d_a][skillset][skill] = rb
+
+    # defense_layer_calc(char, skillset)
+
+
+def generate_skill_list(char):
+    """
+    Desired Outcome
+
+    =====[Skills]=====================================
+
+    {skillset_name}
+    -------------------------------
+    Offense:
+    {skill_name}            Rank: {rank}        Rank Bonus: {rank_bonus}
+
+    Defense:
+
+    ==================================================
+    """
+
+    offense_skill_list = []
+    defense_skill_list = []
+    utility_skill_list = []
+
+    offense_rank_list = []
+    defense_rank_list = []
+    utility_rank_list = []
+    
+    offense_rank_bonus_list = []
+    defense_rank_bonus_list = []
+    utility_rank_bonus_list = []
+
+    offense_skill_string_list = []
+    defense_skill_string_list = []
+    utility_skill_string_list = []
+
+    skillset_string_list = []
+
+    skillset_dic = None
+    skill_dic = None
+    num = 0
+    offense_skill_string = ""
+    defense_skill_string = ""
+    utility_skill_string = ""
+    full_skillsets_string = ""
+
+    header = "=====[Skills]====================================="
+    footer = "=================================================="
+
+  
+    for i in VIABLE_SKILLSETS:
+        # We reset the skill lists at the start of each new skillset iteration.
+        offense_skill_list = []
+        defense_skill_list = []
+        utility_skill_list = []
+
+        offense_rank_list = []
+        defense_rank_list = []
+        utility_rank_list = []
+
+        offense_rank_bonus_list = []
+        defense_rank_bonus_list = []
+        utility_rank_bonus_list = []
+
+        offense_skill_string_list = []
+        defense_skill_string_list = []
+        utility_skill_string_list = []
+
+        if char.attributes.get(i): # If the skillset exists on the character.
+            skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
+            print(skillset_dic)
+
+            # Build skill lists
+            for x in VIABLE_SKILLS:
+                if skillset_dic.get(x): # If the skill exists on the character.
+                    print("Found skill in skillset!") # !!! FAILED HERE !!!
+                    skill_dic = skillset_dic.get(x) # Store that skill's dictionary.
+                    print(f"Got the skill dictionary: {skill_dic}")
+
+                    # Store the skill's name in a list, sorted by skill type.
+                    if skillsets[i][x]['skill_type'] == 'offense':
+                        offense_skill_list.append(x)
+                        offense_rank_list.append(skill_dic['rank'])
+                        offense_rank_bonus_list.append(skill_dic['rank_bonus'])
+                    elif skillsets[i][x]['skill_type'] == 'defense':
+                        defense_skill_list.append(x)
+                        defense_rank_list.append(skill_dic['rank'])
+                        defense_rank_bonus_list.append(skill_dic['rank_bonus'])
+                    elif skillsets[i][x]['skill_type'] == 'utility':
+                        utility_skill_list.append(x)
+                        utility_rank_list.append(skill_dic['rank'])
+                        utility_rank_bonus_list.append(skill_dic['rank_bonus'])
+
+            # Build this skillset's string.
+            skillset_title = (f"{i}\n"
+                        "-------------------------------\n")
+            num = 0
+            for v in offense_skill_list:
+                offense_skill_string_list.append(f"{v}            Rank: {offense_rank_list[num]}        Rank Bonus: {offense_rank_bonus_list[num]}\n")
+                num += 1
+            offense_skill_string = list_to_string(offense_skill_string_list)
+
+            num = 0
+            for v in defense_skill_list:
+                defense_skill_string_list.append(f"{v}            Rank: {defense_rank_list[num]}        Rank Bonus: {defense_rank_bonus_list[num]}\n")
+                num += 1
+            defense_skill_string = list_to_string(defense_skill_string_list)
+
+            num = 0
+            for v in utility_skill_list:
+                utility_skill_string_list.append(f"{v}            Rank: {utility_rank_list[num]}        Rank Bonus: {utility_rank_bonus_list[num]}\n")
+                num += 1
+            utility_skill_string = list_to_string(utility_skill_string_list)
+            
+            skillset_string_list.append(f"{skillset_title}{offense_skill_string}{defense_skill_string}{utility_skill_string}")
+
+    # Now we compile the final list.
+    full_skillsets_string = list_to_string(skillset_string_list)
+    result = f"{header}\n\n{full_skillsets_string}\n{footer}"
+    return result

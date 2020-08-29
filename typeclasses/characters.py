@@ -11,8 +11,6 @@ class Character(DefaultCharacter):
 
     def at_object_creation(self):
         # Stats
-        if not self.attributes.get('gsp'):
-            self.attributes.add('gsp', 10)
         if not self.attributes.get('hp'):
             self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
 
@@ -41,8 +39,6 @@ class Character(DefaultCharacter):
             self.attributes.add('lying', False)
 
         # Skills
-        if not self.attributes.has('def_skills'):
-            self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low': {}}, 'dodge': {'high': {}, 'mid': {}, 'low': {}}, 'shield': {'high': {}, 'mid': {}, 'low': {}}})
         if not self.attributes.has('def_rb'):
             self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
 

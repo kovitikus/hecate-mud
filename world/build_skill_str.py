@@ -173,25 +173,15 @@ def create_defense_desc(target):
     r_wield = t_wield.get('right')
     b_wield = t_wield.get('both')
 
-   
-
-
-
-
     def_skills = target.attributes.get('def_skills')
 
-    weap_def = def_skills.get('weapon')
-
-    weap_high = weap_def.get('high')
-    weap_mid = weap_def.get('mid')
-    weap_low = weap_def.get('low')
-
-
-    dodge_def = def_skills.get('dodge')
-
-    dodge_high = dodge_def.get('high')
-    dodge_mid = dodge_def.get('mid')
-    dodge_low = dodge_def.get('low')
+    if r_wield:
+        if r_wield.is_typeclass('objects.Staves'):
+            weap_type = 'staves'
+        elif r_wield.is_typeclass('objects.Swords'):
+            weap_type = 'swords'
+        best_weap_high_skill = def_skills.get('best_weap_high_skill')
+        best_weap_high_rb = def_skills.get(best_weap_high_skill)
 
     if l_wield.is_typeclass('objects.Shields'):
         shield_def = def_skills.get('shield')
@@ -199,3 +189,8 @@ def create_defense_desc(target):
         shield_high = shield_def.get('high')
         shield_mid = shield_def.get('mid')
         shield_low = shield_def.get('low')
+
+
+
+
+
