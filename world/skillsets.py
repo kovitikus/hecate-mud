@@ -64,122 +64,22 @@ def skill_level(rank, difficulty):
         return rb # Return if any rank.
     return None # Return if no rank.
 
-def best_weap_def(char, skillset):
-    weap_dic = char.db.def_skills.get('weapon')
-    weap_high_def = weap_dic.get('high')
-    weap_mid_def = weap_dic.get('mid')
-    weap_low_def = weap_dic.get('low')
-    weap_high_rb = 0.0
-    weap_mid_rb = 0.0
-    weap_low_rb = 0.0
-    best_weap_high_skill = None
-    best_weap_mid_skill = None
-    best_weap_low_skill = None
+def return_rank_bonus(rank, difficulty):
+    print(f"Entered Return Rank Bonus with rank: {rank} difficulty: {difficulty}")
+    if difficulty == 'easy':
+        rb = easy_rb
+    elif difficulty == 'average':
+        rb = average_rb
+    elif difficulty == 'difficult':
+        rb = difficult_rb
+    elif difficulty == 'impossible':
+        rb = impossible_rb
 
-    if weap_high_def.get(skillset):
-        weap_high_dic = weap_high_def.get(skillset)
-        print(weap_high_dic)
-        for k, v in weap_high_dic.items():
-            if v > weap_high_rb:
-                best_weap_high_skill = k
-                weap_high_rb = v
-        weap_high_dic['best_weap_high_skill'] = best_weap_high_skill
+    rb = rb[rank - 1]
+    return rb
 
-    if weap_mid_def.get(skillset):
-        weap_mid_dic = weap_mid_def.get(skillset)
-        for k, v in weap_mid_dic.items():
-            if v > weap_mid_rb:
-                best_weap_mid_skill = k
-                weap_mid_rb = v
-        weap_mid_dic['best_weap_mid_skill'] = best_weap_mid_skill
 
-    if weap_low_def.get(skillset):
-        weap_low_dic = weap_low_def.get(skillset)
-        for k, v in weap_low_dic.items():
-            if v > weap_low_rb:
-                best_weap_low_skill = k
-                weap_low_rb = v
-        weap_low_dic['best_weap_low_skill'] = best_weap_low_skill
-
-    return weap_high_rb, weap_mid_rb, weap_low_rb
-
-def best_dodge_def(char, skillset):
-    dodge_dic = char.db.def_skills.get('dodge')
-    dodge_high_def = dodge_dic.get('high')
-    dodge_mid_def = dodge_dic.get('mid')
-    dodge_low_def = dodge_dic.get('low')
-    dodge_high_rb = 0.0
-    dodge_mid_rb = 0.0
-    dodge_low_rb = 0.0
-    best_dodge_high_skill = None
-    best_dodge_mid_skill = None
-    best_dodge_low_skill = None
-
-    if dodge_high_def.get('cm'):
-        dodge_high_dic = dodge_high_def.get('cms')
-        for k, v in dodge_high_dic.items():
-            if v > dodge_high_rb:
-                best_dodge_high_skill = k
-                dodge_high_rb = v
-        dodge_high_dic['best_dodge_high_skill'] = best_dodge_high_skill
-
-    if dodge_mid_def.get('cm'):
-        dodge_mid_dic = dodge_mid_def.get('cms')
-        for k, v in dodge_mid_dic.items():
-            if v > dodge_mid_rb:
-                best_dodge_mid_skill = k
-                dodge_mid_rb = v
-        dodge_mid_dic['best_dodge_mid_skill'] = best_dodge_mid_skill
-
-    if dodge_low_def.get('cm'):
-        dodge_low_dic = dodge_low_def.get('cms')
-        for k, v in dodge_low_dic.items():
-            if v > dodge_low_rb:
-                best_dodge_low_skill = k
-                dodge_low_rb = v
-        dodge_low_dic['best_dodge_low_skill'] = best_dodge_low_skill
-
-    return dodge_high_rb, dodge_mid_rb, dodge_low_rb
-
-def best_shield_def(char, skillset):
-    shield_dic = char.db.def_skills.get('shield')
-    shield_high_def = shield_dic.get('high')
-    shield_mid_def = shield_dic.get('mid')
-    shield_low_def = shield_dic.get('low')
-    shield_high_rb = 0.0
-    shield_mid_rb = 0.0
-    shield_low_rb = 0.0
-    best_shield_high_skill = None
-    best_shield_mid_skill = None
-    best_shield_low_skill = None
-
-    if shield_high_def.get('shield'):
-        shield_high_dic = shield_high_def.get('shield')
-        for k, v in shield_high_dic.items():
-            if v > shield_high_rb:
-                best_shield_high_skill = k
-                shield_high_rb = v
-        shield_high_dic['best_shield_high_skill'] = best_shield_high_skill
-
-    if shield_mid_def.get('shield'):
-        shield_mid_dic = shield_mid_def.get('shield')
-        for k, v in shield_mid_dic.items():
-            if v > shield_mid_rb:
-                best_shield_mid_skill = k
-                shield_mid_rb = v
-        shield_mid_dic['best_shield_mid_skill'] = best_shield_mid_skill
-
-    if shield_low_def.get('shield'):
-        shield_low_dic = shield_low_def.get('shield')
-        for k, v in shield_low_dic.items():
-            if v > shield_low_rb:
-                best_shield_low_skill = k
-                shield_low_rb = v
-        shield_low_dic['best_shield_low_skill'] = best_shield_low_skill
-
-    return shield_high_rb, shield_mid_rb, shield_low_rb
-
-def defense_layer_calc(char):
+def defense_layer_calc(char, only_skill_return=False, only_rb_return=False):
     """
     Defensive rank bonus includes up to 3 layers of defense.
     The highest RB defensive manuever of each high, mid, and low will gain 100% of it's RB.
@@ -208,14 +108,22 @@ def defense_layer_calc(char):
     High, Mid, and Low always refer to the area 
     of the body that the attack targets and not the numerical value.
     """
+
     b_defense_skill_list = []
     r_defense_skill_list = []
     l_defense_skill_list = []
 
+    temp_rank = 0
+    temp_difficulty = ''
+
+    weap_high_skill, weap_mid_skill, weap_low_skill = '', '', ''
+    offhand_high_skill, offhand_mid_skill, offhand_low_skill = '', '', ''
+    dodge_high_skill, dodge_mid_skill, dodge_low_skill = '', '', ''
+
     # Initialize rankbonus values.
-    weap_high_rb, weap_mid_rb, weap_low_rb = 0, 0, 0
-    shield_high_rb, shield_mid_rb, shield_low_rb = 0, 0 ,0
-    dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0, 0, 0
+    weap_high_rb, weap_mid_rb, weap_low_rb = 0.0, 0.0, 0.0
+    offhand_high_rb, offhand_mid_rb, offhand_low_rb = 0.0, 0.0, 0.0
+    dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0.0, 0.0, 0.0
 
     # Decide how many layers, based on if wielding.
     wielding = char.attributes.get('wielding')
@@ -227,8 +135,8 @@ def defense_layer_calc(char):
     if b_wield:
         if b_wield.attributes.has('skillset'):
             b_wield_skillset = b_wield.attributes.get('skillset')
-            char_b_weapon_skillset = char.attributes.get(b_wield_skillset) # Grab weapon skillset dictionary from char.
-            skills = [*char_b_weapon_skillset] # Create a list of the skill names.
+            char_b_weap_skillset = char.attributes.get(b_wield_skillset) # Grab weapon skillset dictionary from char.
+            skills = [*char_b_weap_skillset] # Create a list of the skill names.
 
             # Check each key in the dictionary against all viable skills.
             for i in skills:
@@ -238,19 +146,23 @@ def defense_layer_calc(char):
 
             # Sort 
             for i in b_defense_skill_list:
+                temp_rank = char_b_weap_skillset.get(i)
+                temp_difficulty = skillsets[b_wield_skillset][i]['difficulty']
                 if skillsets[b_wield_skillset][i]['default_aim'] == 'high':
-                    weap_high_rb += char_b_weapon_skillset[i].get('rank_bonus')
+                    weap_high_rb += return_rank_bonus(temp_rank, temp_difficulty)
+                    weap_high_skill = i
                 elif skillsets[b_wield_skillset][i]['default_aim'] == 'mid':
-                    weap_mid_rb += char_b_weapon_skillset[i].get('rank_bonus')
+                    weap_mid_rb += return_rank_bonus(temp_rank, temp_difficulty)
+                    weap_mid_skill = i
                 elif skillsets[b_wield_skillset][i]['default_aim'] == 'low':
-                    weap_low_rb += char_b_weapon_skillset[i].get('rank_bonus')
-
+                    weap_low_rb += return_rank_bonus(temp_rank, temp_difficulty)
+                    weap_low_skill = i
 
     if r_wield:
         if r_wield.attributes.has('skillset'):
             r_wield_skillset = r_wield.attributes.get('skillset')
-            char_r_weapon_skillset = char.attributes.get(r_wield_skillset) # Grab weapon skillset dictionary from char.
-            skills = [*char_r_weapon_skillset] # Create a list of the skill names.
+            char_r_weap_skillset = char.attributes.get(r_wield_skillset) # Grab weapon skillset dictionary from char.
+            skills = [*char_r_weap_skillset] # Create a list of the skill names.
 
             # Check each key in the dictionary against all viable skills.
             for i in skills:
@@ -259,19 +171,24 @@ def defense_layer_calc(char):
                         r_defense_skill_list.append(i)
 
             for i in r_defense_skill_list:
+                temp_rank = char_r_weap_skillset.get(i)
+                temp_difficulty = skillsets[r_wield_skillset][i]['difficulty']
                 if skillsets[r_wield_skillset][i]['default_aim'] == 'high':
-                    weap_high_rb += char_r_weapon_skillset[i].get('rank_bonus')
+                    weap_high_rb += char_r_weap_skillset[i].get('rank_bonus')
+                    weap_high_skill = i
                 elif skillsets[r_wield_skillset][i]['default_aim'] == 'mid':
-                    weap_mid_rb += char_r_weapon_skillset[i].get('rank_bonus')
+                    weap_mid_rb += char_r_weap_skillset[i].get('rank_bonus')
+                    weap_mid_skill = i
                 elif skillsets[r_wield_skillset][i]['default_aim'] == 'low':
-                    weap_low_rb += char_r_weapon_skillset[i].get('rank_bonus')
+                    weap_low_rb += char_r_weap_skillset[i].get('rank_bonus')
+                    weap_low_skill = i
 
     if l_wield:
         if l_wield.is_typeclass('typeclasses.objects.Shields'):
             if l_wield.attributes.has('skillset'):
                 l_wield_skillset = l_wield.attributes.get('skillset')
-                char_l_weapon_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
-                skills = [*char_l_weapon_skillset] # Create a list of the skill names.
+                char_l_weap_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
+                skills = [*char_l_weap_skillset] # Create a list of the skill names.
 
                 # Check each key in the dictionary against all viable skills.
                 for i in skills:
@@ -280,17 +197,22 @@ def defense_layer_calc(char):
                             l_defense_skill_list.append(i)
 
                 for i in l_defense_skill_list:
+                    temp_rank = char_b_weap_skillset.get(i)
+                    temp_difficulty = skillsets[b_wield_skillset][i]['difficulty']
                     if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
-                        shield_high_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_high_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_high_skill = i
                     elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
-                        shield_mid_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_mid_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_mid_skill = i
                     elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
-                        shield_low_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_low_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_low_skill = i
         else:
             if l_wield.attributes.has('skillset'):
                 l_wield_skillset = l_wield.attributes.get('skillset')
-                char_l_weapon_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
-                skills = [*char_l_weapon_skillset] # Create a list of the skill names.
+                char_l_weap_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
+                skills = [*char_l_weap_skillset] # Create a list of the skill names.
 
                 # Check each key in the dictionary against all viable skills.
                 for i in skills:
@@ -299,20 +221,27 @@ def defense_layer_calc(char):
                             l_defense_skill_list.append(i)
 
                 for i in l_defense_skill_list:
+                    temp_rank = char_l_weap_skillset.get(i)
+                    temp_difficulty = skillsets[l_wield_skillset][i]['difficulty']
                     if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
-                        shield_high_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_high_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_high_skill = i
                     elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
-                        shield_mid_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_mid_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_mid_skill = i
                     elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
-                        shield_low_rb += char_l_weapon_skillset[i].get('rank_bonus')
+                        offhand_low_rb += char_l_weap_skillset[i].get('rank_bonus')
+                        offhand_low_skill = i
 
     # Get all dodge rank bonuses
     # !!! NO DODGES EXIST YET !!!
     
+    high_skills = [weap_high_skill, offhand_high_skill, dodge_high_skill]
+    mid_skills = [weap_mid_skill, offhand_mid_skill, dodge_mid_skill]
+    low_skills = [weap_low_skill, offhand_low_skill, dodge_low_skill]
     
-
     # High Layer
-    h_rb = [weap_high_rb, dodge_high_rb, shield_high_rb]
+    h_rb = [weap_high_rb, dodge_high_rb, offhand_high_rb]
     h_rb.sort(reverse=True)
     h_layer1 = h_rb[0] * 1
     h_layer2 = h_rb[1] * 0.5
@@ -320,7 +249,7 @@ def defense_layer_calc(char):
     high_def_rb = (h_layer1 + h_layer2 + h_layer3)
 
     # Mid Layer
-    m_rb = [weap_mid_rb, dodge_mid_rb, shield_mid_rb]
+    m_rb = [weap_mid_rb, dodge_mid_rb, offhand_mid_rb]
     m_rb.sort(reverse=True)
     m_layer1 = m_rb[0] * 1
     m_layer2 = m_rb[1] * 0.5
@@ -328,7 +257,7 @@ def defense_layer_calc(char):
     mid_def_rb = (m_layer1 + m_layer2 + m_layer3)
 
     # Low Layer
-    l_rb = [weap_low_rb, dodge_low_rb, shield_low_rb]
+    l_rb = [weap_low_rb, dodge_low_rb, offhand_low_rb]
     l_rb.sort(reverse=True)
     l_layer1 = l_rb[0] * 1
     l_layer2 = l_rb[1] * 0.5
@@ -341,7 +270,12 @@ def defense_layer_calc(char):
     def_rb['mid'] = mid_def_rb
     def_rb['low'] = low_def_rb
 
-    return high_def_rb, mid_def_rb, low_def_rb
+    if only_skill_return:
+        return high_skills, mid_skills, low_skills
+    elif only_rb_return:
+        return high_def_rb, mid_def_rb, low_def_rb
+    else:
+        return high_skills, mid_skills, low_skills, high_def_rb, mid_def_rb, low_def_rb
 
 def rb_stance(self, o_rb, d_rb, stance):
     '''
@@ -469,90 +403,25 @@ def learn_skill(char, skillset, skill):
 
     Example Skillset Saved Attribute
     ---------------------------------
-    staves = {'total_sp': 125, 'total_ranks': 500, 'offense': {'leg_sweep': {'rank': 100, 'rank_bonus': 115}, 'end_jab': {'rank': 100, 'rank_bonus': }, 'defense': {'high_block': etc, etc}}
+    staves = {'total_ranks': 300, 'leg_sweep': 100, 'end_jab': 100, 'high_block': 100}
     '''
     # Return the data of the skill.
     difficulty = skillsets[skillset][skill]['difficulty']
-    skill_type = skillsets[skillset][skill]['skill_type']
-    
-    # Set the per rank SP cost and rank bonus dictionary of the skill.
-    sp_cost = 0
-    if difficulty == 'easy':
-        rb = easy_rb
-        sp_cost = 5
-    elif difficulty == 'average':
-        rb = average_rb
-        sp_cost = 7
-    elif difficulty == 'difficult':
-        rb = difficult_rb
-        sp_cost = 9
-    elif difficulty == 'impossible':
-        rb = impossible_rb
-        sp_cost = 11
     
     # Check if the skillset is not already learned and if not, create it.
     if not char.attributes.has(skillset):
-        char.attributes.add(skillset, {'total_sp': sp_cost, 'total_ranks': 0})
+        char.attributes.add(skillset, {'total_ranks': 0})
 
     dic_skillset = char.attributes.get(skillset)
-    total_sp = dic_skillset['total_sp']
-    if total_sp < sp_cost:
-        char.msg('You do not have enough skill points to learn this skill.')
-        return
-    
-    # # Place skill in either attack or defense dictionary, based on damage type.
-    # if skill_type == 'defense':
-    #     #place skill in defense category
-    #     dic_type = dic_skillset.get('defense')
-    # elif skill_type == 'offense':
-    #     #place skill in attack category
-    #     dic_type = dic_skillset.get('offense')
 
     # Check if the skill already exists. Create it otherwise. 
     if not dic_skillset.get(skill):
-        dic_skillset[skill] = {'rank': 0, 'rank_bonus': 0}
-    rank = dic_skillset[skill]['rank']
+        dic_skillset[skill] = 0
+    rank = dic_skillset[skill]
     rank += 1
-    dic_skillset[skill]['rank'] = rank
-    dic_skillset['total_sp'] -= sp_cost
-    rb = rb[rank - 1]
-    dic_skillset[skill]['rank_bonus'] = rb
+    dic_skillset[skill] = rank
     dic_skillset['total_ranks'] += 1
-    char.msg(f"You have spent {sp_cost} SP to learn rank {rank} of {skillset} {skill}, earning the rank bonus of {dic_skillset[skill]['rank_bonus']}.")
-
-
-
-    # # Setup the defensive skill attributes for High, Mid, Low defensive layering calculations.
-    # d_skill = skillsets[skillset][skill]
-    # def_a = d_skill.get('default_aim')
-    # damage_type = d_skill['damage_type']
-    # if not char.attributes.has('def_skills'):
-    #         char.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low': {}}, 'dodge': {'high': {}, 'mid': {}, 'low': {}}, 'shield': {'high': {}, 'mid': {}, 'low': {}}})
-    # def_skills = char.attributes.get('def_skills')
-
-    # for d_a in def_a:
-    #     if damage_type == 'weapon_block':
-    #         if not skillset in def_skills:
-    #             def_skills['weapon'][d_a] = {skillset: None}
-    #             if not skill in def_skills:
-    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
-    #         def_skills['weapon'][d_a][skillset][skill] = rb
-    
-    #     elif damage_type == 'dodge':
-    #         if not skillset in def_skills:
-    #             def_skills['weapon'][d_a] = {skillset: None}
-    #             if not skill in def_skills:
-    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
-    #         def_skills['weapon'][d_a][skillset][skill] = rb
-
-    #     elif damage_type == 'shield_block':
-    #         if not skillset in def_skills:
-    #             def_skills['weapon'][d_a] = {skillset: None}
-    #             if not skill in def_skills:
-    #                 def_skills['weapon'][d_a][skillset] = {skill: None}
-    #         def_skills['weapon'][d_a][skillset][skill] = rb
-
-    # defense_layer_calc(char, skillset)
+    char.msg(f"You learn rank {rank} of {skillset} {skill}, earning the rank bonus of {return_rank_bonus(rank, difficulty)}.")
 
 
 def generate_skill_list(char):
@@ -591,10 +460,11 @@ def generate_skill_list(char):
     skillset_string_list = []
 
     skillset_dic = None
-    skill_dic = None
+    skill_rank = 0
+    skill_rank_bonus = 0.0
+    skill_difficulty = ''
 
     total_ranks = 0
-    skill_points = 0.0
     num = 0
     offense_skill_string = ""
     defense_skill_string = ""
@@ -623,36 +493,33 @@ def generate_skill_list(char):
         defense_skill_string_list = []
         utility_skill_string_list = []
 
-        offense_skill_string = ''
-        defense_skill_string = ''
-        utility_skill_string = ''
-
         if char.attributes.get(i): # If the skillset exists on the character.
             skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
             total_ranks = skillset_dic.get('total_ranks')
-            skill_points = skillset_dic.get('total_sp')
 
             # Build skill lists
             for x in VIABLE_SKILLS:
                 if skillset_dic.get(x): # If the skill exists on the character.
-                    skill_dic = skillset_dic.get(x) # Store that skill's dictionary.
+                    skill_rank = skillset_dic.get(x) # Store that skill's dictionary.
+                    skill_difficulty = skillsets[i][x]['difficulty']
+                    skill_rank_bonus = return_rank_bonus(skill_rank, skill_difficulty)
 
                     # Store the skill's name in a list, sorted by skill type.
                     if skillsets[i][x]['skill_type'] == 'offense':
                         offense_skill_list.append(x)
-                        offense_rank_list.append(skill_dic['rank'])
-                        offense_rank_bonus_list.append(skill_dic['rank_bonus'])
+                        offense_rank_list.append(skill_rank)
+                        offense_rank_bonus_list.append(skill_rank_bonus)
                     elif skillsets[i][x]['skill_type'] == 'defense':
                         defense_skill_list.append(x)
-                        defense_rank_list.append(skill_dic['rank'])
-                        defense_rank_bonus_list.append(skill_dic['rank_bonus'])
+                        defense_rank_list.append(skill_rank)
+                        defense_rank_bonus_list.append(skill_rank_bonus)
                     elif skillsets[i][x]['skill_type'] == 'utility':
                         utility_skill_list.append(x)
-                        utility_rank_list.append(skill_dic['rank'])
-                        utility_rank_bonus_list.append(skill_dic['rank_bonus'])
+                        utility_rank_list.append(skill_rank)
+                        utility_rank_bonus_list.append(skill_rank_bonus)
 
             # Build this skillset's string.
-            skillset_title = (f"\n\n|g{cap(i)}|n - Skill Points: |g{skill_points}|n    Total Ranks: |g{total_ranks}|n\n"
+            skillset_title = (f"\n\n|g{cap(i)}|n - Total Ranks: |g{total_ranks}|n\n"
                         "--------------------------------------------------")
             num = 0
             for v in offense_skill_list:
@@ -681,7 +548,7 @@ def generate_skill_list(char):
     full_skillsets_string = ''.join(skillset_string_list)
 
     # Current total defensive rank bonuses.
-    high_def_rb, mid_def_rb, low_def_rb = defense_layer_calc(char)
+    high_def_rb, mid_def_rb, low_def_rb = defense_layer_calc(char, only_rb_return=True)
     def_rb = f"\n\nCurrent total defensive RB - High: {high_def_rb}    Mid: {mid_def_rb}    Low: {low_def_rb}\n"
 
     result = f"{header}{full_skillsets_string}{def_rb}\n{footer}"
