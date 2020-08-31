@@ -1,7 +1,4 @@
-from evennia.utils.utils import list_to_string
-
-
-def skill_level(rank, difficulty):
+def generate_rank_bonus(rank, difficulty):
     '''
     RANK += RANK BONUS PER RANK
     --------------------------
@@ -63,9 +60,89 @@ def skill_level(rank, difficulty):
             rb *= 0.55
         return rb # Return if any rank.
     return None # Return if no rank.
+    
+easy_rb = []
+average_rb = []
+difficult_rb = []
+impossible_rb = []
+
+for i in range(1, 1_001):
+    rb = generate_rank_bonus(i, 'easy')
+    easy_rb.append(rb)
+
+    rb = generate_rank_bonus(i, 'average')
+    average_rb.append(rb)
+
+    rb = generate_rank_bonus(i, 'difficult')
+    difficult_rb.append(rb)
+
+    rb = generate_rank_bonus(i, 'impossible')
+    impossible_rb.append(rb)
+
+# Skillset Order: Alphabetically
+# Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
+skillsets = {'staves': 
+                {'end jab': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'parting jab': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'parting swat': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'simple strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'swat': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'parting smash':
+                     {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'pivot smash': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'side strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'snapstrike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'stepping spin': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'longarm strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'pivoting longarm': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'spinstrike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'sweep strike': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
+                'tbash': 
+                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'mid block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                'low block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'overhead block': 
+                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                'defensive sweep': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'feint': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                'leg sweep': 
+                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'}
+                },
+            'holy':
+                {'heal':
+                    {'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
+                }
+            }
+
+# Create lists of the skillsets and their skills.
+VIABLE_SKILLSETS = []
+VIABLE_SKILLS = []
+temp_skill_list = []
+for k, v in skillsets.items():
+    VIABLE_SKILLSETS.append(k)
+    temp_skill_list.append(v)
+for i in temp_skill_list:
+    for k, v in i.items():
+        VIABLE_SKILLS.append(k)
 
 def return_rank_bonus(rank, difficulty):
-    print(f"Entered Return Rank Bonus with rank: {rank} difficulty: {difficulty}")
     if difficulty == 'easy':
         rb = easy_rb
     elif difficulty == 'average':
@@ -78,7 +155,6 @@ def return_rank_bonus(rank, difficulty):
     rb = rb[rank - 1]
     return rb
 
-
 def defense_layer_calc(char, only_skill_return=False, only_rb_return=False):
     """
     Defensive rank bonus includes up to 3 layers of defense.
@@ -86,7 +162,8 @@ def defense_layer_calc(char, only_skill_return=False, only_rb_return=False):
     The second highest RB will supply 50% and the third will only be worth 33%.
     Each layer can only consist of a single defensive manuever from each of the following categories:
         Weapon Blocks, Combat Manuever Dodges, and Shield Blocks.
-        Weapons that require 2 hands can only ever gain 2 defensive layers. Shields are the only way to gain all 3 layers.
+        Weapons that require 2 hands can only ever gain 2 defensive layers. 
+        Shields or offhand weapons are the only way to gain all 3 layers.
 
     For Example:
     Staves Mid Block with 100 Rank Bonus * 1 = 100
@@ -309,88 +386,6 @@ def rb_stance(self, o_rb, d_rb, stance):
         d_rb = d_rb * 1
         return o_rb, d_rb
 
-easy_rb = []
-average_rb = []
-difficult_rb = []
-impossible_rb = []
-
-for i in range(1, 1_001):
-    rb = skill_level(i, 'easy')
-    easy_rb.append(rb)
-
-    rb = skill_level(i, 'average')
-    average_rb.append(rb)
-
-    rb = skill_level(i, 'difficult')
-    difficult_rb.append(rb)
-
-    rb = skill_level(i, 'impossible')
-    impossible_rb.append(rb)
-
-# Skillset Order: Alphabetically
-# Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
-skillsets = {'staves': 
-                {'end jab': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'parting jab': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'parting swat': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'simple strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'swat': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'parting smash':
-                     {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'pivot smash': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'side strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'snapstrike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'stepping spin': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'longarm strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'pivoting longarm': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'spinstrike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'sweep strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
-                'tbash': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'mid block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
-                'low block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'overhead block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
-                'defensive sweep': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'feint': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
-                'leg sweep': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'}
-                },
-            'holy':
-                {'heal':
-                    {'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
-                }
-            }
-
-# Create lists of the skillsets and their skills.
-VIABLE_SKILLSETS = []
-VIABLE_SKILLS = []
-temp_skill_list = []
-for k, v in skillsets.items():
-    VIABLE_SKILLSETS.append(k)
-    temp_skill_list.append(v)
-for i in temp_skill_list:
-    for k, v in i.items():
-        VIABLE_SKILLS.append(k)
-    
-
 def learn_skill(char, skillset, skill):
     '''
     Skill Difficulty = Skill Point Cost per Rank
@@ -422,7 +417,6 @@ def learn_skill(char, skillset, skill):
     dic_skillset[skill] = rank
     dic_skillset['total_ranks'] += 1
     char.msg(f"You learn rank {rank} of {skillset} {skill}, earning the rank bonus of {return_rank_bonus(rank, difficulty)}.")
-
 
 def generate_skill_list(char):
     """
