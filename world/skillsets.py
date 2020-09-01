@@ -60,7 +60,7 @@ def generate_rank_bonus(rank, difficulty):
             rb *= 0.55
         return rb # Return if any rank.
     return None # Return if no rank.
-    
+
 easy_rb = []
 average_rb = []
 difficult_rb = []
@@ -211,103 +211,104 @@ def defense_layer_calc(char, only_skill_return=False, only_rb_return=False):
 
     if b_wield:
         if b_wield.attributes.has('skillset'):
-            b_wield_skillset = b_wield.attributes.get('skillset')
-            char_b_weap_skillset = char.attributes.get(b_wield_skillset) # Grab weapon skillset dictionary from char.
-            skills = [*char_b_weap_skillset] # Create a list of the skill names.
+            item_skillset = b_wield.attributes.get('skillset')
+            char_skillset_dic = char.attributes.get(item_skillset)
+            skills = [*char_skillset_dic] # Create a list of the skill names.
 
             # Check each key in the dictionary against all viable skills.
             for i in skills:
-                if skillsets[b_wield_skillset].get(i):
-                    if skillsets[b_wield_skillset][i]['skill_type'] == 'defense':
+                if skillsets[item_skillset].get(i):
+                    # Skill is in the main dictionary. Check if it's a defense skill.
+                    if skillsets[item_skillset][i]['skill_type'] == 'defense':
                         b_defense_skill_list.append(i)
 
-            # Sort 
+            # Sort each defensive skill by region defended.
             for i in b_defense_skill_list:
-                temp_rank = char_b_weap_skillset.get(i)
-                temp_difficulty = skillsets[b_wield_skillset][i]['difficulty']
-                if skillsets[b_wield_skillset][i]['default_aim'] == 'high':
+                temp_rank = char_skillset_dic.get(i)
+                temp_difficulty = skillsets[item_skillset][i]['difficulty']
+                if skillsets[item_skillset][i]['default_aim'] == 'high':
                     weap_high_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_high_skill = i
-                elif skillsets[b_wield_skillset][i]['default_aim'] == 'mid':
+                elif skillsets[item_skillset][i]['default_aim'] == 'mid':
                     weap_mid_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_mid_skill = i
-                elif skillsets[b_wield_skillset][i]['default_aim'] == 'low':
+                elif skillsets[item_skillset][i]['default_aim'] == 'low':
                     weap_low_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_low_skill = i
 
     if r_wield:
         if r_wield.attributes.has('skillset'):
-            r_wield_skillset = r_wield.attributes.get('skillset')
-            char_r_weap_skillset = char.attributes.get(r_wield_skillset) # Grab weapon skillset dictionary from char.
-            skills = [*char_r_weap_skillset] # Create a list of the skill names.
+            item_skillset = r_wield.attributes.get('skillset')
+            char_skillset_dic = char.attributes.get(item_skillset)
+            skills = [*char_skillset_dic] # Create a list of the skill names.
 
             # Check each key in the dictionary against all viable skills.
             for i in skills:
-                if skillsets[r_wield_skillset].get(i):
-                    if skillsets[r_wield_skillset][i]['skill_type'] == 'defense':
+                if skillsets[item_skillset].get(i):
+                    if skillsets[item_skillset][i]['skill_type'] == 'defense':
                         r_defense_skill_list.append(i)
-
+            # Sort each defensive skill by region defended.
             for i in r_defense_skill_list:
-                temp_rank = char_r_weap_skillset.get(i)
-                temp_difficulty = skillsets[r_wield_skillset][i]['difficulty']
-                if skillsets[r_wield_skillset][i]['default_aim'] == 'high':
-                    weap_high_rb += char_r_weap_skillset[i].get('rank_bonus')
+                temp_rank = char_skillset_dic.get(i)
+                temp_difficulty = skillsets[item_skillset][i]['difficulty']
+                if skillsets[item_skillset][i]['default_aim'] == 'high':
+                    weap_high_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_high_skill = i
-                elif skillsets[r_wield_skillset][i]['default_aim'] == 'mid':
-                    weap_mid_rb += char_r_weap_skillset[i].get('rank_bonus')
+                elif skillsets[item_skillset][i]['default_aim'] == 'mid':
+                    weap_mid_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_mid_skill = i
-                elif skillsets[r_wield_skillset][i]['default_aim'] == 'low':
-                    weap_low_rb += char_r_weap_skillset[i].get('rank_bonus')
+                elif skillsets[item_skillset][i]['default_aim'] == 'low':
+                    weap_low_rb += return_rank_bonus(temp_rank, temp_difficulty)
                     weap_low_skill = i
 
     if l_wield:
         if l_wield.is_typeclass('typeclasses.objects.Shields'):
             if l_wield.attributes.has('skillset'):
-                l_wield_skillset = l_wield.attributes.get('skillset')
-                char_l_weap_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
-                skills = [*char_l_weap_skillset] # Create a list of the skill names.
+                item_skillset = l_wield.attributes.get('skillset')
+                char_skillset_dic = char.attributes.get(item_skillset)
+                skills = [*char_skillset_dic] # Create a list of the skill names.
 
                 # Check each key in the dictionary against all viable skills.
                 for i in skills:
-                    if skillsets[l_wield_skillset].get(i):
-                        if skillsets[l_wield_skillset][i]['skill_type'] == 'defense':
+                    if skillsets[item_skillset].get(i):
+                        if skillsets[item_skillset][i]['skill_type'] == 'defense':
                             l_defense_skill_list.append(i)
 
                 for i in l_defense_skill_list:
-                    temp_rank = char_b_weap_skillset.get(i)
-                    temp_difficulty = skillsets[b_wield_skillset][i]['difficulty']
-                    if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
-                        offhand_high_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    temp_rank = char_skillset_dic.get(i)
+                    temp_difficulty = skillsets[item_skillset][i]['difficulty']
+                    if skillsets[item_skillset][i]['default_aim'] == 'high':
+                        offhand_high_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_high_skill = i
-                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
-                        offhand_mid_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    elif skillsets[item_skillset][i]['default_aim'] == 'mid':
+                        offhand_mid_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_mid_skill = i
-                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
-                        offhand_low_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    elif skillsets[item_skillset][i]['default_aim'] == 'low':
+                        offhand_low_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_low_skill = i
         else:
             if l_wield.attributes.has('skillset'):
-                l_wield_skillset = l_wield.attributes.get('skillset')
-                char_l_weap_skillset = char.attributes.get(l_wield_skillset) # Grab weapon skillset dictionary from char.
-                skills = [*char_l_weap_skillset] # Create a list of the skill names.
+                item_skillset = l_wield.attributes.get('skillset')
+                char_skillset_dic = char.attributes.get(item_skillset) # Grab weapon skillset dictionary from char.
+                skills = [*char_skillset_dic] # Create a list of the skill names.
 
                 # Check each key in the dictionary against all viable skills.
                 for i in skills:
-                    if skillsets[l_wield_skillset].get(i):
-                        if skillsets[l_wield_skillset][i]['skill_type'] == 'defense':
+                    if skillsets[item_skillset].get(i):
+                        if skillsets[item_skillset][i]['skill_type'] == 'defense':
                             l_defense_skill_list.append(i)
 
                 for i in l_defense_skill_list:
-                    temp_rank = char_l_weap_skillset.get(i)
-                    temp_difficulty = skillsets[l_wield_skillset][i]['difficulty']
-                    if skillsets[l_wield_skillset][i]['default_aim'] == 'high':
-                        offhand_high_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    temp_rank = char_skillset_dic.get(i)
+                    temp_difficulty = skillsets[item_skillset][i]['difficulty']
+                    if skillsets[item_skillset][i]['default_aim'] == 'high':
+                        offhand_high_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_high_skill = i
-                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'mid':
-                        offhand_mid_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    elif skillsets[item_skillset][i]['default_aim'] == 'mid':
+                        offhand_mid_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_mid_skill = i
-                    elif skillsets[l_wield_skillset][i]['default_aim'] == 'low':
-                        offhand_low_rb += char_l_weap_skillset[i].get('rank_bonus')
+                    elif skillsets[item_skillset][i]['default_aim'] == 'low':
+                        offhand_low_rb += return_rank_bonus(temp_rank, temp_difficulty)
                         offhand_low_skill = i
 
     # Get all dodge rank bonuses
