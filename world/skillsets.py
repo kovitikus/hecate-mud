@@ -156,8 +156,8 @@ def return_rank_bonus(rank, difficulty):
     return rb
 
 def return_defense_skills(char, skillset, rb_only=False, skills_only=False):
-    temp_rank = 0
-    temp_difficulty = ''
+    rank = 0
+    difficulty = ''
     defense_skill_list = []
 
     char_skillset_dic = char.attributes.get(skillset)
@@ -172,16 +172,16 @@ def return_defense_skills(char, skillset, rb_only=False, skills_only=False):
 
     # Sort each defensive skill by region defended.
     for i in defense_skill_list:
-        temp_rank = char_skillset_dic.get(i)
-        temp_difficulty = skillsets[skillset][i]['difficulty']
+        rank = char_skillset_dic.get(i)
+        difficulty = skillsets[skillset][i]['difficulty']
         if skillsets[skillset][i]['default_aim'] == 'high':
-            high_rb = return_rank_bonus(temp_rank, temp_difficulty)
+            high_rb = return_rank_bonus(rank, difficulty)
             high_skill = i
         elif skillsets[skillset][i]['default_aim'] == 'mid':
-            mid_rb = return_rank_bonus(temp_rank, temp_difficulty)
+            mid_rb = return_rank_bonus(rank, difficulty)
             mid_skill = i
         elif skillsets[skillset][i]['default_aim'] == 'low':
-            low_rb = return_rank_bonus(temp_rank, temp_difficulty)
+            low_rb = return_rank_bonus(rank, difficulty)
             low_skill = i
 
     # Return the values       
