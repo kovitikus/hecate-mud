@@ -156,6 +156,8 @@ def return_rank_bonus(rank, difficulty):
     return rb
 
 def return_defense_skills(char, skillset, rb_only=False, skills_only=False):
+    high_rb, mid_rb, low_rb = 0, 0, 0
+    high_skill, mid_skill, low_skill = '', '', ''
     rank = 0
     difficulty = ''
     defense_skill_list = []
