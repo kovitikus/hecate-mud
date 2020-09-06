@@ -79,7 +79,7 @@ for i in range(1, 1_001):
     rb = generate_rank_bonus(i, 'impossible')
     impossible_rb.append(rb)
 
-
+# Exp Curve - https://docs.google.com/spreadsheets/d/1Mh5IDJ6wdKxT_FZurnoOEd97_-1u6m5tIKs-Xz6E4EY/edit?usp=sharing
 def generate_exp(desired_rank):
     exp_required_to_lvl = 10.0
     for i in range(2, desired_rank+1):
@@ -94,7 +94,6 @@ desired_rank_exp_req = []
 for i in range(2, 1_001):
     exp_req = generate_exp(i)
     desired_rank_exp_req.append(exp_req)
-
 
 def skill_xp_gain(desired_rank):
     hits_per_rank = 30
