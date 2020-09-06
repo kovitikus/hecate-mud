@@ -52,12 +52,11 @@ class CombatHandler:
         """
         owner = self.owner
         a_skillset = owner.attributes.get(skillset)
-        a_skill = a_skillset.get(skill)
-        a_rb = a_skill.get('rb')
+        a_rank = a_skillset.get(skill)
+        a_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
+        a_rb = skillsets.return_rank_bonus(a_rank, a_difficulty)
 
-        defen_high = target.db.def_rb['high']
-        defen_mid = target.db.def_rb['mid']
-        defen_low = target.db.def_rb['low']
+        defen_high, defen_mid, defen_low = skillsets.defense_layer_calc(target, rb_only=True)
 
 
         if aim == 'high':
@@ -115,8 +114,15 @@ class CombatHandler:
             damage = 0
         return damage_tier, damage
 
-    def attack(self, target, skillset, skill, weapon, damage_type, aim):
+    def get_weapon_type(self, skillset, skill):
+        if skillsets.skillsets.get(skillset):
+            if skillsets.skillsets[skillset].get(skill):
+                weapon_type = skillsets.skillsets[skillset][skill]['weapon']
+                return weapon_type
+
+    def attack(self, target, skillset, skill, damage_type, aim):
         attacker = self.owner
+        weapon = self.get_weapon_type(skillset, skill)
 
         if not gen_mec.check_roundtime(attacker):
             return
@@ -139,61 +145,60 @@ class CombatHandler:
 
         if roll > success:
             hit = True
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit)
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
 
-            self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            attacker.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
-            self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
-            self.take_damage(target, damage)
+            attacker.location.msg_contents(f"{others_desc}", exclude=(attacker, target))
+            target.combat.take_damage(attacker, damage)
 
         else:
             hit = False
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit)
+            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
 
-            self.owner.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            attacker.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
-            self.owner.location.msg_contents(f"{others_desc}", exclude=(self.owner, target))
+            attacker.location.msg_contents(f"{others_desc}", exclude=(attacker, target))
         
         gen_mec.set_roundtime(attacker)
 
-    def take_damage(self, target, damage):
-        t_name = target.key
-        location = target.location
-        targ_app = target.attributes.get('approached')
-        print('Target\'s approached list is: ', targ_app)
+    def take_damage(self, attacker, damage):
+        owner = self.owner
+        name = owner.key
+        location = owner.location
+        owner_app = owner.attributes.get('approached')
         
-        hp = target.attributes.get('hp')
+        hp = owner.attributes.get('hp')
         current_hp = hp['current_hp']
         current_hp -= damage
-        target.db.hp['current_hp'] = current_hp
+        owner.db.hp['current_hp'] = current_hp
 
-        location.msg_contents(f'{t_name} has {current_hp} health remaining!')
+        location.msg_contents(f'{name} has {current_hp} health remaining!')
         if current_hp >= 1:
-            target.db.ko = False
-        elif current_hp <= 0 and target.db.ko != True:
-            target.db.ko = True
-            location.msg_contents(f'{t_name} falls unconscious!')
+            owner.db.ko = False
+        elif current_hp <= 0 and owner.db.ko != True:
+            owner.db.ko = True
+            location.msg_contents(f'{name} falls unconscious!')
         if current_hp <= -100:
             # Check for
-            for a in targ_app:
-                print('This is a in target\'s approached list: ', a)
-                ap_list = a.attributes.get('approached')
-                print('This is the approached list of the attacker: ', ap_list)
-                if ap_list:
-                    ap_list.remove(target)
-            if targ_app:
-                targ_app.remove(self.owner)
-            if not target.has_account:
-                okay = target.delete()
+            for a in owner_app:
+                if a is not None:
+                    ap_list = a.attributes.get('approached')
+                    if ap_list:
+                        ap_list.remove(owner)
+            if owner_app:
+                owner_app.remove(attacker)
+            if not owner.has_account:
+                okay = owner.delete()
                 if not okay:
-                    location.msg_contents(f'\nERROR: {t_name} not deleted, probably because delete() returned False.')
+                    location.msg_contents(f'\nERROR: {name} not deleted, probably because delete() returned False.')
                 else:
-                    location.msg_contents(f'{t_name} breathes a final breath and expires.')
+                    location.msg_contents(f'{name} breathes a final breath and expires.')
             else:
-                target.db.hp['current_hp'] = target.db.hp['max_hp']
-                location.msg_contents(f"{t_name} dies and is resurrected to max HP.", exclude=target)
-                target.msg("You die and are resurrected to full HP.")
-                target.db.ko = False
+                owner.db.hp['current_hp'] = owner.db.hp['max_hp']
+                location.msg_contents(f"{name} dies and is resurrected to max HP.", exclude=owner)
+                owner.msg("You die and are resurrected to full HP.")
+                owner.db.ko = False
 
     def heal(self, target):
         owner = self.owner
@@ -201,7 +206,7 @@ class CombatHandler:
         if not gen_mec.check_roundtime(owner):
             return 
 
-        heal_rank = owner.db.holy['heal']['rank']
+        heal_rank = owner.db.holy['heal']
         max_hp = target.db.hp['max_hp']
         current_hp = target.db.hp['current_hp']
 
@@ -212,7 +217,7 @@ class CombatHandler:
                 owner.msg(f"|c{target.name} is already at full health!|n")
             return
 
-        heal_amount = heal_rank * 2
+        heal_amount = max_hp / 10
         current_hp += heal_amount
         if current_hp > max_hp:
             current_hp = max_hp

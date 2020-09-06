@@ -83,51 +83,58 @@ for i in range(1, 1_001):
 # Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
 skillsets = {'staves': 
                 {'end jab': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave end jab', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'parting jab': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave parting jab', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'parting swat': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave parting swat', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'simple strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave simple strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'swat': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave swat', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'parting smash':
-                     {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                     {'uid': 'stave parting smash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'pivot smash': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave pivot smash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'side strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave side strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'snapstrike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'uid': 'stave snapstrike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'stepping spin': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave stepping spin', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'longarm strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'uid': 'stave longarm strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'pivoting longarm': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave pivoting longarm', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'spinstrike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'uid': 'stave spinstrike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'sweep strike': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high']},
+                    {'uid': 'stave sweep strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high'], 'weapon': 'stave'},
                 'tbash': 
-                    {'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'uid': 'stave tbash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'mid block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid'},
+                    {'uid': 'stave mid block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'low block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                    {'uid': 'stave low block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
                 'overhead block': 
-                    {'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high'},
+                    {'uid': 'stave overhead block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'defensive sweep': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                    {'uid': 'stave defensive sweep', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
                 'feint': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'},
+                    {'uid': 'stave feint', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
                 'leg sweep': 
-                    {'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low'}
+                    {'uid': 'stave leg sweep', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'}
                 },
             'holy':
                 {'heal':
-                    {'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid'}
+                    {'uid': 'stave swat', 'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': None}
+                },
+            'rat':
+                {'bite':
+                    {'uid': 'rat bite', 'skill_type': 'offense', 'damage_type': 'pierce', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'high', 'weapon': 'bite'},
+                'claw':
+                    {'uid': 'rat claw', 'skill_type': 'offense', 'damage_type': 'slash', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'mid', 'weapon': 'claw'}
+                
                 }
             }
 
@@ -178,13 +185,13 @@ def return_defense_skills(char, skillset, rb_only=False, skills_only=False):
         difficulty = skillsets[skillset][i]['difficulty']
         if skillsets[skillset][i]['default_aim'] == 'high':
             high_rb = return_rank_bonus(rank, difficulty)
-            high_skill = i
+            high_skill = skillsets[skillset][i]['uid']
         elif skillsets[skillset][i]['default_aim'] == 'mid':
             mid_rb = return_rank_bonus(rank, difficulty)
-            mid_skill = i
+            mid_skill = skillsets[skillset][i]['uid']
         elif skillsets[skillset][i]['default_aim'] == 'low':
             low_rb = return_rank_bonus(rank, difficulty)
-            low_skill = i
+            low_skill = skillsets[skillset][i]['uid']
 
     # Return the values       
     if rb_only == True:
@@ -222,9 +229,9 @@ def defense_layer_calc(char, rb_only=False, skills_only=False):
     of the body that the attack targets and not the numerical value.
     """
 
-    weap_high_skill, weap_mid_skill, weap_low_skill = '', '', ''
-    offhand_high_skill, offhand_mid_skill, offhand_low_skill = '', '', ''
-    dodge_high_skill, dodge_mid_skill, dodge_low_skill = '', '', ''
+    weap_high_skill, weap_mid_skill, weap_low_skill = None, None, None
+    offhand_high_skill, offhand_mid_skill, offhand_low_skill = None, None, None
+    dodge_high_skill, dodge_mid_skill, dodge_low_skill = None, None, None
 
     # Initialize rankbonus values.
     weap_high_rb, weap_mid_rb, weap_low_rb = 0.0, 0.0, 0.0
@@ -232,27 +239,27 @@ def defense_layer_calc(char, rb_only=False, skills_only=False):
     dodge_high_rb, dodge_mid_rb, dodge_low_rb = 0.0, 0.0, 0.0
 
     # Acquire the item(s) wielded.
-    wielding = char.attributes.get('wielding')
-    l_wield = wielding.get('left')
-    r_wield = wielding.get('right')
-    b_wield = wielding.get('both')
-
-
-    if b_wield:
-        if b_wield.attributes.has('skillset'):
-            item_skillset = b_wield.attributes.get('skillset')
-            weap_high_rb, weap_mid_rb, weap_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
-            weap_high_skill, weap_mid_skill, weap_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
-    if r_wield:
-        if r_wield.attributes.has('skillset'):
-            item_skillset = r_wield.attributes.get('skillset')
-            weap_high_rb, weap_mid_rb, weap_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
-            weap_high_skill, weap_mid_skill, weap_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
-    if l_wield:
-        if l_wield.attributes.has('skillset'):
-            item_skillset = l_wield.attributes.get('skillset')
-            offhand_high_rb, offhand_mid_rb, offhand_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
-            offhand_high_skill, offhand_mid_skill, offhand_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
+    if char.attributes.get('wielding'):
+        wielding  = char.attributes.get('wielding')
+        l_wield = wielding.get('left')
+        r_wield = wielding.get('right')
+        b_wield = wielding.get('both')
+    
+        if b_wield:
+            if b_wield.attributes.has('skillset'):
+                item_skillset = b_wield.attributes.get('skillset')
+                weap_high_rb, weap_mid_rb, weap_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
+                weap_high_skill, weap_mid_skill, weap_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
+        if r_wield:
+            if r_wield.attributes.has('skillset'):
+                item_skillset = r_wield.attributes.get('skillset')
+                weap_high_rb, weap_mid_rb, weap_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
+                weap_high_skill, weap_mid_skill, weap_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
+        if l_wield:
+            if l_wield.attributes.has('skillset'):
+                item_skillset = l_wield.attributes.get('skillset')
+                offhand_high_rb, offhand_mid_rb, offhand_low_rb = return_defense_skills(char, item_skillset, rb_only=True)
+                offhand_high_skill, offhand_mid_skill, offhand_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
 
     # Get all dodge rank bonuses
     # !!! NO DODGES EXIST YET !!!

@@ -71,3 +71,9 @@ See the `@spawn` command and `evennia.utils.spawner` for more info.
 # "key": "goblin archwizard",
 # "prototype" : ("GOBLIN_WIZARD", "ARCHWIZARD_MIXIN")
 #}
+
+RAT = {
+    'prototype_key': 'rat',
+    'key': 'rat',
+    'typeclass': 'typeclasses.mobs.Rat'
+}

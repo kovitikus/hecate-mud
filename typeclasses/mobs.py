@@ -1,4 +1,4 @@
-from evennia import DefaultCharacter
+from typeclasses.characters import Character
 from world import skillsets
 from world.combat_handler import CombatHandler
 from typeclasses.scripts import ScriptMob
@@ -8,40 +8,30 @@ from evennia import utils
 from evennia import TICKER_HANDLER as tickerhandler
 import random
 
-class DefaultMob(DefaultCharacter):
+class DefaultMob(Character):
     def at_object_creation(self):
-        # Stats
-        self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
-
-        # Statuses
-        self.attributes.add('approached', [])
-        self.attributes.add('ko', False)
-        self.attributes.add('feinted', None)
-        self.attributes.add('busy', False)
-
-        # Skills
-        self.attributes.add('def_skills', {'weapon': {'high': {}, 'mid': {}, 'low':{}}, 'dodge': {'high': {}, 'mid': {}, 'low':{}}, 'shield': {'high': {}, 'mid': {}, 'low':{}}})
-        self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
+        super().at_object_creation()
         
-
-
     @lazy_property
     def combat(self):
         return CombatHandler(self)
     @lazy_property
     def combat_script(self):
         return ScriptMob(self)
+
+class Humanoid(DefaultMob):
+    def at_object_creation(self):
+        super().at_object_creation()
+
+class Creature(DefaultMob):
+    def at_object_creation(self):
+        super().at_object_creation()
         
-class Rat(DefaultMob):
-    
-    rat_skills = {'claw': {'damage_type': 'slash', 'difficulty': 'easy', 'attack_range': 'melee', 'default_aim': 'mid'},
-                    'bite': {'damage_type': 'slash', 'difficulty': 'easy', 'attack_range': 'melee', 'default_aim': 'high'}}
+class Rat(Creature):
     def at_object_creation(self):
         super().at_object_creation()
         rank = 10
-        rb = skillsets.easy_rb
-        rb = rb[rank - 1]
-        rat_skills = {'claw': {'rank': rank, 'rb': rb}, 'bite': {'rank': rank, 'rb': rb}}
+        rat_skills = {'claw': rank, 'bite': rank}
         self.attributes.add('rat', rat_skills)
         tickerhandler.add(3, self.claw)
 
@@ -71,13 +61,12 @@ class Rat(DefaultMob):
 
     def claw(self):
         target = self.get_target()
-        damage_type = self.rat_skills['claw']['damage_type']
+        damage_type = 'slash'
         skillset = 'rat'
         skill = 'claw'
-        weapon = 'claw' #TODO:Fix the weapon requirement for attackers.
-        aim = self.rat_skills['claw']['default_aim']
+        aim = 'mid'
         if target:
-            self.combat.attack(target, skillset, skill, weapon, damage_type, aim)
+            self.combat.attack(target, skillset, skill, damage_type, aim)
 
     def bite(self):
         pass

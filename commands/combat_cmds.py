@@ -82,8 +82,6 @@ class CmdStaveSwat(BaseCommand):
         if not both_wield or not both_wield.is_typeclass('typeclasses.objects.Staves'):
             caller.msg("You must be wielding a stave to do that!")
             return
-        else:
-            weapon = both_wield
         target = caller.search(self.args, quiet=True)
         if not target:
             caller.msg('That target does not exist!')
@@ -95,4 +93,4 @@ class CmdStaveSwat(BaseCommand):
 
         aim = skillsets.skillsets['staves']['swat']['default_aim']
         damage_type = skillsets.skillsets['staves']['swat']['damage_type']
-        caller.combat.attack(target, 'staves', 'swat', weapon, damage_type, aim)
+        caller.combat.attack(target, 'staves', 'swat', damage_type, aim)

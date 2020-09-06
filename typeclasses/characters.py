@@ -38,10 +38,6 @@ class Character(DefaultCharacter):
         if not self.attributes.has('lying'):
             self.attributes.add('lying', False)
 
-        # Skills
-        if not self.attributes.has('def_rb'):
-            self.attributes.add('def_rb', {'high': 0, 'mid': 0, 'low': 0})
-
     def announce_move_from(self, destination, msg=None, mapping=None, **kwargs):
         """
         Called if the move is to be announced. This is
@@ -157,7 +153,6 @@ class Character(DefaultCharacter):
             return
         self.msg(f"{self.location.short_desc(self)}")
 
-
     def return_appearance(self, looker, **kwargs):
         if not looker:
             return ""
@@ -204,3 +199,15 @@ class Character(DefaultCharacter):
         else:
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
+
+class OOC_Character(Character):
+    def at_object_creation(self):
+        super().at_object_creation()
+
+class Player_Character(Character):
+    def at_object_creation(self):
+        super().at_object_creation()
+
+class NPC(Character):
+    def at_object_creation(self):
+        super().at_object_creation()
