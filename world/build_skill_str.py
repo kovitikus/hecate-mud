@@ -176,7 +176,19 @@ def create_defense_desc(target, aim, c_a_name, art_weap, weapon, t_name):
                     'stave overhead block':
                         {'attacker': f"{t_name} raises their {targ_weap} high and blocks your {weapon}!",
                         'target': f"You raise your {targ_weap} high and block {c_a_name}\'s {weapon}!",
-                        'others': f"{t_name} raises their {targ_weap} and blocks {c_a_name}\'s {weapon}!"}
+                        'others': f"{t_name} raises their {targ_weap} and blocks {c_a_name}\'s {weapon}!"},
+                    'marts dodge':
+                        {'attacker': f"{t_name} dodges your {weapon}!",
+                        'target': f"You dodge {c_a_name}\'s {weapon}!",
+                        'others': f"{t_name} dodges {c_a_name}\'s {weapon}!"},
+                    'marts duck':
+                        {'attacker': f"{t_name} squats low and ducks right under your {weapon}!",
+                        'target': f"You squat low and duck right under {c_a_name}\'s {weapon}!",
+                        'others': f"{t_name} squats low and ducks right under {c_a_name}\'s {weapon}!"},
+                    'marts jump':
+                        {'attacker': f"{t_name} jumps over your {weapon} and you fail to connect!",
+                        'target': f"You jump over {c_a_name}\'s {weapon} and {c_a_name} fails to connect!",
+                        'others': f"{t_name} jumps over {c_a_name}\'s {weapon} and {c_a_name} fails to connect!"}
                     }
 
     a_outcome = defense_skills[outcome]['attacker']

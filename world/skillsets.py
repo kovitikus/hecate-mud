@@ -389,7 +389,7 @@ def learn_skill(char, skillset, skill):
     
     # Check if the skillset is not already learned and if not, create it.
     if not char.attributes.has(skillset):
-        char.attributes.add(skillset, {'base ranks': 1, 'bonus ranks': 0, 'current exp': 0})
+        char.attributes.add(skillset, {'base ranks': 1, 'bonus ranks': 0, 'current exp': 0.0})
 
     dic_skillset = char.attributes.get(skillset)
 
