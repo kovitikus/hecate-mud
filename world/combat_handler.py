@@ -161,6 +161,8 @@ class CombatHandler:
             attacker.location.msg_contents(f"{others_desc}", exclude=(attacker, target))
         
         gen_mec.set_roundtime(attacker)
+        if attacker.has_account:
+            skillsets.grant_exp(attacker, skillset)
 
     def take_damage(self, attacker, damage):
         owner = self.owner

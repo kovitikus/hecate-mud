@@ -79,9 +79,47 @@ for i in range(1, 1_001):
     rb = generate_rank_bonus(i, 'impossible')
     impossible_rb.append(rb)
 
+
+def generate_exp(desired_rank):
+    exp_required_to_lvl = 10.0
+    for i in range(2, desired_rank+1):
+        exp_required_to_lvl = exp_required_to_lvl + i
+    return exp_required_to_lvl
+
+# Must subtract 2 from any request from this list to get proper desired rank.
+# List only contains ranks 2 through 1,000
+# Each result is the exp required to reach that rank from the subsequent rank.
+desired_rank_exp_req = []
+
+for i in range(2, 1_001):
+    exp_req = generate_exp(i)
+    desired_rank_exp_req.append(exp_req)
+
+
+def skill_xp_gain(desired_rank):
+    hits_per_rank = 30
+    count = 0
+    xp_gain = 0
+    for i in range(2, desired_rank+1):
+        xp_gain = desired_rank_exp_req[i - 2] / hits_per_rank
+        count += 1
+        if count == 20:
+            hits_per_rank += 2
+            count = 0
+    return xp_gain
+
+
 # Skillset Order: Alphabetically
 # Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
-skillsets = {'staves': 
+skillsets = {'martial arts':
+                {'dodge':
+                    {'uid': 'marts dodge','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': None},
+                'duck':
+                    {'uid': 'marts duck','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'high', 'weapon': None},
+                'jump':
+                    {'uid': 'marts jump','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'low', 'weapon': None}
+                },
+            'staves': 
                 {'end jab': 
                     {'uid': 'stave end jab', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'parting jab': 
@@ -134,7 +172,6 @@ skillsets = {'staves':
                     {'uid': 'rat bite', 'skill_type': 'offense', 'damage_type': 'pierce', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'high', 'weapon': 'bite'},
                 'claw':
                     {'uid': 'rat claw', 'skill_type': 'offense', 'damage_type': 'slash', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'mid', 'weapon': 'claw'}
-                
                 }
             }
 
@@ -262,7 +299,9 @@ def defense_layer_calc(char, rb_only=False, skills_only=False):
                 offhand_high_skill, offhand_mid_skill, offhand_low_skill = return_defense_skills(char, item_skillset, skills_only=True)
 
     # Get all dodge rank bonuses
-    # !!! NO DODGES EXIST YET !!!
+    if char.attributes.get('martial arts'):
+        dodge_high_skill, dodge_mid_skill, dodge_low_skill = return_defense_skills(char, 'martial arts', skills_only=True)
+        dodge_high_rb, dodge_mid_rb, dodge_low_rb = return_defense_skills(char, 'martial arts', rb_only=True)
     
     high_skills = [weap_high_skill, offhand_high_skill, dodge_high_skill]
     mid_skills = [weap_mid_skill, offhand_mid_skill, dodge_mid_skill]
@@ -350,7 +389,7 @@ def learn_skill(char, skillset, skill):
     
     # Check if the skillset is not already learned and if not, create it.
     if not char.attributes.has(skillset):
-        char.attributes.add(skillset, {'total_ranks': 0})
+        char.attributes.add(skillset, {'base ranks': 1, 'bonus ranks': 0, 'current exp': 0})
 
     dic_skillset = char.attributes.get(skillset)
 
@@ -360,8 +399,30 @@ def learn_skill(char, skillset, skill):
     rank = dic_skillset[skill]
     rank += 1
     dic_skillset[skill] = rank
-    dic_skillset['total_ranks'] += 1
     char.msg(f"You learn rank {rank} of {skillset} {skill}, earning the rank bonus of {return_rank_bonus(rank, difficulty)}.")
+
+def grant_exp(char, skillset):
+    if char.attributes.get(skillset):
+        skillset_dic = char.attributes.get(skillset)
+        print(f"skillset_dic: {skillset_dic}")
+        base_ranks = skillset_dic.get('base ranks')
+        current_exp = skillset_dic.get('current exp')
+        desired_rank = base_ranks + 1
+        print(f"desired rank: {desired_rank}")
+        exp_gain = skill_xp_gain(desired_rank)
+        total_exp = current_exp + exp_gain
+        print(f"current exp: {current_exp}, exp gained: {exp_gain}, total exp: {total_exp}")
+
+        exp_req = desired_rank_exp_req[desired_rank - 2]
+
+        if total_exp > exp_req: # Level up!
+            exp_diff = total_exp - exp_req
+            skillset_dic['current exp'] = exp_diff
+            skillset_dic['base ranks'] = base_ranks + 1
+            char.msg(f"You have reached the base rank of {skillset_dic['base ranks']} in {skillset}!")
+        else:
+            skillset_dic['current exp'] = total_exp
+            char.msg(f"You have gained {exp_gain} exp toward your {skillset} skillset with {exp_req - total_exp} exp remaining to level.")
 
 def generate_skill_list(char):
     """
@@ -403,7 +464,6 @@ def generate_skill_list(char):
     skill_rank_bonus = 0.0
     skill_difficulty = ''
 
-    total_ranks = 0
     num = 0
     offense_skill_string = ""
     defense_skill_string = ""
@@ -416,6 +476,10 @@ def generate_skill_list(char):
   
     for i in VIABLE_SKILLSETS:
         # We reset the skill lists at the start of each new skillset iteration.
+        offense_skill_string = ""
+        defense_skill_string = ""
+        utility_skill_string = ""
+
         offense_skill_list = []
         defense_skill_list = []
         utility_skill_list = []
@@ -434,7 +498,11 @@ def generate_skill_list(char):
 
         if char.attributes.get(i): # If the skillset exists on the character.
             skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
-            total_ranks = skillset_dic.get('total_ranks')
+            base_ranks = skillset_dic.get('base ranks')
+            bonus_ranks = skillset_dic.get('bonus ranks')
+            current_exp = skillset_dic.get('current exp')
+            next_rank_exp_req = desired_rank_exp_req[(base_ranks + 1) - 2]
+            exp_remaining = next_rank_exp_req - current_exp
 
             # Build skill lists
             for x in VIABLE_SKILLS:
@@ -458,7 +526,8 @@ def generate_skill_list(char):
                         utility_rank_bonus_list.append(skill_rank_bonus)
 
             # Build this skillset's string.
-            skillset_title = (f"\n\n|g{cap(i)}|n - Total Ranks: |g{total_ranks}|n\n"
+            skillset_title = (f"\n\n|g{cap(i)}|n - Base Ranks: |g{base_ranks}|n    Bonus Ranks: |g{bonus_ranks}|n\n"
+                            f"Current Exp: {current_exp}    Rank {base_ranks + 1} Exp Requirement: {next_rank_exp_req}    Required Exp Remaining: |c{exp_remaining}|n\n"
                         "--------------------------------------------------")
             num = 0
             for v in offense_skill_list:
