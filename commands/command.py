@@ -11,7 +11,7 @@ from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
-from world import skillsets, attack_desc
+from world import skillsets
 from world.generic_str import article
 
 
@@ -133,7 +133,7 @@ class CmdTest(Command):
 
 class CmdSkills(Command):
     """
-    Prints the character's skills to the screen, along with related information such as Rank Bonus.
+    Prints the character's skills to the screen, along with related information such as Rank Score.
 
     Usage:
         skills

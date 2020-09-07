@@ -207,7 +207,7 @@ class OOC_Character(Character):
 class Player_Character(Character):
     def at_object_creation(self):
         super().at_object_creation()
-        self.attributes.add('martial arts', {'base ranks': 1, 'bonus ranks': 0, 'current exp': 0.0, 'dodge': 1, 'duck': 1, 'jump': 1})
+        self.attributes.add('martial arts', {'base ranks': 1, 'bonus ranks': 0, 'current ap': 0, 'dodge': 1, 'duck': 1, 'jump': 1})
 
 class NPC(Character):
     def at_object_creation(self):

@@ -46,31 +46,31 @@ class CombatHandler:
     
     def success_calc(self, target, skillset, skill, aim):
         """
-        Only whole numbers (rounded down) are used to determine the offensive RB.
+        Only whole numbers (rounded down) are used to determine the offensive RS.
 
-        TODO: Add a round down for the final RB. Integers only!
+        TODO: Add a round down for the final RS. Integers only!
         """
         owner = self.owner
         a_skillset = owner.attributes.get(skillset)
         a_rank = a_skillset.get(skill)
         a_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
-        a_rb = skillsets.return_rank_bonus(a_rank, a_difficulty)
+        a_rs = skillsets.return_rank_score(a_rank, a_difficulty)
 
-        defen_high, defen_mid, defen_low = skillsets.defense_layer_calc(target, rb_only=True)
+        defen_high, defen_mid, defen_low = skillsets.defense_layer_calc(target, rs_only=True)
 
 
         if aim == 'high':
-            t_rb = defen_high
+            t_rs = defen_high
         elif aim == 'mid':
-            t_rb = defen_mid
+            t_rs = defen_mid
         elif aim == 'low':
-            t_rb == defen_low
+            t_rs == defen_low
 
-        if a_rb > t_rb:
-            bonus = a_rb - t_rb
+        if a_rs > t_rs:
+            bonus = a_rs - t_rs
             success = 50 - bonus
-        elif t_rb > a_rb:
-            loss = t_rb - a_rb
+        elif t_rs > a_rs:
+            loss = t_rs - a_rs
             success = 50 + loss
         else:
             success = 50
@@ -162,7 +162,7 @@ class CombatHandler:
         
         gen_mec.set_roundtime(attacker)
         if attacker.has_account:
-            skillsets.grant_exp(attacker, skillset)
+            skillsets.grant_ap(attacker, skillset)
 
     def take_damage(self, attacker, damage):
         owner = self.owner
