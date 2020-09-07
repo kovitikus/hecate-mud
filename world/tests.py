@@ -15,15 +15,6 @@ class TestSkillsets(EvenniaTest):
         super().tearDown()
         self.stave.delete()
 
-    def test_ap_req_list(self):
-        rank = 6
-        self.assertEqual(skillsets.desired_rank_ap_req[rank-2], 30)
-
-    def test_generate_ap(self):
-        rank = 6
-        ap_required_to_lvl = skillsets.generate_ap(rank)
-        self.assertEqual(ap_required_to_lvl, 30)
-
     def test_return_rank_score(self):
         rank = 3
         difficulty = 'difficult'

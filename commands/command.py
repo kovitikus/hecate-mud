@@ -51,26 +51,23 @@ class CmdCharGen(Command):
         EvMenu(caller, "world.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
        auto_quit=True, auto_look=True, auto_help=True)
 
-class CmdLearnSkill(Command):
+class CmdLearnSkillset(Command):
     key = 'learn'
     """
-    Usage: learn <skillset> <skill>
+    Usage: learn <skillset>
     """
 
     def parse(self):
+        self.args = self.args.lstrip()
         caller = self.caller
-        args = self.args.lstrip()
-        try:
-            self.skillset, self.skill = args.split(" ", 1)
-        except ValueError:
-            caller.msg("Usage: learn <skillset> <skill>")
+        args = self.args
+        
+        if not args:
+            caller.msg("Usage: learn <skillset>")
             raise InterruptCommand
 
-        if self.skillset not in skillsets.VIABLE_SKILLSETS:
-            caller.msg(f"{self.skillset} is not a viable skillset!")
-            raise InterruptCommand
-        if self.skill not in skillsets.VIABLE_SKILLS:
-            caller.msg(f"{self.skill} is not a viable skill of {self.skillset}!")
+        if args not in skillsets.VIABLE_SKILLSETS:
+            caller.msg(f"{args} is not a viable skillset!")
             raise InterruptCommand
 
     def func(self):
@@ -79,7 +76,7 @@ class CmdLearnSkill(Command):
             caller.msg('Usage: learn <skillset> <skill>')
             return
 
-        skillsets.learn_skill(self.caller, self.skillset, self.skill)
+        skillsets.learn_skillset(self.caller, self.args)
 
 class CmdGrantSP(Command):
     key = '@grant-sp'

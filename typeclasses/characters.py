@@ -2,6 +2,7 @@ from evennia import DefaultCharacter
 from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 from world.combat_handler import CombatHandler
+from world import skillsets
 
 class Character(DefaultCharacter):
 
@@ -207,7 +208,7 @@ class OOC_Character(Character):
 class Player_Character(Character):
     def at_object_creation(self):
         super().at_object_creation()
-        self.attributes.add('martial arts', {'base ranks': 1, 'bonus ranks': 0, 'current ap': 0, 'dodge': 1, 'duck': 1, 'jump': 1})
+        skillsets.generate_fresh_skillset(self, 'martial arts')
 
 class NPC(Character):
     def at_object_creation(self):

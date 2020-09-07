@@ -38,7 +38,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         self.add(command.CmdDesc())
         self.add(command.CmdCharGen())
-        self.add(command.CmdLearnSkill())
+        self.add(command.CmdLearnSkillset())
         self.add(command.CmdGrantSP())
         self.add(command.CmdTest())
         self.add(command.CmdLook())

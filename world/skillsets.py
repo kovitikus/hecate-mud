@@ -135,8 +135,8 @@ skillsets = {'martial arts':
                     {'uid': 'stave spinstrike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'sweep strike': 
                     {'uid': 'stave sweep strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high'], 'weapon': 'stave'},
-                'tbash': 
-                    {'uid': 'stave tbash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                'triple bash': 
+                    {'uid': 'stave triple bash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
                 'mid block': 
                     {'uid': 'stave mid block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
                 'low block': 
@@ -357,36 +357,32 @@ def rs_stance(self, o_rs, d_rs, stance):
         d_rs = d_rs * 1
         return o_rs, d_rs
 
-def learn_skill(char, skillset, skill):
-    '''
-    Skill Difficulty = Skill Point Cost per Rank
-    ---------------------------------------------
 
-    Easy = 5
-    Average = 7
-    Difficult = 9
-    Impossible = 11
-
-    Example Skillset Saved Attribute
-    ---------------------------------
-    staves = {'total_ranks': 300, 'leg_sweep': 100, 'end_jab': 100, 'high_block': 100}
-    '''
-    # Return the data of the skill.
-    difficulty = skillsets[skillset][skill]['difficulty']
-    
+def learn_skillset(char, skillset):
     # Check if the skillset is not already learned and if not, create it.
     if not char.attributes.has(skillset):
-        char.attributes.add(skillset, {'base ranks': 1, 'bonus ranks': 0, 'current ap': 0})
+        generate_fresh_skillset(char, skillset)
+        char.msg(f"You learn {skillset}.")
+    else:
+        char.msg(f"You already know {skillset}!")
 
-    dic_skillset = char.attributes.get(skillset)
-
-    # Check if the skill already exists. Create it otherwise. 
-    if not dic_skillset.get(skill):
-        dic_skillset[skill] = 0
-    rank = dic_skillset[skill]
-    rank += 1
-    dic_skillset[skill] = rank
-    char.msg(f"You learn rank {rank} of {skillset} {skill}, earning the rank score of {return_rank_score(rank, difficulty)}.")
+def generate_fresh_skillset(char, skillset, starting_rank=1):
+    # store lists of baseline skills for each skillset
+    base_dic = {'base ranks': starting_rank, 'bonus ranks': 0, 'current ap': 0}
+    staves = {'end jab': 1, 'parting jab': 1, 'parting swat': 1, 'simple strike': 1, 'swat': 1, 
+                'parting smash': 1, 'pivot smash': 1, 'side strike': 1, 'snapstrike': 1, 'stepping spin': 1, 
+                'longarm strike': 1, 'pivoting longarm': 1, 'spinstrike': 1, 'sweep strike': 1, 'triple bash': 1, 
+                'mid block': 1, 'low block': 1, 'overhead block': 1, 'defensive sweep': 1, 'feint': 1, 'leg sweep': 1}
+    holy = {'heal': 1}
+    marts = {'dodge': 1, 'duck': 1, 'jump': 1}
+    # setup all the fresh new skills and set them to 0 in a new skillset
+    if skillset == 'staves':
+        char.attributes.add(skillset, {**base_dic, **staves})
+    elif skillset == 'holy':
+        char.attributes.add(skillset, {**base_dic, **holy})
+    elif skillset == 'martial arts':
+        char.attributes.add(skillset, {**base_dic, **marts})
+    
 
 def grant_ap(char, skillset):
     if char.attributes.get(skillset):
@@ -407,6 +403,19 @@ def grant_ap(char, skillset):
         else:
             skillset_dic['current ap'] = total_ap
             char.msg(f"You have gained {ap_gain} AP toward your {skillset} skillset with {ap_req - total_ap} AP remaining to level.")
+
+def return_skill_rank(char, skillset, skill):
+    skill_rank = 0
+    if char.attributes.has(skillset):
+        skillset_dic = char.attributes.get(skillset)
+        skillset_base_rank = skillset_dic.get('base ranks')
+        skillset_bonus_rank = skillset_dic.get('bonus ranks')
+        skillset_rank = skillset_base_rank + skillset_bonus_rank
+        if skillset_dic.get(skill):
+            skill_bonus_rank = skillset_dic.get(skill)
+            skill_bonus_rank -= 1 # Must remove the base rank required for value parsing.
+            skill_rank = skillset_rank + skill_bonus_rank
+    return skill_rank
 
 def generate_skill_list(char):
     """
@@ -432,6 +441,14 @@ def generate_skill_list(char):
     offense_rank_list = []
     defense_rank_list = []
     utility_rank_list = []
+
+    offense_skill_base_rank_list = []
+    defense_skill_base_rank_list = []
+    utility_skill_base_rank_list = []
+
+    offense_skill_bonus_rank_list = []
+    defense_skill_bonus_rank_list = []
+    utility_skill_bonus_rank_list = []
     
     offense_rank_score_list = []
     defense_rank_score_list = []
@@ -444,6 +461,8 @@ def generate_skill_list(char):
     skillset_string_list = []
 
     skillset_dic = None
+    skill_base_rank = 0
+    skill_bonus_rank = 0
     skill_rank = 0
     skill_rank_score = 0.0
     skill_difficulty = ''
@@ -472,6 +491,14 @@ def generate_skill_list(char):
         defense_rank_list = []
         utility_rank_list = []
 
+        offense_skill_base_rank_list = []
+        defense_skill_base_rank_list = []
+        utility_skill_base_rank_list = []
+
+        offense_skill_bonus_rank_list = []
+        defense_skill_bonus_rank_list = []
+        utility_skill_bonus_rank_list = []
+
         offense_rank_score_list = []
         defense_rank_score_list = []
         utility_rank_score_list = []
@@ -482,8 +509,10 @@ def generate_skill_list(char):
 
         if char.attributes.get(i): # If the skillset exists on the character.
             skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
+            print(f"skillset_dic = {skillset_dic}")
             base_ranks = skillset_dic.get('base ranks')
             bonus_ranks = skillset_dic.get('bonus ranks')
+            skill_base_rank = base_ranks + bonus_ranks
             current_ap = skillset_dic.get('current ap')
             next_rank_ap_req = ap_required(base_ranks + 1)
             ap_remaining = next_rank_ap_req - current_ap
@@ -491,21 +520,31 @@ def generate_skill_list(char):
             # Build skill lists
             for x in VIABLE_SKILLS:
                 if skillset_dic.get(x): # If the skill exists on the character.
-                    skill_rank = skillset_dic.get(x) # Store that skill's dictionary.
+                    print(f"skill acquire = {skillset_dic.get(x)}")
+                    skill_bonus_rank = skillset_dic.get(x) # Store that skill's bonus
+                    skill_bonus_rank -= 1 # Must remove the base rank required to parse the key.
+                    print(f"skill_bonus_rank = {skill_bonus_rank}")
+                    skill_rank = return_skill_rank(char, i, x)
                     skill_difficulty = skillsets[i][x]['difficulty']
                     skill_rank_score = return_rank_score(skill_rank, skill_difficulty)
 
                     # Store the skill's name in a list, sorted by skill type.
                     if skillsets[i][x]['skill_type'] == 'offense':
                         offense_skill_list.append(x)
+                        offense_skill_base_rank_list.append(skill_base_rank)
+                        offense_skill_bonus_rank_list.append(skill_bonus_rank)
                         offense_rank_list.append(skill_rank)
                         offense_rank_score_list.append(skill_rank_score)
                     elif skillsets[i][x]['skill_type'] == 'defense':
                         defense_skill_list.append(x)
+                        defense_skill_base_rank_list.append(skill_base_rank)
+                        defense_skill_bonus_rank_list.append(skill_bonus_rank)
                         defense_rank_list.append(skill_rank)
                         defense_rank_score_list.append(skill_rank_score)
                     elif skillsets[i][x]['skill_type'] == 'utility':
                         utility_skill_list.append(x)
+                        utility_skill_base_rank_list.append(skill_base_rank)
+                        utility_skill_bonus_rank_list.append(skill_bonus_rank)
                         utility_rank_list.append(skill_rank)
                         utility_rank_score_list.append(skill_rank_score)
 
@@ -515,21 +554,21 @@ def generate_skill_list(char):
                         "--------------------------------------------------")
             num = 0
             for v in offense_skill_list:
-                offense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{offense_rank_list[num]}|n        RS: |G{offense_rank_score_list[num]}|n\n")
+                offense_skill_string_list.append(f"|G{cap(v)}|n    Base Rank: |G{offense_skill_base_rank_list[num]}|n    Bonus Ranks: |G{offense_skill_bonus_rank_list[num]}|n    Rank: |G{offense_rank_list[num]}|n    Rank Score: |G{offense_rank_score_list[num]}|n\n")
                 num += 1
             if len(offense_skill_string_list) > 0:
                 offense_skill_string = f"\nOffense:\n{''.join(offense_skill_string_list)}"
 
             num = 0
             for v in defense_skill_list:
-                defense_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{defense_rank_list[num]}|n        RS: |G{defense_rank_score_list[num]}|n\n")
+                defense_skill_string_list.append(f"|G{cap(v)}|n    Base Rank: |G{defense_skill_base_rank_list[num]}|n    Bonus Ranks: |G{defense_skill_bonus_rank_list[num]}|n    Rank: |G{defense_rank_list[num]}|n    Rank Score: |G{defense_rank_score_list[num]}|n\n")
                 num += 1
             if len(defense_skill_string_list) > 0:
                 defense_skill_string = f"\nDefense:\n{''.join(defense_skill_string_list)}"
 
             num = 0
             for v in utility_skill_list:
-                utility_skill_string_list.append(f"|G{cap(v)}|n            Rank: |G{utility_rank_list[num]}|n        RS: |G{utility_rank_score_list[num]}|n\n")
+                utility_skill_string_list.append(f"|G{cap(v)}|n    Base Rank: |G{utility_skill_base_rank_list[num]}|n    Bonus Ranks: |G{utility_skill_bonus_rank_list[num]}|n    Rank: |G{utility_rank_list[num]}|n    Rank Score: |G{utility_rank_score_list[num]}|n\n")
                 num += 1
             if len(utility_skill_string_list) > 0:
                 utility_skill_string = f"\nUtility:\n{''.join(utility_skill_string_list)}"
