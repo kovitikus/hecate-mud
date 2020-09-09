@@ -31,8 +31,7 @@ class Rat(Creature):
     def at_object_creation(self):
         super().at_object_creation()
         rank = 10
-        rat_skills = {'claw': rank, 'bite': rank}
-        self.attributes.add('rat', rat_skills)
+        skillsets.generate_fresh_skillset(self, 'rat', starting_rank=rank)
         tickerhandler.add(3, self.claw)
 
 

@@ -205,7 +205,7 @@ def return_defense_skills(char, skillset, rs_only=False, skills_only=False):
 
     # Sort each defensive skill by region defended.
     for i in defense_skill_list:
-        rank = char_skillset_dic.get(i)
+        rank = return_skill_rank(char, skillset, i)
         difficulty = skillsets[skillset][i]['difficulty']
         if skillsets[skillset][i]['default_aim'] == 'high':
             high_rs = return_rank_score(rank, difficulty)
@@ -369,12 +369,14 @@ def learn_skillset(char, skillset):
 def generate_fresh_skillset(char, skillset, starting_rank=1):
     # store lists of baseline skills for each skillset
     base_dic = {'base ranks': starting_rank, 'bonus ranks': 0, 'current ap': 0}
-    staves = {'end jab': 1, 'parting jab': 1, 'parting swat': 1, 'simple strike': 1, 'swat': 1, 
-                'parting smash': 1, 'pivot smash': 1, 'side strike': 1, 'snapstrike': 1, 'stepping spin': 1, 
-                'longarm strike': 1, 'pivoting longarm': 1, 'spinstrike': 1, 'sweep strike': 1, 'triple bash': 1, 
-                'mid block': 1, 'low block': 1, 'overhead block': 1, 'defensive sweep': 1, 'feint': 1, 'leg sweep': 1}
-    holy = {'heal': 1}
-    marts = {'dodge': 1, 'duck': 1, 'jump': 1}
+    staves = {'end jab': 0, 'parting jab': 0, 'parting swat': 0, 'simple strike': 0, 'swat': 0, 
+                'parting smash': 0, 'pivot smash': 0, 'side strike': 0, 'snapstrike': 0, 'stepping spin': 0, 
+                'longarm strike': 0, 'pivoting longarm': 0, 'spinstrike': 0, 'sweep strike': 0, 'triple bash': 0, 
+                'mid block': 0, 'low block': 0, 'overhead block': 0, 'defensive sweep': 0, 'feint': 0, 'leg sweep': 0}
+    holy = {'heal': 0}
+    marts = {'dodge': 0, 'duck': 0, 'jump': 0}
+    rat = {'claw': 0, 'bite': 0}
+
     # setup all the fresh new skills and set them to 0 in a new skillset
     if skillset == 'staves':
         char.attributes.add(skillset, {**base_dic, **staves})
@@ -382,6 +384,8 @@ def generate_fresh_skillset(char, skillset, starting_rank=1):
         char.attributes.add(skillset, {**base_dic, **holy})
     elif skillset == 'martial arts':
         char.attributes.add(skillset, {**base_dic, **marts})
+    elif skillset == 'rat':
+        char.attributes.add(skillset, {**base_dic, **rat})
     
 
 def grant_ap(char, skillset):
@@ -411,9 +415,8 @@ def return_skill_rank(char, skillset, skill):
         skillset_base_rank = skillset_dic.get('base ranks')
         skillset_bonus_rank = skillset_dic.get('bonus ranks')
         skillset_rank = skillset_base_rank + skillset_bonus_rank
-        if skillset_dic.get(skill):
+        if skill in skillset_dic:
             skill_bonus_rank = skillset_dic.get(skill)
-            skill_bonus_rank -= 1 # Must remove the base rank required for value parsing.
             skill_rank = skillset_rank + skill_bonus_rank
     return skill_rank
 
@@ -519,10 +522,9 @@ def generate_skill_list(char):
 
             # Build skill lists
             for x in VIABLE_SKILLS:
-                if skillset_dic.get(x): # If the skill exists on the character.
+                if x in skillset_dic: # If the skill exists on the character.
                     print(f"skill acquire = {skillset_dic.get(x)}")
                     skill_bonus_rank = skillset_dic.get(x) # Store that skill's bonus
-                    skill_bonus_rank -= 1 # Must remove the base rank required to parse the key.
                     print(f"skill_bonus_rank = {skill_bonus_rank}")
                     skill_rank = return_skill_rank(char, i, x)
                     skill_difficulty = skillsets[i][x]['difficulty']

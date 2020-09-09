@@ -51,8 +51,7 @@ class CombatHandler:
         TODO: Add a round down for the final RS. Integers only!
         """
         owner = self.owner
-        a_skillset = owner.attributes.get(skillset)
-        a_rank = a_skillset.get(skill)
+        a_rank = skillsets.return_skill_rank(owner, skillset, skill)
         a_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
         a_rs = skillsets.return_rank_score(a_rank, a_difficulty)
 
