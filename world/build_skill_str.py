@@ -109,7 +109,7 @@ def create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, d
                         {'attacker': f"You claw at {t_name} with your front paws! {a_outcome}",
                         'target': f"{c_a_name} claws at you with {a_poss} front paws! {t_outcome}",
                         'others': f"{c_a_name} claws at {t_name} with {a_poss} front paws! {o_outcome}"},
-                    'claw': 
+                    'bite': 
                         {'attacker': f"You bite at {t_name} with your teeth! {a_outcome}",
                         'target': f"{c_a_name} bites at you with {a_poss} teeth! {t_outcome}",
                         'others': f"{c_a_name} bites at {t_name} with {a_poss} teeth! {o_outcome}"}
