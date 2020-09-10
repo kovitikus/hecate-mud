@@ -58,7 +58,6 @@ class Room(DefaultRoom):
             short_desc = f"{short_desc} {list_to_string(characters)} {'is' if len(characters) == 1 else 'are'} here."
         
         if exits:
-            print(f"Exits: {exits}")
             num = 1
             exits_len = len(exits)
             exits_string = f"You see "
@@ -203,7 +202,6 @@ class OOC_Quarters(Room):
         exit_to_common_room = create_object(typeclass="typeclasses.exits.Exit",
                                             key="north", aliases="n", destination=common_room[0],
                                             location=portal_room, home=portal_room)
-        print(f"{'Exit to common room created!' if exit_to_common_room else 'Exit to common room NOT created!'}")
 
 
 class SewerRoom(Room):

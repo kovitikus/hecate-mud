@@ -2,7 +2,6 @@ import random
             
 import time, datetime
 from evennia import utils
-from evennia.utils import gametime
 from typeclasses.rooms import Room
 
 class MobHandler:
@@ -37,24 +36,19 @@ class MobHandler:
         rand_targ = random.randrange(t_len)
         target = visible[rand_targ - 1]
         owner.combat.approach(owner, target)
-        self.choose_attack(target)
+        self.check_for_target()
 
     def choose_attack(self, target):
-        # print('entered the attack choice method')
-        # skill_list = ['claw',]
-        # attack = random.choice(skill_list)
-        # print(f"attack choice = {attack}")
-        # if attack == 'claw':
-        #     print('chosen attack was claw')
-        #     self.claw(target)
-        self.claw(target)
-
-    def claw(self, target):
-        print("entered the mob claw method")
         owner = self.owner
-        skill_list = ['claw', 'bite']
-        skillset = 'rat'
-        skill = random.choice(skill_list)
+
+        if utils.inherits_from(owner, 'typeclasses.mobs.Rat'):
+            skillset = 'rat'
+            skill_list = ['claw', 'bite']
+            skill = random.choice(skill_list)
+            self.attack(target, skillset, skill)
+
+    def attack(self, target, skillset, skill):
+        owner = self.owner
         owner.combat.attack(target, skillset, skill)
     
     def idle(self):

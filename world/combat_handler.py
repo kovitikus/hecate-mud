@@ -73,7 +73,7 @@ class CombatHandler:
             success = 50 + loss
         else:
             success = 50
-
+        success = int(success)
         return success
 
     def body_part_choice(self, aim):
@@ -93,8 +93,6 @@ class CombatHandler:
     def damage_tier(self, success, roll):
         if roll > success:
             difference = roll - success
-            if difference < 1: # This is required to prevent issues with floats > 0 and < 1 TODO: only use integers!
-                difference = 1
             if 1 <= difference <= 10:
                 damage_tier = 0
                 damage = random.randrange(1, 4)

@@ -9,7 +9,7 @@ class SpawnHandler:
 
     def spawn_timer(self):
         # start a timer on the room to check if spawning
-        utils.delay(3, self.on_spawn_timer_tick())
+        utils.delay(3, self.on_spawn_timer_tick)
 
     def on_spawn_timer_tick(self):
         # roll the dice and see if a mob will spawn

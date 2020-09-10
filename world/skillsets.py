@@ -523,7 +523,6 @@ def generate_skill_list(char):
 
         if char.attributes.get(i): # If the skillset exists on the character.
             skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
-            print(f"skillset_dic = {skillset_dic}")
             base_ranks = skillset_dic.get('base ranks')
             bonus_ranks = skillset_dic.get('bonus ranks')
             skill_base_rank = base_ranks + bonus_ranks
@@ -534,9 +533,7 @@ def generate_skill_list(char):
             # Build skill lists
             for x in VIABLE_SKILLS:
                 if x in skillset_dic: # If the skill exists on the character.
-                    print(f"skill acquire = {skillset_dic.get(x)}")
                     skill_bonus_rank = skillset_dic.get(x) # Store that skill's bonus
-                    print(f"skill_bonus_rank = {skill_bonus_rank}")
                     skill_rank = return_skill_rank(char, i, x)
                     skill_difficulty = skillsets[i][x]['difficulty']
                     skill_rank_score = return_rank_score(skill_rank, skill_difficulty)
