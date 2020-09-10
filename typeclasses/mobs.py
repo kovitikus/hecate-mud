@@ -31,7 +31,7 @@ class Rat(Creature):
         super().at_object_creation()
         rank = 10
         skillsets.generate_fresh_skillset(self, 'rat', starting_rank=rank)
-        tickerhandler.add(3, self.mob.claw)
+        self.mob.idle()
 
 class Dummy(DefaultMob):
     def revive(self):
