@@ -10,7 +10,9 @@ from evennia import DefaultRoom
 from evennia import search_object
 from evennia.utils import inherits_from
 from evennia.utils.create import create_object
-from evennia.utils.utils import list_to_string
+from evennia.utils.utils import list_to_string, lazy_property
+
+from world.spawn_handler import SpawnHandler
 
 
 class Room(DefaultRoom):
@@ -202,3 +204,22 @@ class OOC_Quarters(Room):
                                             key="north", aliases="n", destination=common_room[0],
                                             location=portal_room, home=portal_room)
         print(f"{'Exit to common room created!' if exit_to_common_room else 'Exit to common room NOT created!'}")
+
+
+class SewerRoom(Room):
+    @lazy_property
+    def spawn(self):
+        return SpawnHandler(self)
+    def at_object_receive(self, new_arrival, source_location):
+        if new_arrival.has_account and not new_arrival.is_superuser:
+            self.spawn.spawn_mob(new_arrival)
+    def at_object_leave(self, moved_obj, target_location):
+        empty_room = False
+        if moved_obj.has_account and not moved_obj.is_superuser:
+            for obj in self.contents_get():
+                if obj.has_account and not obj.is_superuser:
+                    return
+                else:
+                    empty_room = True
+            if empty_room:
+                self.spawn.destroy_mob()

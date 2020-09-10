@@ -47,3 +47,7 @@ class Stair(Exit):
     def at_object_creation(self):
         if not self.attributes.has('desc'):
             self.attributes.add('desc', 'a stairway')
+
+class Ladder(Exit):
+    def at_object_creation(self):
+        self.attributes.add('desc', 'a ladder')
