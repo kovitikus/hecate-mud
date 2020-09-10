@@ -212,7 +212,7 @@ class SewerRoom(Room):
         return SpawnHandler(self)
     def at_object_receive(self, new_arrival, source_location):
         if new_arrival.has_account and not new_arrival.is_superuser:
-            self.spawn.spawn_mob(new_arrival)
+            self.spawn.spawn_timer()
     def at_object_leave(self, moved_obj, target_location):
         empty_room = False
         if moved_obj.has_account and not moved_obj.is_superuser:

@@ -1,6 +1,6 @@
-import time, datetime
+import time, datetime, random
 from evennia import utils, search_script
-from evennia.utils import gametime
+from evennia.utils import gametime, inherits_from
 from typeclasses.rooms import Room
 
 def check_roundtime(owner):
@@ -39,8 +39,13 @@ def set_roundtime(owner):
 def unbusy(owner):
     owner.msg('|yYou are no longer busy.|n')
     owner.db.busy = False
+    if inherits_from(owner, 'typeclasses.mobs.DefaultMob'):
+        print('unbusy inherited from defaultmob')
+        owner.mob.check_for_target()
 
-
+def roll_die(sides=100):
+    roll = random.randint(1, sides)
+    return roll
 
 
         

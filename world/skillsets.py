@@ -357,6 +357,17 @@ def rs_stance(self, o_rs, d_rs, stance):
         d_rs = d_rs * 1
         return o_rs, d_rs
 
+def return_damage_type(skillset, skill):
+    if skillset in skillsets:
+        if skill in skillsets[skillset]:
+            damage_type = skillsets[skillset][skill]['damage_type']
+            return damage_type
+
+def return_default_aim(skillset, skill):
+    if skillset in skillsets:
+        if skill in skillsets[skillset]:
+            default_aim = skillsets[skillset][skill]['default_aim']
+            return default_aim
 
 def learn_skillset(char, skillset):
     # Check if the skillset is not already learned and if not, create it.

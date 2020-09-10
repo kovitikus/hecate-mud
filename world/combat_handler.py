@@ -119,9 +119,11 @@ class CombatHandler:
                 weapon_type = skillsets.skillsets[skillset][skill]['weapon']
                 return weapon_type
 
-    def attack(self, target, skillset, skill, damage_type, aim):
+    def attack(self, target, skillset, skill):
         attacker = self.owner
         weapon = self.get_weapon_type(skillset, skill)
+        damage_type = skillsets.return_damage_type(skillset, skill)
+        aim = skillsets.return_default_aim(skillset, skill)
 
         if not gen_mec.check_roundtime(attacker):
             return
@@ -190,11 +192,7 @@ class CombatHandler:
             if owner_app:
                 owner_app.remove(attacker)
             if not owner.has_account:
-                okay = owner.delete()
-                if not okay:
-                    location.msg_contents(f'\nERROR: {name} not deleted, probably because delete() returned False.')
-                else:
-                    location.msg_contents(f'{name} breathes a final breath and expires.')
+                owner.on_death()
             else:
                 owner.db.hp['current_hp'] = owner.db.hp['max_hp']
                 location.msg_contents(f"{name} dies and is resurrected to max HP.", exclude=owner)

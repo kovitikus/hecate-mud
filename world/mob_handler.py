@@ -8,15 +8,21 @@ from typeclasses.rooms import Room
 class MobHandler:
     def __init__(self, owner):
         self.owner = owner
-    def get_target(self):
+
+    def check_for_target(self):
         owner = self.owner
         # Set target to first approached if already approached.
         approached = owner.attributes.get('approached')
         app_len = len(approached)
         if app_len >= 1:
             target = approached[0]
-            return target
+            self.choose_attack(target)
+            return
+        else:
+            self.get_target()
 
+    def get_target(self):
+        owner = self.owner
         # If approached is empty, find new target and approach it.
         visible = []
         for targ in owner.location.contents_get(exclude=owner):
@@ -24,63 +30,32 @@ class MobHandler:
                     visible.append(targ)
         t_len = len(visible)
         if not t_len:
+            self.idle()
             return
         
         # Pick random target from visible targets.
         rand_targ = random.randrange(t_len)
         target = visible[rand_targ - 1]
         owner.combat.approach(owner, target)
-        return target
+        self.choose_attack(target)
 
-    def check_roundtime(self):
+    def choose_attack(self, target):
+        # print('entered the attack choice method')
+        # skill_list = ['claw',]
+        # attack = random.choice(skill_list)
+        # print(f"attack choice = {attack}")
+        # if attack == 'claw':
+        #     print('chosen attack was claw')
+        #     self.claw(target)
+        self.claw(target)
+
+    def claw(self, target):
+        print("entered the mob claw method")
         owner = self.owner
-        if owner.db.ko == True:
-            owner.msg("You can't do that while unconscious!")
-            return False
-
-        # Create cooldown attribute if non-existent.
-        if not owner.attributes.has('roundtime'):
-            owner.db.roundtime = 0
-
-        # Calculate current time, total cooldown, and remaining time.
-        now = time.time()
-        lastcast = owner.attributes.get('roundtime')
-        cooldown = lastcast + 2
-        time_remaining = cooldown - now
-
-        # Inform the owner that they are in cooldown and exit the function.
-        if time_remaining > 0 or owner.db.busy == True:
-            if time_remaining >= 2:
-                message = f"You need to wait {int(time_remaining)} more seconds."
-            elif time_remaining >= 1 and time_remaining < 2:
-                message = f"You need to wait {int(time_remaining)} more second."
-            elif time_remaining < 1:
-                message = f"You are in the middle of something."
-            owner.msg(message)
-            return False
-        return True
-
-    def set_roundtime(self):
-        owner = self.owner
-        now = time.time()
-        utils.delay(2, self.unbusy, owner, persistent=True)
-        owner.db.busy = True
-        owner.db.roundtime = now
-
-    def unbusy(self):
-        owner = self.owner
-        owner.msg('|yYou are no longer busy.|n')
-        owner.db.busy = False
-
-    def claw(self):
-        owner = self.owner
-        target = self.get_target()
-        damage_type = 'slash'
+        skill_list = ['claw', 'bite']
         skillset = 'rat'
-        skill = 'claw'
-        aim = 'mid'
-        if target:
-            owner.combat.attack(target, skillset, skill, damage_type, aim)
+        skill = random.choice(skill_list)
+        owner.combat.attack(target, skillset, skill)
     
     def idle(self):
-        pass
+        utils.delay(5, self.check_for_target)

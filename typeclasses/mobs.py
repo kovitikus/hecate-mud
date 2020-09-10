@@ -10,7 +10,14 @@ from evennia import TICKER_HANDLER as tickerhandler
 class DefaultMob(Character):
     def at_object_creation(self):
         super().at_object_creation()
-        
+    def on_death(self):
+        name = self.key
+        okay = self.delete()
+        if not okay:
+            self.location.msg_contents(f'\nERROR: {name} not deleted, probably because delete() returned False.')
+        else:
+            self.location.msg_contents(f'{name} breathes a final breath and expires.')
+            self.location.spawn.spawn_timer()
     @lazy_property
     def combat(self):
         return CombatHandler(self)
@@ -31,7 +38,6 @@ class Rat(Creature):
         super().at_object_creation()
         rank = 10
         skillsets.generate_fresh_skillset(self, 'rat', starting_rank=rank)
-        self.mob.idle()
 
 class Dummy(DefaultMob):
     def revive(self):
