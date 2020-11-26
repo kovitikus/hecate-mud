@@ -3,6 +3,25 @@ from evennia.utils import create
 from world import skillsets
 
 # Assertions are given arguments in the form of (actual_result, expected_result)
+
+class TestEquipmentHandler(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.basic_bag = create.create_object(typeclass='typeclasses.objects.EquipmentBag', key='Basic Bag')
+        self.char_test = create.create_object(typeclass='typeclasses.characters.Character', key='Test Char')
+    
+    def tearDown(self):
+        super().tearDown()
+        self.basic_bag.delete()
+        self.char_test.delete()
+
+    def test_equipment_generation(self):
+        equip_dic = {'head': None, 'neck': None, 'shoulder': None, 'chest': None, 'arms': None, 'hands': None,
+                        'fingers': None, 'waist': None, 'thighs': None, 'calves': None, 'feet': None, 'bag': self.basic_bag}
+        actual_dic = self.char_test.attributes.get('equipment')
+        self.assertDictEqual(equip_dic, actual_dic)
+
+
 class TestSkillsets(EvenniaTest):
     def setUp(self):
         super().setUp()

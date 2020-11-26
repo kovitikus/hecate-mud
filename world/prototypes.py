@@ -1,3 +1,5 @@
+import random
+
 """
 Prototypes
 
@@ -77,3 +79,30 @@ RAT = {
     'key': 'rat',
     'typeclass': 'typeclasses.mobs.Rat'
 }
+
+
+INVENTORY_CONTAINER = {
+    'prototype_key': 'inventory_container',
+    'key': 'inventory_container',
+    'typeclass': 'typeclasses.objects.InventoryContainer'
+}
+
+
+INVENTORY_BAG = {
+    'prototype_parent': 'inventory_container',
+    'key': lambda: generate_random_bag_key()
+}
+
+def generate_random_bag_key():
+    color = ('red', 'blue', 'green', 'yellow', 'black')
+    adjective = ('tattered', 'worn', 'pristine', 'well-crafted', 'frayed')
+    # a tattered red bag
+    # a pristine yellow bag
+    bag_key = f"a {random.choice(adjective)} {random.choice(color)} bag"
+    return bag_key
+
+# Bags
+# Satchels
+# Sacks
+# Backpacks
+

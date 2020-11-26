@@ -49,3 +49,14 @@ class Shields(OffHand):
         self.attributes.add('skillset', 'shields')
         self.tags.add('shields', category='skillset')
 
+class Chest(Object):
+    def at_object_creation(self):
+        self.tags.add('chest', category='equipment')
+
+class Container(Object):
+    pass
+
+class InventoryContainer(Container):
+    def at_object_creation(self):
+        self.tags.add('inventory_container', category='container')
+        self.attributes.add('max_slots', 50)

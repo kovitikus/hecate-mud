@@ -120,13 +120,31 @@ class CmdTest(Command):
 
     def func(self):
         caller = self.caller
+        #caller.msg("Command is currently disabled.")
+
+        char = create.create_object(typeclass='typeclasses.characters.Character', key='char1')
+        if char:
+            caller.msg('Character was created.')
+        equip_dic = char.attributes.get('equipment')
+        caller.msg(f"This is the test character's current equipment: {str(equip_dic)}")
+        bag = equip_dic.get('inventory_container')
+        caller.msg(f"This is the bag we have equipped: {bag}")
+        bag_max_slots = bag.db.max_slots
+        char_max_slots = char.db.inventory_slots['max_slots']
+        caller.msg(f"The bag's max slots: {bag_max_slots}")
+        caller.msg(f"The character's max inventory slots: {char_max_slots}")
+        success = char.delete()
+        if success:
+            caller.msg(f"Character was successfully deleted!")
+        
+        
         # caller.msg("This should be an image!")
         # caller.msg(image="https://i.imgur.com/2Wo1BpT.png")
         # caller.msg(video="https://youtu.be/YUOxwynb9UU")
         # caller.msg(video="https://vimeo.com/358147193")
-        caller.msg("Printing something to the log file!")
-        logger.log_msg("Something to the log file!!")
-        print("printing to the log file too!")
+        # caller.msg("Printing something to the log file!")
+        # logger.log_msg("Something to the log file!!")
+        # print("printing to the log file too!")
 
 class CmdSkills(Command):
     """
@@ -185,12 +203,14 @@ class CmdInventory(Command):
         caller = self.caller
         items = caller.contents
         left_hand, right_hand = caller.db.hands.values()
+        equip_items = caller.db.equipment.values()
 
         # Remove hands and append all other items to a new list.
         filtered_items = []
         for i in items:
-            if i not in [left_hand, right_hand]:
-                filtered_items.append(i)
+            if i not in [left_hand, right_hand, equip_items]:
+                if i not in equip_items:
+                    filtered_items.append(i)
 
         if not filtered_items:
             string = "Your inventory is empty."
@@ -215,6 +235,88 @@ class CmdInventory(Command):
 
                 string = f"|wYou are carrying:\n{category_string}\n{table}"
         caller.msg(string)
+
+class CmdEquip(Command):
+    """
+    Head - Crown/Helmet/Hat
+    Neck - Necklace/Amulet
+    Shoulders - Shoulder Pads
+    Chest - Chest Armor
+    Arms - Sleeves
+    Hands - Pair of Gloves
+    Fingers - Rings (Maximum of 4 for balancing purposes.)
+    Waist - Belt/Sash
+    Thighs - Greaves
+    Calves - Greaves
+    Feet - Boots/Shoes/Sandals
+
+    Bag - Satchel/Backpack/Sack/Bag (Determines maximum inventory slots.)
+
+    Weapons
+        - Any weapon can be manually wielded from the inventory or the ground via the `wield` command.
+        - Equipped weapons are automatically wielded if no other weapon is manually wielded.
+        - Shields and other offhands can also be equipped.
+        - 2H weapons have a limit of 1 slot per type.
+        - 1H weapons have a limit of 2 slots per type (Sword, Dagger, etc.) to compensate for dual-wielding.
+        - Offhand weapons have a limit of 1 slot per type. (Shield, Tome, etc.)
+    """
+    key = 'equip'
+    locks = "cmd:all()"
+
+    def parse(self):
+        if self.args:
+            self.args = self.args.strip()
+
+    def func(self):
+        caller = self.caller
+        left_hand, right_hand = caller.db.hands.values()
+        hands = [left_hand, right_hand]
+        
+
+        if caller.attributes.has('equipment'):
+            equip_dic = {}
+            equip_dic = caller.attributes.get('equipment')
+        else:
+            caller.msg(f"You have no equipment!")
+
+        if self.args:
+            args = self.args
+            item = caller.search(args, quiet=True)
+            if item:
+
+                #check the location of the item, if it is not in the inventory, add it to the inventory
+                # if the inventory is full, return an error
+                # if item.location == caller.location:
+                    #not in hands or inventory, but on the ground of the room.
+                # elif item.location == caller and in hands:
+                    #item is in hands and doesn't count toward inventory, check if inventory is full and
+                    #move item to inventory before equipping.
+                # elif item.location == caller and not in hands:
+                    #in inventory and not in hands, green light to go to equip section
+
+                if item.tags.has('inventory_container'):
+                    current_inventory_container = equip_dic.get('inventory_container')
+                    if current_inventory_container != None:
+                        if item.db.max_slots < current_inventory_container.db.max_slots:
+                            caller.msg(f"Your currently equipped container is better than {item.get_display_name()}.")
+                            return
+                        else:
+                            equip_dic['inventory_container'] = item
+                            caller.db.inventory_slots['max_slots'] = item.db.max_slots
+
+                if item.tags.has('chest'):
+                    chest_slot = equip_dic.get('chest')
+                    if chest_slot == None:
+                        equip_dic['chest'] = item
+                    else:
+                        caller.msg("You must unequip your current chest piece first, before equipping a new one.")
+                        return
+        else:
+            # List the equipment
+            caller.equip.list_equipment()
+
+class CmdUnequip(Command):
+    pass
 
 class CmdInhand(Command):
     key = 'inhand'
