@@ -13,6 +13,7 @@ from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
 from world import skillsets
 from world.generic_str import article
+from world import general_mechanics as gen_mec
 
 
 class Command(BaseCommand):
@@ -234,6 +235,8 @@ class CmdInventory(Command):
                 category_string = get_category_string(arg_type)
 
                 string = f"|wYou are carrying:\n{category_string}\n{table}"
+        # Add currency
+        string = f"{string}\n{gen_mec.return_currency(caller)}"
         caller.msg(string)
 
 class CmdEquip(Command):

@@ -20,6 +20,7 @@ class Character(DefaultCharacter):
         if not self.attributes.get('hp'):
             self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
         self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
+        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
         
         self.equip.generate_equipment()
 
