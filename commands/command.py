@@ -917,6 +917,7 @@ class CmdLight(Command):
         else:
             args = self.args.strip()
             obj = caller.search(args, quiet=True)
+            obj = obj[0]
             if obj:
                 if not inherits_from(obj, 'typeclasses.objects.Lighting'):
                     caller.msg(f"{obj.get_display_name(caller)} cannot be lit!")

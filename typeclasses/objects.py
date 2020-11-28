@@ -71,12 +71,11 @@ class Torch(Lighting):
         # Torches burn at the rate of 10 fuel per minute, or 5 fuel every 30 seconds.
 
     def ignite(self, lighter):
+        print('we made it inside the ignite function')
         room, held_by = self.find_location()
-        if held_by == 'character':
-            lighter.msg(f"You light {self.name}, igniting it.")
-            room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
-        elif held_by == 'room':
-            room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
+        
+        lighter.msg(f"You light {self.name}, igniting it.")
+        room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
 
     def find_location(self):
         #Check to see if the torch is in the hands (inventory) of player
@@ -91,4 +90,5 @@ class Torch(Lighting):
         elif inherits_from(here, 'typeclasses.rooms.Room'):
             held_by = 'room'
             room = here
+            print('torch location is inherited from room')
         return room, held_by
