@@ -916,7 +916,7 @@ class CmdLight(Command):
             raise InterruptCommand
         else:
             args = self.args.strip()
-            obj = caller.search(obj, quiet=True)
+            obj = caller.search(args, quiet=True)
             if obj:
                 if not inherits_from(obj, 'typeclasses.objects.Lighting'):
                     caller.msg(f"{obj.get_display_name(caller)} cannot be lit!")

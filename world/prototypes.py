@@ -115,3 +115,16 @@ MERCHANT = {
 BASIC_SUPPLIES = {
     'prototype_parent': 'merchant',
     'key': 'basic supplies merchant'
+}
+
+LIGHTING = {
+    'prototype_key': 'lighting',
+    'key': 'lighting',
+    'typeclass': 'typeclasses.objects.Lighting'
+}
+
+TORCH = {
+    'prototype_parent': 'lighting',
+    'key': 'torch',
+    'typeclass': 'typeclasses.objects.Torch'
+}
