@@ -1,4 +1,5 @@
 from evennia import DefaultObject
+from evennia import TICKER_HANDLER as tickerhandler
 from evennia.utils import create
 from evennia.utils import logger
 from evennia.utils import ansi
@@ -71,24 +72,49 @@ class Torch(Lighting):
         # Torches burn at the rate of 10 fuel per minute, or 5 fuel every 30 seconds.
 
     def ignite(self, lighter):
-        print('we made it inside the ignite function')
         room, held_by = self.find_location()
         
         lighter.msg(f"You light {self.name}, igniting it.")
         room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
 
+        tickerhandler.add(30, self.on_burn_tick, persistent=True)
+
+    def on_burn_tick(self):
+        fuel = self.attributes.get('fuel')
+        room, held_by = self.find_location()
+        burn_rate = 25
+
+        if fuel <= 0:
+            self.death(room, held_by)
+            return
+        
+        if inherits_from(held_by, "typeclasses.characters.Character"):
+            held_by.msg(f"Your {self.name} flickers.")
+            room.msg_contents(f"{held_by.name}'s {self.name} flickers.", exclude=held_by)
+        else:
+            room.msg_contents(f"{self.name} flickers.")
+        self.db.fuel -= burn_rate
+            
+
+    def death(self, room, held_by):
+        tickerhandler.remove(30, self.on_burn_tick, persistent=True)
+        if inherits_from(held_by, "typeclasses.characters.Character"):
+            held_by.msg(f"Your {self.name} torch dies out and it collapses into a tiny pile of ash.")
+            room.msg_contents(f"{held_by.name}'s {self.name} dies out and it collapses into a tiny pile of ash.", exclude=held_by)
+        else:
+            room.msg_contents(f"{self.name} dies out and it collapses into a tiny pile of ash.")
+        self.delete()
+
+
+
     def find_location(self):
         #Check to see if the torch is in the hands (inventory) of player
         # or if the torch is in a a room.
-        here = self.location
-        held_by = None
+        held_by = self.location
         room = None
 
-        if inherits_from(here, 'typeclasses.characters.Character'):
-            held_by = 'character'
-            room = here.location
-        elif inherits_from(here, 'typeclasses.rooms.Room'):
-            held_by = 'room'
-            room = here
-            print('torch location is inherited from room')
+        if inherits_from(held_by, 'typeclasses.characters.Character'):
+            room = held_by.location
+        elif inherits_from(held_by, 'typeclasses.rooms.Room'):
+            room = held_by
         return room, held_by
