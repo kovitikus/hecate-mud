@@ -906,6 +906,34 @@ class CmdMatch(Command): #TODO: NOT FINISHED
             self.caller.msg(f"Object found {self.args}.")
     pass
 
+class CmdLight(Command):
+    key = 'light'
+
+    def parse(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Light what?")
+            raise InterruptCommand
+        else:
+            args = self.args.strip()
+            obj = caller.search(obj, quiet=True)
+            if obj:
+                if not inherits_from(obj, 'typeclasses.objects.Lighting'):
+                    caller.msg(f"{obj.get_display_name(caller)} cannot be lit!")
+                    raise InterruptCommand
+                else:
+                    self.obj = obj
+            else:
+                caller.msg(f"{args} not found!")
+                raise InterruptCommand
+
+    def func(self):
+        caller = self.caller
+        obj = self.obj
+
+        obj.ignite(caller)
+
+
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.
 
