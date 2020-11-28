@@ -3,6 +3,7 @@ from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 from world.combat_handler import CombatHandler
 from world.equipment_handler import EquipmentHandler
+from world.merchant_handler import MerchantHandler
 from world import skillsets
 
 class Character(DefaultCharacter):
@@ -221,3 +222,11 @@ class Player_Character(Character):
 
 class NPC(Character):
     pass
+
+class Merchant(NPC):
+    @lazy_property
+    def merch(self):
+        return MerchantHandler(self)
+    
+    def at_object_creation(self):
+        self.attributes.add('stock', [])

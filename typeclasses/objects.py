@@ -2,6 +2,7 @@ from evennia import DefaultObject
 from evennia.utils import create
 from evennia.utils import logger
 from evennia.utils import ansi
+from evennia.utils.utils import inherits_from
 from world.generic_str import article
 
 class Object(DefaultObject):
@@ -60,3 +61,34 @@ class InventoryContainer(Container):
     def at_object_creation(self):
         self.tags.add('inventory_container', category='container')
         self.attributes.add('max_slots', 50)
+
+class Lighting(Object):
+    pass
+
+class Torch(Lighting):
+    def at_object_creation(self):
+        self.attributes.add('fuel', 100)
+        # Torches burn at the rate of 10 fuel per minute, or 5 fuel every 30 seconds.
+
+    def ignite(self, lighter):
+        room, held_by = self.find_location()
+        if held_by == 'character':
+            lighter.msg(f"You light {self.name}, igniting it.")
+            room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
+        elif held_by == 'room':
+            room.msg_contents(f"{lighter.get_display_name(self)} lights {self.name}, igniting it.", exclude=lighter)
+
+    def find_location(self):
+        #Check to see if the torch is in the hands (inventory) of player
+        # or if the torch is in a a room.
+        here = self.location
+        held_by = None
+        room = None
+
+        if inherits_from(here, 'typeclasses.characters.Character'):
+            held_by = 'character'
+            room = here.location
+        elif inherits_from(here, 'typeclasses.rooms.Room'):
+            held_by = 'room'
+            room = here
+        return room, held_by
