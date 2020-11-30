@@ -942,6 +942,18 @@ class CmdStock(Command):
             if i.is_typeclass('typeclasses.characters.Merchant'):
                 self.caller.msg(i.merch.return_stock())
 
+class CmdBuy(Command):
+    key = 'buy'
+    def func(self):
+        if not self.args:
+            self.caller.msg("You must specify an item to purchase!")
+        else:
+            self.args = self.args.strip()
+
+        room_contents = self.caller.location.contents
+        for i in room_contents:
+            if i.is_typeclass('typeclasses.characters.Merchant'):
+                self.caller.msg(i.merch.sell_item(self.caller, self.args))
 
 
 def get_arg_type(args):

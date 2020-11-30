@@ -113,16 +113,12 @@ def remove_coin(owner, plat=0, gold=0, silver=0, copper=0):
         coin_dic['gold'] = total_gold
         coin_dic['plat'] = total_plat
 
-def return_proto_attr_dic(prototype):
+def return_proto_dic(prototype):
     proto_dic = search_prototype(prototype)
     proto_dic = proto_dic[0]
+    name = proto_dic['key']
     attrs = proto_dic['attrs']
-    attr_dic = {}
+    attr_dic = {'key': name}
     for i in attrs:
         attr_dic[i[0]] = i[1]
     return attr_dic
-
-def return_proto_key(prototype):
-    proto_dic = search_prototype(prototype)
-    proto_dic = proto_dic[0]
-    return proto_dic['key']

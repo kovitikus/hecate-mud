@@ -8,5 +8,5 @@ MERCHANT = {
 BASIC_SUPPLIES = {
     'prototype_parent': 'merchant',
     'key': 'basic supplies merchant',
-    'stock': ['crudely_made_torch', 'foul_smelling_bait']
+    'stock': {'crudely_made_torch': 10, 'foul_smelling_bait': 100}
 }
