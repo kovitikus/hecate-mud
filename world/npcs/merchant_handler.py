@@ -1,4 +1,5 @@
-from world.items.item_prototypes import ITEMS
+from world.items import item_prototypes
+from world.general_mechanics import return_proto_attr_value, return_proto_key
 
 class MerchantHandler:
     def __init__(self, owner):
@@ -27,9 +28,8 @@ class MerchantHandler:
         price = None
 
         for i in stocked_items:
-            item = ITEMS[i]
-            name = item['key']
-            price = item['price']
+            name = return_proto_key(i)
+            price = return_proto_attr_value(i, 'price')
             body.append(f"{name}    {price}\n")
 
         msg = f"{header}\n{''.join(body)}{footer}"

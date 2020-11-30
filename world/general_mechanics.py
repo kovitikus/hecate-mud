@@ -2,6 +2,7 @@ import time, datetime, random
 from evennia import utils, search_script
 from evennia.utils import gametime, inherits_from
 from typeclasses.rooms import Room
+from evennia.prototypes.prototypes import search_prototype
 
 def check_roundtime(owner):
     if owner.db.ko == True:
@@ -111,3 +112,16 @@ def remove_coin(owner, plat=0, gold=0, silver=0, copper=0):
         coin_dic['silver'] = total_silver
         coin_dic['gold'] = total_gold
         coin_dic['plat'] = total_plat
+
+def return_proto_attr_value(prototype, attribute):
+    proto_dic = search_prototype(prototype)
+    proto_dic = proto_dic[0]
+    attrs = proto_dic['attrs']
+    for i in attrs:
+        if i[0] == attribute:
+            return i[1]
+
+def return_proto_key(prototype):
+    proto_dic = search_prototype(prototype)
+    proto_dic = proto_dic[0]
+    return proto_dic['key']
