@@ -12,7 +12,7 @@ from evennia.utils import inherits_from
 from evennia.utils.create import create_object
 from evennia.utils.utils import list_to_string, lazy_property
 
-from world.spawn_handler import SpawnHandler
+from world.mobs.mob_spawner import MobSpawner
 
 
 class Room(DefaultRoom):
@@ -207,7 +207,7 @@ class OOC_Quarters(Room):
 class SewerRoom(Room):
     @lazy_property
     def spawn(self):
-        return SpawnHandler(self)
+        return MobSpawner(self)
     def at_object_receive(self, new_arrival, source_location):
         if new_arrival.has_account and not new_arrival.is_superuser:
             self.spawn.spawn_timer()
