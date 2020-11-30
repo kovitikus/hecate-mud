@@ -1,3 +1,5 @@
+from world.items.item_prototypes import ITEMS
+
 class MerchantHandler:
     def __init__(self, owner):
         self.owner = owner
@@ -18,5 +20,19 @@ class MerchantHandler:
             stocked_items = owner.attributes.get('stock')
 
         header = "=========[Stock]==============="
+        body = []
         footer = "==============================="
+        item = None
+        name = None
+        price = None
+
+        for i in stocked_items:
+            item = ITEMS[i]
+            name = item['key']
+            price = item['price']
+            body.append(f"{name}    {price}\n")
+
+        msg = f"{header}\n{''.join(body)}{footer}"
+        return msg
+            
         

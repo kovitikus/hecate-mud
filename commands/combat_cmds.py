@@ -1,7 +1,7 @@
 from evennia import Command as BaseCommand
 from evennia import utils
 from evennia import InterruptCommand
-from world import skillsets
+from world.skills import skillsets
 import time
 import random
 

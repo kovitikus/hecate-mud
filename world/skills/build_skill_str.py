@@ -1,6 +1,6 @@
 import random
 from world import generic_str
-from world import skillsets
+from world.skills import skillsets
 
 article = generic_str.article
 pronoun = generic_str.pronoun

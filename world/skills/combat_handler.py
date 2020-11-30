@@ -1,6 +1,6 @@
 from evennia import utils
-from world import skillsets
-from world import build_skill_str
+from world.skills import skillsets
+from world.skills import build_skill_str
 from world import general_mechanics as gen_mec
 import random
 

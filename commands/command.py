@@ -11,7 +11,7 @@ from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
-from world import skillsets
+from world.skills import skillsets
 from world.generic_str import article
 from world import general_mechanics as gen_mec
 
@@ -933,6 +933,15 @@ class CmdLight(Command):
         obj = self.obj
 
         obj.ignite(caller)
+
+class CmdStock(Command):
+    key = 'stock'
+    def func(self):
+        room_contents = self.caller.location.contents
+        for i in room_contents:
+            if i.is_typeclass('typeclasses.characters.Merchant'):
+                self.caller.msg(i.merch.return_stock())
+
 
 
 def get_arg_type(args):

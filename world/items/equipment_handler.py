@@ -1,5 +1,6 @@
 from evennia.utils.create import create_object
 from evennia.prototypes.spawner import spawn
+from world.items.item_prototypes import ITEMS
 
 class EquipmentHandler:
     def __init__(self, owner):
@@ -29,7 +30,7 @@ class EquipmentHandler:
         '''
         owner = self.owner
         if not owner.attributes.has('equipment'):
-            basic_bag = spawn('inventory_bag')
+            basic_bag = spawn(ITEMS['inventory_bag'])
             if basic_bag:
                 basic_bag = basic_bag[0]
                 basic_bag.move_to(owner)

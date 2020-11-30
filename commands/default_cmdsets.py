@@ -62,6 +62,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdSkills())
         self.add(command.CmdEquip())
         self.add(command.CmdLight())
+        self.add(command.CmdStock())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
