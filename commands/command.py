@@ -4,6 +4,7 @@ Commands
 Commands describe the input the account can do to the game.
 
 """
+import re
 
 from evennia import Command as BaseCommand
 from evennia import logger
@@ -11,6 +12,7 @@ from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
 from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
+
 from world.skills import skillsets
 from world.generic_str import article
 from world import general_mechanics as gen_mec
@@ -935,6 +937,11 @@ class CmdLight(Command):
         obj.ignite(caller)
 
 class CmdStock(Command):
+    """
+    Usage: stock
+
+    Returns the stock of a merchant in the room.
+    """
     key = 'stock'
     def func(self):
         room_contents = self.caller.location.contents
@@ -943,17 +950,41 @@ class CmdStock(Command):
                 self.caller.msg(i.merch.return_stock())
 
 class CmdBuy(Command):
+    """
+    Usage: buy <quantity> <item>
+
+    If the quantity is not specified it defaults to 1.
+
+    Examples:
+        buy 10 torch
+        buy tea
+    """
     key = 'buy'
-    def func(self):
+    def parse(self):
         if not self.args:
             self.caller.msg("You must specify an item to purchase!")
+            raise InterruptCommand
         else:
             self.args = self.args.strip()
+            args = self.args
+        regex = r"\d"
+        if re.search(regex, self.args) is not None:
+            args = self.args.split(" ", 1)
+            quantity = int(args[0])
+            item = args[1]
+        else:
+            quantity = 1
+            item = args
 
-        room_contents = self.caller.location.contents
+        self.quantity = quantity
+        self.item = item
+
+    def func(self):
+        caller = self.caller
+        room_contents = caller.location.contents
         for i in room_contents:
             if i.is_typeclass('typeclasses.characters.Merchant'):
-                self.caller.msg(i.merch.sell_item(self.caller, self.args))
+                caller.msg(i.merch.sell_item(caller, self.item, quantity=self.quantity))
 
 
 def get_arg_type(args):

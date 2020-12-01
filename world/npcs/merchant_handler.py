@@ -71,10 +71,10 @@ class MerchantHandler:
                     buyer_coin['copper'] -= total_price
             else:
                 return coin_shortage
-                
+
             stocked_items[item] -= quantity
             msg = f"You buy {quantity} of {item} for a total of {total_price}. {owner.name} places them in the room."
-            for i in range(quantity):
+            for _ in range(quantity):
                 spawned_item = spawn(item)[0]
                 # spawned_item = spawned_item[0]
                 spawned_item.move_to(owner.location, quiet=True)
