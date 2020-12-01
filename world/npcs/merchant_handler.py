@@ -1,6 +1,7 @@
 from evennia.prototypes.spawner import spawn
+
+from world import general_mechanics as gen_mec
 from world.items import item_prototypes
-from world.general_mechanics import return_proto_dic
 
 class MerchantHandler:
     def __init__(self, owner):
@@ -30,7 +31,7 @@ class MerchantHandler:
         quantity = 0
 
         for k, v in stocked_items.items():
-            item_dic = return_proto_dic(k)
+            item_dic = gen_mec.return_proto_dic(k)
 
             name = item_dic.get('key')
             price = item_dic.get('price', 0)
@@ -54,7 +55,7 @@ class MerchantHandler:
             msg = f"{owner.name} does haven't {quantity} of {item} in stock!"
         else:
             # get the price of the item
-            item_dic = return_proto_dic(item)
+            item_dic = gen_mec.return_proto_dic(item)
             price = item_dic['price']
 
             # multiply it by the quantity
@@ -76,6 +77,5 @@ class MerchantHandler:
             msg = f"You buy {quantity} of {item} for a total of {total_price}. {owner.name} places them in the room."
             for _ in range(quantity):
                 spawned_item = spawn(item)[0]
-                # spawned_item = spawned_item[0]
                 spawned_item.move_to(owner.location, quiet=True)
         return msg

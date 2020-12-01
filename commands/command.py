@@ -986,6 +986,39 @@ class CmdBuy(Command):
             if i.is_typeclass('typeclasses.characters.Merchant'):
                 caller.msg(i.merch.sell_item(caller, self.item, quantity=self.quantity))
 
+class CmdConvertCoin(Command):
+    """
+    Usage: convertcoin <amount> <type> to <type>
+
+    Example:
+        convertcoin 10 plat to copper
+    """
+    key = 'convertcoin'
+    def parse(self):
+        if not self.args:
+            self.caller.msg("Usage: convertcoin <amount> <type> to <type>")
+            raise InterruptCommand
+        else:
+            args = self.args.strip()
+            args = args.split('to', 1)
+            amount = args[0].split(' ', 1)
+            self.coin_value = int(amount[0].strip())
+            self.coin_type = amount[1].strip()
+            self.result_type = args[1].strip()
+    def func(self):
+        coin_type = self.coin_type
+        coin_value = self.coin_value
+        result_type = self.result_type
+
+        if coin_type == 'plat':
+            result_value = gen_mec.convert_coin(plat=coin_value, result_type=result_type)
+        elif coin_type == 'gold':
+            result_value = gen_mec.convert_coin(gold=coin_value, result_type=result_type)
+        elif coin_type == 'silver':
+            result_value = gen_mec.convert_coin(silver=coin_value, result_type=result_type)
+        elif coin_type == 'copper':
+            result_value = gen_mec.convert_coin(copper=coin_value, result_type=result_type)
+        self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.
