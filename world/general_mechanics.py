@@ -139,3 +139,61 @@ def return_proto_dic(prototype):
     for i in attrs:
         attr_dic[i[0]] = i[1]
     return attr_dic
+
+def group_objects(objects, obj_loc):
+    msg = ''
+    inv_stack_objects = []
+    qty_stack_objects = []
+    stacked_obj_names = []
+
+    for obj in objects:
+        if not obj.tags.has('stackable'):
+            msg = f"{obj} cannot be grouped!"
+            return msg
+    
+    for obj in objects:
+        if obj.tags.has('quantity', category='stack'):
+            qty_stack_objects.append(obj)
+        elif obj.tags.has('inventory', category='stack'):
+            inv_stack_objects.append(obj)
+
+    if len(qty_stack_objects) > 1:
+        if qty_stack_objects[0].is_typeclass('typeclasses.objects.Coin', exact=True):
+            qty_stack = utils.create.create_object(key=f'a pile of coins.', 
+                    typeclass='typeclasses.objects.StackQuantity', 
+                    location=obj_loc)
+            if qty_stack:
+                for coin in qty_stack_objects:
+                    plat = coin.db.coin['plat']
+                    gold = coin.db.coin['gold']
+                    silver = coin.db.coin['silver']
+                    copper = coin.db.coin['copper']
+                    add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
+                    stacked_obj_names.append(coin.name)
+                stacked_obj_names = comma_separated_string_list(stacked_obj_names)
+                msg = f"You group together {stacked_obj_names}."
+                return msg
+                
+
+
+    return msg
+
+def objects_to_strings(object_list):
+    string_list = []
+    for i in object_list:
+        string_list.append(i.name)
+    return string_list
+
+def comma_separated_string_list(string_list):
+    num = 0
+    list_len = len(string_list)
+    formatted_string = ''
+    for i in string_list:
+        if list_len == num:
+            formatted_string = f"{formatted_string} and {i}"
+        if num == 0:
+            formatted_string = f"{formatted_string}{i},"
+        else:
+            formatted_string = f"{formatted_string} {i},"
+        num += 1
+    return formatted_string

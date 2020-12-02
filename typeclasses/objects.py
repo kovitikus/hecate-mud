@@ -58,10 +58,33 @@ class Chest(Object):
 class Container(Object):
     pass
 
+class Coin(Object):
+    def at_object_creation(self):
+        self.tags.add('stackable')
+        self.tags.add('quantity', category='stack')
+        self.tags.add('coin', category='currency')
+        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+
 class InventoryContainer(Container):
     def at_object_creation(self):
         self.tags.add('inventory_container', category='container')
         self.attributes.add('max_slots', 50)
+
+class StackQuantity(Object):
+    # Stacking objects which have no unique attributes, such as coin.
+    # Only accepts objects tagged with ('quantity', category='stack').
+    # Objects added to this stack are destroyed and a counter on the stack object is increased.
+    # Objects removed from this stack are created and a counter on the stack object is decreased.
+    def at_object_creation(self):
+        self.attributes.add('quantity', 0)
+    pass
+
+class StackInventory(Object):
+    # Stacking objects that have unique attributes and must be preserved.
+    # Only accepts objects tagged with ('inventory', category='stack').
+    # Objects added to this stack are stored in the contents of the stack object.
+    # Objects removed from this stack are pulled from the contents of the stack object.
+    pass
 
 class Lighting(Object):
     pass

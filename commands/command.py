@@ -956,8 +956,11 @@ class CmdBuy(Command):
     If the quantity is not specified it defaults to 1.
 
     Examples:
-        buy 10 torch
-        buy tea
+            > buy 10 torch
+            The merchant places 10 torches in front of you.
+
+            > buy tea
+            The bartender places a cup of tea in front of you.
     """
     key = 'buy'
     def parse(self):
@@ -988,10 +991,11 @@ class CmdBuy(Command):
 
 class CmdConvertCoin(Command):
     """
-    Usage: convertcoin <amount> <type> to <type>
+    Usage:  convertcoin <amount> <type> to <type>
 
     Example:
-        convertcoin 10 plat to copper
+            > convertcoin 1 gold to copper
+            1 gold is equel to 1000000 copper
     """
     key = 'convertcoin'
     def parse(self):
@@ -1019,6 +1023,51 @@ class CmdConvertCoin(Command):
         elif coin_type == 'copper':
             result_value = gen_mec.convert_coin(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
+
+class CmdGroup(Command):
+    """
+    Usage:  group <objects>
+            group my <objects>
+
+    Groups items of the same type.
+    Prioritizes items in the room, specify 'my' to group items in your inventory.
+
+    Example:
+            > group torch
+            You group together some torches.
+    """
+    key = 'group'
+
+    def parse(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage:  group <objects> | group my <objects>")
+            raise InterruptCommand
+        args = self.args
+
+        regex = r"(my)"
+        if re.search(regex, args):
+            self.args = args.split(' ', 1)[1].strip()
+            self.obj_loc = caller
+        else:
+            self.args = args.strip()
+            self.obj_loc = caller.location
+        
+    def func(self):
+        caller = self.caller
+        args = self.args
+        obj_loc = self.obj_loc
+
+        objects = caller.search(args, location=obj_loc, quiet=True)
+        if len(objects) == 0:
+            caller.msg(f"{args} was not found!")
+            return
+        elif len(objects) == 1:
+            caller.msg(f"Only 1 {args} was found. Aborting the grouping request.")
+            return
+        else:
+            msg = gen_mec.group_objects(objects, obj_loc)
+            caller.msg(msg)
 
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.
