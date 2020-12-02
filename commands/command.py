@@ -104,7 +104,6 @@ class CmdGrantSP(Command):
         except ValueError:
             caller.msg("The number must be an integer.")
             raise InterruptCommand
-        print(f"Viable Skillsets: {skillsets.VIABLE_SKILLSETS}")
         if self.skillset not in skillsets.VIABLE_SKILLSETS:
             caller.msg(f"{self.skillset} is not a viable skillset!")
             raise InterruptCommand
@@ -1024,24 +1023,31 @@ class CmdConvertCoin(Command):
             result_value = gen_mec.convert_coin(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
-class CmdGroup(Command):
+class CmdStack(Command):
     """
-    Usage:  group <objects>
+    Usage:  stack <objects>
+            stack my <objects>
+
+            group <objects>
             group my <objects>
 
     Groups items of the same type.
-    Prioritizes items in the room, specify 'my' to group items in your inventory.
+    Prioritizes items in the room, specify 'my' to stack items in your inventory.
 
     Example:
+            > stack torch
+            You group together some torches.
+            
             > group torch
             You group together some torches.
     """
-    key = 'group'
+    key = 'stack'
+    aliases = 'group'
 
     def parse(self):
         caller = self.caller
         if not self.args:
-            caller.msg("Usage:  group <objects> | group my <objects>")
+            caller.msg("Usage:  stack|group <my> <objects>")
             raise InterruptCommand
         args = self.args
 
@@ -1063,10 +1069,10 @@ class CmdGroup(Command):
             caller.msg(f"{args} was not found!")
             return
         elif len(objects) == 1:
-            caller.msg(f"Only 1 {args} was found. Aborting the grouping request.")
+            caller.msg(f"Only 1 {args} was found. Stack request aborted!")
             return
         else:
-            msg = gen_mec.group_objects(objects, obj_loc)
+            msg = gen_mec.stack_objects(objects, obj_loc)
             caller.msg(msg)
 
 def get_arg_type(args):

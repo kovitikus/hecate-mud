@@ -65,7 +65,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdStock())
         self.add(command.CmdBuy())
         self.add(command.CmdConvertCoin())
-        self.add(command.CmdGroup())
+        self.add(command.CmdStack())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """

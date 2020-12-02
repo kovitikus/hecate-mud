@@ -140,43 +140,81 @@ def return_proto_dic(prototype):
         attr_dic[i[0]] = i[1]
     return attr_dic
 
-def group_objects(objects, obj_loc):
+def stack_objects(objects, obj_loc):
     msg = ''
     inv_stack_objects = []
     qty_stack_objects = []
-    stacked_obj_names = []
+    stacked_obj_names = comma_separated_string_list(objects_to_strings(objects))
 
+    # Check of every object in list is stackable. Abort if not.
     for obj in objects:
-        if not obj.tags.has('stackable'):
-            msg = f"{obj} cannot be grouped!"
+        if not obj.tags.get('stackable'):
+            msg = f"{obj} is not able to be grouped!"
             return msg
     
+    # Check if all objects in the list have the same name.
+    same_name = all_same(objects_to_strings(objects))
+
+    # Sort objects into quantity or inventory stack type lists.
     for obj in objects:
-        if obj.tags.has('quantity', category='stack'):
+        if obj.tags.get('quantity', category='stack'):
             qty_stack_objects.append(obj)
-        elif obj.tags.has('inventory', category='stack'):
+        elif obj.tags.get('inventory', category='stack'):
             inv_stack_objects.append(obj)
 
+    # Quantity Stackables
     if len(qty_stack_objects) > 1:
-        if qty_stack_objects[0].is_typeclass('typeclasses.objects.Coin', exact=True):
-            qty_stack = utils.create.create_object(key=f'a pile of coins.', 
-                    typeclass='typeclasses.objects.StackQuantity', 
-                    location=obj_loc)
-            if qty_stack:
-                for coin in qty_stack_objects:
-                    plat = coin.db.coin['plat']
-                    gold = coin.db.coin['gold']
-                    silver = coin.db.coin['silver']
-                    copper = coin.db.coin['copper']
-                    add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
-                    stacked_obj_names.append(coin.name)
-                stacked_obj_names = comma_separated_string_list(stacked_obj_names)
-                msg = f"You group together {stacked_obj_names}."
+        are_coins = False
+        #Check to see if all quantity stack objects are coins.
+        for obj in qty_stack_objects:
+            if obj.is_typeclass('typeclasses.objects.Coin', exact=True):
+                are_coins = True
+            else:
+                msg = "You can't group coins with non-coins!"
                 return msg
+        if are_coins:
+            stack_coins(obj_loc, qty_stack_objects, stacked_obj_names)
+            msg = f"You group together {stacked_obj_names}."
+            return msg
+
+    # Inventory Stackables
+    if len(inv_stack_objects) > 1:
+        inv_quantity = 0
+        if same_name:
+            inv_stack = utils.create.create_object(key=f'a pile of {inv_stack_objects[0].name}es', 
+                typeclass='typeclasses.objects.StackInventory', 
+                location=obj_loc)
+            if inv_stack:
+                for obj in inv_stack_objects:
+                    obj.move_to(inv_stack, quiet=True, move_hooks=False)
+                    inv_quantity += 1
+                inv_stack.db.quantity = inv_quantity
+                msg = f"You group together some {inv_stack_objects[0].name}es into a pile."
+                return msg
+
+
+
+    
+def all_same(items):
+    return all(x == items[0] for x in items)
+
                 
+def stack_coins(obj_loc, qty_stack_objects, stacked_obj_names):
+    qty_stack = utils.create.create_object(key=f'a pile of coins', 
+            typeclass='typeclasses.objects.StackQuantity', 
+            location=obj_loc)
+    if qty_stack:
+        qty_stack.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        for obj in qty_stack_objects:
+            plat = obj.db.coin['plat']
+            gold = obj.db.coin['gold']
+            silver = obj.db.coin['silver']
+            copper = obj.db.coin['copper']
+            add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
+            obj.delete()
+        return qty_stack
 
 
-    return msg
 
 def objects_to_strings(object_list):
     string_list = []
@@ -185,13 +223,13 @@ def objects_to_strings(object_list):
     return string_list
 
 def comma_separated_string_list(string_list):
-    num = 0
+    num = 1
     list_len = len(string_list)
     formatted_string = ''
     for i in string_list:
         if list_len == num:
             formatted_string = f"{formatted_string} and {i}"
-        if num == 0:
+        elif num == 1:
             formatted_string = f"{formatted_string}{i},"
         else:
             formatted_string = f"{formatted_string} {i},"

@@ -5,6 +5,7 @@ from evennia.utils import logger
 from evennia.utils import ansi
 from evennia.utils.utils import inherits_from
 from world.generic_str import article
+from world import general_mechanics as gen_mec
 
 class Object(DefaultObject):
     def get_numbered_name(self, count, looker, **kwargs):
@@ -77,14 +78,25 @@ class StackQuantity(Object):
     # Objects removed from this stack are created and a counter on the stack object is decreased.
     def at_object_creation(self):
         self.attributes.add('quantity', 0)
-    pass
+    def return_appearance(self, looker, **kwargs):
+        if self.attributes.has('coin'):
+            currency = gen_mec.return_currency(self)
+            looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
 
 class StackInventory(Object):
     # Stacking objects that have unique attributes and must be preserved.
     # Only accepts objects tagged with ('inventory', category='stack').
     # Objects added to this stack are stored in the contents of the stack object.
     # Objects removed from this stack are pulled from the contents of the stack object.
-    pass
+    def at_object_creation(self):
+        self.attributes.add('quantity', 0)
+    def return_appearance(self, looker, **kwargs):
+        inventory = self.contents
+        msg = f"You see {self.get_display_name(looker)}.\n"
+        msg = f"{msg}It consists of:\n"
+        for i in inventory:
+            msg = f"{msg}    {i.get_display_name(looker)}\n"
+        looker.msg(msg)
 
 class Lighting(Object):
     pass
@@ -93,6 +105,9 @@ class Torch(Lighting):
     def at_object_creation(self):
         self.attributes.add('fuel', 100)
         # Torches burn at the rate of 10 fuel per minute, or 5 fuel every 30 seconds.
+
+        self.tags.add('stackable')
+        self.tags.add('inventory', category='stack')
 
     def ignite(self, lighter):
         room, held_by = self.find_location()
