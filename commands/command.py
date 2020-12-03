@@ -1023,38 +1023,38 @@ class CmdConvertCoin(Command):
             result_value = gen_mec.convert_coin(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
-class CmdStack(Command):
+class CmdGroup(Command):
     """
-    Usage:  stack <objects>
-            stack my <objects>
-
-            group <objects>
+    Usage:  group <objects>
             group my <objects>
+            group <object> with <object>
 
     Groups items of the same type.
-    Prioritizes items in the room, specify 'my' to stack items in your inventory.
+    Prioritizes items in the room. Specify 'my' to group items in your inventory.
 
     Example:
-            > stack torch
-            You group together some torches.
-            
             > group torch
             You group together some torches.
     """
-    key = 'stack'
-    aliases = 'group'
+    key = 'group'
+    aliases = ['stack',]
 
     def parse(self):
         caller = self.caller
         if not self.args:
-            caller.msg("Usage:  stack|group <my> <objects>")
+            caller.msg("Usage:  group <my> <objects>")
             raise InterruptCommand
         args = self.args
 
-        regex = r"(my)"
-        if re.search(regex, args):
+        if re.search(r"(my)", args):
             self.args = args.split(' ', 1)[1].strip()
             self.obj_loc = caller
+        elif re.search(r"(with)", args):
+            args = args.split('with', 1)
+            arg1 = args[0].strip()
+            arg2 = args[1].strip()
+            self.args = [arg1, arg2]
+            self.obj_loc = caller.location
         else:
             self.args = args.strip()
             self.obj_loc = caller.location
@@ -1069,11 +1069,49 @@ class CmdStack(Command):
             caller.msg(f"{args} was not found!")
             return
         elif len(objects) == 1:
-            caller.msg(f"Only 1 {args} was found. Stack request aborted!")
+            caller.msg(f"Only 1 {args} was found!")
             return
         else:
-            msg = gen_mec.stack_objects(objects, obj_loc)
+            msg = gen_mec.group_objects(objects, obj_loc)
             caller.msg(msg)
+
+class CmdUngroup(Command):
+    """
+    Usage:  ungroup <group>
+            ungroup my <group>
+
+    Ungroups a pile of objects.
+    Prioritizes items in the room. Specify 'my' to group items in your inventory.
+    Coins only ungroup if the pile contains more than one type of coin; use split instead.
+
+    Example:
+            ungroup torches
+            You separate a pile of torches.
+    """
+    key = 'ungroup'
+    aliases = ['unstack',]
+    def parse(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage:  ungroup <object>")
+            raise InterruptCommand
+
+        if re.search(r"(my)", self.args):
+            self.args = self.args.split(' ', 1)[0].strip()
+            self.obj_loc = self.caller
+        else:
+            self.args = self.args.strip()
+            self.obj_loc = self.caller.location
+
+    def func(self):
+        caller = self.caller
+        args = self.args
+
+        obj = caller.search(args)
+        if obj:
+            msg = gen_mec.ungroup_objects(obj, self.obj_loc)
+            caller.msg(msg)
+
 
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.

@@ -65,6 +65,10 @@ class Coin(Object):
         self.tags.add('quantity', category='stack')
         self.tags.add('coin', category='currency')
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+    def return_appearance(self, looker, **kwargs):
+        if self.attributes.has('coin'):
+            currency = gen_mec.return_currency(self)
+            looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
 
 class InventoryContainer(Container):
     def at_object_creation(self):

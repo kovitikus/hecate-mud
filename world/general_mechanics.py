@@ -53,6 +53,10 @@ def return_currency(owner):
         string = f"{coin_dic['plat']}p {coin_dic['gold']}g {coin_dic['silver']}s {coin_dic['copper']}c"
         return string
 
+def return_obj_coin(obj):
+    if obj.attributes.has('coin'):
+        return obj.db.coin['plat'], obj.db.coin['gold'], obj.db.coin['silver'], obj.db.coin['copper']
+
 def add_coin(owner, plat=0, gold=0, silver=0, copper=0):
     if owner.attributes.has('coin'):
         coin_dic = owner.attributes.get('coin')
@@ -140,7 +144,7 @@ def return_proto_dic(prototype):
         attr_dic[i[0]] = i[1]
     return attr_dic
 
-def stack_objects(objects, obj_loc):
+def group_objects(objects, obj_loc):
     msg = ''
     inv_stack_objects = []
     qty_stack_objects = []
@@ -192,7 +196,49 @@ def stack_objects(objects, obj_loc):
                 msg = f"You group together some {inv_stack_objects[0].name}es into a pile."
                 return msg
 
-
+def ungroup_objects(obj, obj_loc):
+    if obj.is_typeclass('typeclasses.objects.StackQuantity'):
+        if obj.tags.get('coin', category='currency'):
+            plat, gold, silver, copper = return_obj_coin(obj)
+            multi_coin = 0
+            for x in [plat, gold, silver, copper]:
+                if x > 0:
+                    multi_coin += 1
+            if multi_coin >= 2:
+                if plat > 0:
+                    plat_pile = utils.create.create_object(key='a pile of platinum coins', location=obj_loc,
+                                                typeclass='typeclasses.objects.Coin')
+                    if plat_pile:
+                        plat_pile.db.coin['plat'] = plat
+                        obj.db.coin['plat'] = 0
+                if gold > 0:
+                    gold_pile = utils.create.create_object(key='a pile of gold coins', location=obj_loc,
+                                                typeclass='typeclasses.objects.Coin')
+                    if gold_pile:
+                        gold_pile.db.coin['gold'] = gold
+                        obj.db.coin['gold'] = 0
+                if silver > 0:
+                    silver_pile = utils.create.create_object(key='a pile of silver coins', location=obj_loc,
+                                                typeclass='typeclasses.objects.Coin')
+                    if silver_pile:
+                        silver_pile.db.coin['silver'] = silver
+                        obj.db.coin['silver'] = 0
+                if copper > 0:
+                    copper_pile = utils.create.create_object(key='a pile of copper coins', location=obj_loc,
+                                                typeclass='typeclasses.objects.Coin')
+                    if copper_pile:
+                        copper_pile.db.coin['copper'] = copper
+                        obj.db.coin['copper'] = 0
+                msg = f"You ungroup {obj.name} into separate piles of coins."
+                obj.delete()
+                return msg
+    elif obj.is_typeclass('typeclasses.objects.StackInventory'):
+        stack_contents = obj.contents
+        for x in stack_contents:
+            x.move_to(obj_loc, quiet=True, move_hooks=False)
+        msg = f"You ungroup {obj.name}, producing {comma_separated_string_list(objects_to_strings(stack_contents))}."
+        obj.delete()
+        return msg
 
     
 def all_same(items):
@@ -205,11 +251,9 @@ def stack_coins(obj_loc, qty_stack_objects, stacked_obj_names):
             location=obj_loc)
     if qty_stack:
         qty_stack.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        qty_stack.tags.add('coin', category='currency')
         for obj in qty_stack_objects:
-            plat = obj.db.coin['plat']
-            gold = obj.db.coin['gold']
-            silver = obj.db.coin['silver']
-            copper = obj.db.coin['copper']
+            plat, gold, silver, copper = return_obj_coin(obj)
             add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
             obj.delete()
         return qty_stack
