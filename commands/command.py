@@ -1112,6 +1112,57 @@ class CmdUngroup(Command):
             msg = gen_mec.ungroup_objects(obj, self.obj_loc)
             caller.msg(msg)
 
+class CmdSplit(Command):
+    """
+    Usage:  split <object>
+            split my <object>
+            split 3 gold from <object>
+            split 3 torch from my <object>
+
+    """
+    key = 'split'
+    def parse(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage:  split <my> <object> | split # <object> from <my> <object>")
+            raise InterruptCommand
+        else:
+            args = self.args
+
+        if 'my' and not 'from' in args:
+            # split my pile
+            self.pile = args.split(' ', 1)[1].strip()
+            self.obj_loc = caller
+
+        elif 'from' and not 'my' in args:
+            # split # object from pile
+            args = args.split('from', 1) # args = [' # object ', ' pile']
+
+            qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
+            self.quantity = qty_obj[0] # quantity = '#'
+            self.qty_obj = qty_obj[1] # qty_obj = 'object'
+
+            self.pile = args[1].strip()
+            self.obj_loc = caller.location
+
+        elif 'from' and 'my' in args:
+            # split # object from my pile
+            args = args.split('from', 1) # args = [' # object', ' my pile']
+
+            qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
+            self.quantity = qty_obj[0] # quantity = '#'
+            self.qty_obj = qty_obj[1] # qty_obj = 'object'
+
+            self.pile = args[1].strip().split(' ', 1)[1]
+            self.obj_loc = caller
+
+        else:
+            # split object
+            self.pile = args.strip()
+            self.obj_loc = caller.location
+
+    def func(self):
+        pass
 
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.
