@@ -1131,38 +1131,61 @@ class CmdSplit(Command):
 
         if 'my' and not 'from' in args:
             # split my pile
+            self.split_type = 'default'
             self.pile = args.split(' ', 1)[1].strip()
-            self.obj_loc = caller
+            self.pile_loc = caller
 
         elif 'from' and not 'my' in args:
             # split # object from pile
+            self.split_type = 'from'
             args = args.split('from', 1) # args = [' # object ', ' pile']
 
             qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
             self.quantity = qty_obj[0] # quantity = '#'
+            if not self.quantity > 0:
+                caller.msg("Quantity must be greater than zero!")
+                raise InterruptCommand
             self.qty_obj = qty_obj[1] # qty_obj = 'object'
 
             self.pile = args[1].strip()
-            self.obj_loc = caller.location
+            self.pile_loc = caller.location
 
         elif 'from' and 'my' in args:
             # split # object from my pile
+            self.split_type = 'from'
             args = args.split('from', 1) # args = [' # object', ' my pile']
 
             qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
             self.quantity = qty_obj[0] # quantity = '#'
+            if not self.quantity > 0:
+                caller.msg("Quantity must be greater than zero!")
+                raise InterruptCommand
             self.qty_obj = qty_obj[1] # qty_obj = 'object'
 
             self.pile = args[1].strip().split(' ', 1)[1]
-            self.obj_loc = caller
+            self.pile_loc = caller
 
         else:
             # split object
+            self.split_type = 'default'
             self.pile = args.strip()
-            self.obj_loc = caller.location
+            self.pile_loc = caller.location
 
     def func(self):
-        pass
+        caller = self.caller
+        split_type = self.split_type
+        pile = self.pile
+        pile_loc = self.pile_loc
+
+        pile = caller.search(pile, location=pile_loc, quiet=True)[0]
+        if pile is not None:
+            if split_type == 'default':
+                msg = gen_mec.split_pile(split_type, pile, pile_loc)
+            elif split_type == 'from':
+                msg = gen_mec.split_pile(split_type, pile, pile_loc, self.quantity, qty_obj)
+
+        caller.msg(msg)
+
 
 def get_arg_type(args):
     arg_type = 0 # Default inventory summary.

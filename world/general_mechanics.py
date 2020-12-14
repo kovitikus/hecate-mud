@@ -240,6 +240,63 @@ def ungroup_objects(obj, obj_loc):
         obj.delete()
         return msg
 
+def split_pile(split_type, pile, obj_loc, quantity=0, qty_obj=None):
+    pile_name = pile.name
+
+    if split_type == 'default':
+        # This condition splits the pile as evenly as possible into 2 piles.
+        # The original pile always contains the higher quantity of items, if not evenly split.
+        pass
+    elif split_type == 'from':
+        if pile.is_typeclass('typeclasses.objects.StackQuantity'):
+            # This is a pile of coins, or other similar pile.
+            if pile.tags.get('coin', category='currency'):
+                currency = pile.attributes.get('coin')
+                coin_type = currency.get(qty_obj)
+                if coin_type >= quantity:
+                    currency[coin_type] -= quantity
+                    # We also have to determine here if the coin pile has homogenized and change its description.
+
+                    # Now we need to make a new coin pile with the value of the
+                    # new coins split from the original.
+
+                else:
+                    # There's not enough coin in the pile to execute the action.
+                    msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
+                    return msg
+            pass
+        elif pile.is_typeclass('typeclasses.objects.StackInventory'):
+            # Object has contents
+            qty_obj_names = []
+
+            qty_objects = pile.search(qty_obj, location=pile, quiet=True)
+            # Check that there are enough objects in the pile to meet requirements.
+            if len(qty_objects) >= quantity:
+                num = 1
+                while num <= quantity:
+                    obj = qty_objects.pop
+                    qty_obj_names.append(obj.name)
+                    obj.move_to(obj_loc, quiet=True, move_hooks=False)
+                    num += 1
+
+                msg = f"You split"
+                if all_same(qty_obj_names):
+                    msg = f"{msg} {quantity} {qty_obj_names[0]}"
+                else:
+                    msg = f"{msg} {comma_separated_string_list(qty_obj_names)}"
+                msg= f"{msg} from {pile_name}."
+            else:
+                msg = f"There aren't {quantity} of {qty_obj} in {pile.name}!"
+                return msg
+
+            # Check if the pile has 1 or less objects remaining.
+            if len(pile.contents) == 1:
+                obj = pile.contents
+                obj.move_to(obj_loc, quiet=True, move_hooks=False)
+            if len(pile.contents) == 0:
+                pile.delete()
+    return msg
+
     
 def all_same(items):
     return all(x == items[0] for x in items)
