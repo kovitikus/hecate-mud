@@ -53,21 +53,26 @@ class CombatHandler:
             owner.db.approached.remove(character)
             self.approached_list.remove(character)
 
+    def clear_approached(self):
+        owner = self.owner
+        if owner.attributes.has('approached'):
+            owner.db.approached.clear()
+            self.approached_list.clear()
 
     def retreat(self):
         owner = self.owner
-        owner_app = owner.attributes.get('approached')
+        owner_app = self.approached_list
         owner_name = owner.key
 
         if len(owner_app) == 0:
             owner.msg(f"You are not approached to anything.")
             return
         for target in owner_app:
-            target.db.approached.remove(owner)
+            target.combat.remove_approached(owner)
             target.msg(f"{owner_name} retreats from you.")
         owner.msg(f"You retreat.")
         
-        owner_app.clear()
+        self.clear_approached()
     
     def success_calc(self, target, skillset, skill, aim):
         """
