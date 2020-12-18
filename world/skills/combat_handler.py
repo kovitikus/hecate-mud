@@ -7,29 +7,52 @@ import random
 class CombatHandler:
     def __init__(self, owner):
         self.owner = owner
+        self.approached_list = self.get_approached()
 
     def approach(self, target):
         owner = self.owner
-        owner_app = owner.attributes.get('approached')
-        t_app = target.attributes.get('approached')
+
+        owner_app = self.approached_list
+        t_app = target.combat.approached_list
+
         owner_name = owner.key
         t_name = target.key
 
-        if target in owner_app:
+        if target in owner_app: # Owner is already approached to the target.
             owner.msg(f"You are already approached to {t_name}!")
             return
-        if len(owner_app) >= 1:
+        if len(owner_app) >= 1: # Cannot approach a new target if currently approached to 1 or more targets.
             owner.msg(f"You are already approached to {owner_app}!")
             target.msg(f"{owner_name} attempts to approach you, but fails.")
             return
-        if len(t_app) >= 3:
+        if len(t_app) >= 3: # Target has 3 characters approached to it and cannot gain more.
             owner.msg(f"{t_app} are already approached to that target!")
             return
-        owner_app.append(target)
-        t_app.append(owner)
+        self.add_approached(target)
+        target.combat.add_approached(owner)
         owner.msg(f"You approach {t_name}.")
         target.msg(f"{owner_name} approaches you.")
         return
+
+    def get_approached(self):
+        owner = self.owner
+        approached_list = []
+        if owner.attributes.has('approached'):
+            approached_list = list(owner.attributes.get('approached'))
+        return approached_list
+
+    def add_approached(self, character):
+        owner = self.owner
+        if owner.attributes.has('approached'):
+            owner.db.approached.append(character)
+            self.approached_list.append(character)
+
+    def remove_approached(self, character):
+        owner = self.owner
+        if owner.attributes.has('approached'):
+            owner.db.approached.remove(character)
+            self.approached_list.remove(character)
+
 
     def retreat(self):
         owner = self.owner
