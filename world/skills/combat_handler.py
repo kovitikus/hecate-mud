@@ -30,19 +30,20 @@ class CombatHandler:
         target.msg(f"{a_name} approaches you.")
         return
 
-    def retreat(self, attacker):
-        a_app = attacker.attributes.get('approached')
-        a_name = attacker.key
+    def retreat(self):
+        owner = self.owner
+        owner_app = owner.attributes.get('approached')
+        owner_name = owner.key
 
-        if len(a_app) == 0:
-            attacker.msg(f"You are not approached to anything.")
+        if len(owner_app) == 0:
+            owner.msg(f"You are not approached to anything.")
             return
-        for t in a_app:
-            t.db.approached.remove(attacker)
-            t.msg(f"{a_name} retreats from you.")
-        attacker.msg(f"You retreat.")
+        for target in owner_app:
+            target.db.approached.remove(owner)
+            target.msg(f"{owner_name} retreats from you.")
+        owner.msg(f"You retreat.")
         
-        a_app.clear()
+        owner_app.clear()
     
     def success_calc(self, target, skillset, skill, aim):
         """

@@ -42,8 +42,7 @@ class Retreat(BaseCommand):
     aliases = ['ret', 'disengage', 'dis']
 
     def func(self):
-        attacker = self.caller
-        self.caller.combat.retreat(attacker)
+        self.caller.combat.retreat()
 
 class CmdHeal(BaseCommand):
     key = 'heal'
