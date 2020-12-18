@@ -27,9 +27,8 @@ class Approach(BaseCommand):
             raise InterruptCommand
 
     def func(self):
-        attacker = self.caller
         target = self.target
-        self.caller.combat.approach(attacker, target)
+        self.caller.combat.approach(target)
 
 class Retreat(BaseCommand):
     """

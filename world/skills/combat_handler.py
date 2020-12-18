@@ -8,26 +8,27 @@ class CombatHandler:
     def __init__(self, owner):
         self.owner = owner
 
-    def approach(self, attacker, target):
-        a_app = attacker.attributes.get('approached')
+    def approach(self, target):
+        owner = self.owner
+        owner_app = owner.attributes.get('approached')
         t_app = target.attributes.get('approached')
-        a_name = attacker.key
+        owner_name = owner.key
         t_name = target.key
 
-        if target in a_app:
-            attacker.msg(f"You are already approached to {t_name}!")
+        if target in owner_app:
+            owner.msg(f"You are already approached to {t_name}!")
             return
-        if len(a_app) >= 1:
-            attacker.msg(f"You are already approached to {a_app}!")
-            target.msg(f"{a_name} attempts to approach you, but fails.")
+        if len(owner_app) >= 1:
+            owner.msg(f"You are already approached to {owner_app}!")
+            target.msg(f"{owner_name} attempts to approach you, but fails.")
             return
         if len(t_app) >= 3:
-            attacker.msg(f"{t_app} are already approached to that target!")
+            owner.msg(f"{t_app} are already approached to that target!")
             return
-        a_app.append(target)
-        t_app.append(attacker)
-        attacker.msg(f"You approach {t_name}.")
-        target.msg(f"{a_name} approaches you.")
+        owner_app.append(target)
+        t_app.append(owner)
+        owner.msg(f"You approach {t_name}.")
+        target.msg(f"{owner_name} approaches you.")
         return
 
     def retreat(self):
