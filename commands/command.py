@@ -160,7 +160,7 @@ class CmdSkills(Command):
 
     def func(self):
         caller = self.caller
-        result = caller.skill.generate_skill_list(caller)
+        result = caller.skill.generate_skill_list()
         caller.msg(result)
 
 class CmdInventory(Command):
