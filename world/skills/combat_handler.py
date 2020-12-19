@@ -81,26 +81,26 @@ class CombatHandler:
         TODO: Add a round down for the final RS. Integers only!
         """
         owner = self.owner
-        a_rank = skillsets.return_skill_rank(owner, skillset, skill)
-        a_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
-        a_rs = skillsets.return_rank_score(a_rank, a_difficulty)
+        attack_rank = owner.skill.return_skill_rank(skillset, skill)
+        attack_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
+        attack_rs = owner.skill.return_rank_score(attack_rank, attack_difficulty)
 
-        defen_high, defen_mid, defen_low = skillsets.defense_layer_calc(target, rs_only=True)
+        defend_high, defend_mid, defend_low = target.skill.defense_layer_calc(rs_only=True)
 
 
         if aim == 'high':
-            t_rs = defen_high
+            defend_rs = defend_high
         elif aim == 'mid':
-            t_rs = defen_mid
+            defend_rs = defend_mid
         elif aim == 'low':
-            t_rs == defen_low
+            defend_rs == defend_low
 
-        if a_rs > t_rs:
-            bonus = a_rs - t_rs
+        if attack_rs > defend_rs:
+            bonus = attack_rs - defend_rs
             success = 50 - bonus
-        elif t_rs > a_rs:
-            loss = t_rs - a_rs
-            success = 50 + loss
+        elif defend_rs > attack_rs:
+            penalty = defend_rs - attack_rs
+            success = 50 + penalty
         else:
             success = 50
         success = int(success)
@@ -144,18 +144,18 @@ class CombatHandler:
         return damage_tier, damage
 
     def get_weapon_type(self, skillset, skill):
-        if skillsets.skillsets.get(skillset):
-            if skillsets.skillsets[skillset].get(skill):
+        if skillset in skillsets.VIABLE_SKILLSETS:
+            if skill in skillsets.skillsets[skillset]:
                 weapon_type = skillsets.skillsets[skillset][skill]['weapon']
                 return weapon_type
 
     def attack(self, target, skillset, skill):
-        attacker = self.owner
+        owner = self.owner
         weapon = self.get_weapon_type(skillset, skill)
-        damage_type = skillsets.return_damage_type(skillset, skill)
-        aim = skillsets.return_default_aim(skillset, skill)
+        damage_type = owner.skill.return_damage_type(skillset, skill)
+        aim = owner.skill.return_default_aim(skillset, skill)
 
-        if not gen_mec.check_roundtime(attacker):
+        if not gen_mec.check_roundtime(owner):
             return
 
         # This is where the fun begins.
@@ -176,24 +176,24 @@ class CombatHandler:
 
         if roll > success:
             hit = True
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
+            owner_desc, target_desc, others_desc = build_skill_str.create_attack_desc(owner, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
 
-            attacker.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            owner.msg(f"|430[Success: {success} Roll: {roll}] {owner_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
-            attacker.location.msg_contents(f"{others_desc}", exclude=(attacker, target))
-            target.combat.take_damage(attacker, damage)
+            owner.location.msg_contents(f"{others_desc}", exclude=(owner, target))
+            target.combat.take_damage(owner, damage)
 
         else:
             hit = False
-            attacker_desc, target_desc, others_desc = build_skill_str.create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
+            owner_desc, target_desc, others_desc = build_skill_str.create_attack_desc(owner, target, skillset, skill, weapon, damage_type, damage_tier, body_part, hit, aim)
 
-            attacker.msg(f"|430[Success: {success} Roll: {roll}] {attacker_desc}|n")
+            owner.msg(f"|430[Success: {success} Roll: {roll}] {owner_desc}|n")
             target.msg(f"|r[Success: {success} Roll: {roll}] {target_desc}|n")
-            attacker.location.msg_contents(f"{others_desc}", exclude=(attacker, target))
+            owner.location.msg_contents(f"{others_desc}", exclude=(owner, target))
         
-        gen_mec.set_roundtime(attacker)
-        if attacker.has_account:
-            skillsets.grant_ap(attacker, skillset)
+        gen_mec.set_roundtime(owner)
+        if owner.has_account:
+            owner.skill.grant_ap(skillset)
 
     def take_damage(self, attacker, damage):
         owner = self.owner
