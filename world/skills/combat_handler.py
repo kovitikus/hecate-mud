@@ -1,4 +1,3 @@
-from evennia import utils
 from world.skills import skillsets
 from world.skills import build_skill_str
 from world import general_mechanics as gen_mec
@@ -8,6 +7,7 @@ class CombatHandler:
     def __init__(self, owner):
         self.owner = owner
         self.approached_list = self.get_approached()
+        self.has_approached_attr = True if owner.attributes.has('approached') else False
 
     def approach(self, target):
         owner = self.owner
@@ -37,25 +37,25 @@ class CombatHandler:
     def get_approached(self):
         owner = self.owner
         approached_list = []
-        if owner.attributes.has('approached'):
+        if self.has_approached_attr:
             approached_list = list(owner.attributes.get('approached'))
         return approached_list
 
     def add_approached(self, character):
         owner = self.owner
-        if owner.attributes.has('approached'):
+        if self.has_approached_attr:
             owner.db.approached.append(character)
             self.approached_list.append(character)
 
     def remove_approached(self, character):
         owner = self.owner
-        if owner.attributes.has('approached'):
+        if self.has_approached_attr:
             owner.db.approached.remove(character)
             self.approached_list.remove(character)
 
     def clear_approached(self):
         owner = self.owner
-        if owner.attributes.has('approached'):
+        if self.has_approached_attr:
             owner.db.approached.clear()
             self.approached_list.clear()
 

@@ -3,6 +3,17 @@ from world.skills import skillsets
 class SkillHandler():
     def __init__(self, owner):
         self.owner = owner
+        self.generate_skillset_dics()
+
+    def generate_skillset_dics(self):
+        owner = self.owner
+        skillset_dics = {}
+
+        for i in skillsets.VIABLE_SKILLSETS:
+            if owner.attributes.has(i):
+                skillset_dic = dict(owner.attributes.get(i))
+                skillset_dics[i] = skillset_dic
+        self.skillset_dics = skillset_dics
 
     def generate_ap(self):
         ap_granted = 1
@@ -32,26 +43,25 @@ class SkillHandler():
         rs = rs[rank - 1]
         return rs
 
-    def return_defense_skills(self, char, skillset, rs_only=False, skills_only=False):
+    def return_defense_skills(self, skillset, rs_only=False, skills_only=False):
         high_rs, mid_rs, low_rs = 0, 0, 0
         high_skill, mid_skill, low_skill = '', '', ''
         rank = 0
         difficulty = ''
         defense_skill_list = []
 
-        char_skillset_dic = char.attributes.get(skillset)
-        skills = [*char_skillset_dic] # Create a list of the skill names.
+        skills = [*self.skillset_dics[skillset]] # Create a list of the skill names.
 
         # Check each key in the dictionary against all viable skills.
         for i in skills:
-            if skillsets.skillsets[skillset].get(i):
+            if i in skillsets.skillsets[skillset]:
                 # Skill is in the main dictionary. Check if it's a defense skill.
                 if skillsets.skillsets[skillset][i]['skill_type'] == 'defense':
                     defense_skill_list.append(i)
 
         # Sort each defensive skill by region defended.
         for i in defense_skill_list:
-            rank = self.return_skill_rank(char, skillset, i)
+            rank = self.return_skill_rank(skillset, i)
             difficulty = skillsets.skillsets[skillset][i]['difficulty']
             if skillsets.skillsets[skillset][i]['default_aim'] == 'high':
                 high_rs = self.return_rank_score(rank, difficulty)
@@ -71,7 +81,7 @@ class SkillHandler():
         else:
             return high_rs, mid_rs, low_rs, high_skill, mid_skill, low_skill
 
-    def defense_layer_calc(self, char, rs_only=False, skills_only=False):
+    def defense_layer_calc(self, rs_only=False, skills_only=False):
         """
         Defensive rank score includes up to 3 layers of defense.
         The highest RS defensive manuever of each high, mid, and low will gain 100% of it's RS.
@@ -98,6 +108,7 @@ class SkillHandler():
         High, Mid, and Low always refer to the area 
         of the body that the attack targets and not the numerical value.
         """
+        owner = self.owner
 
         weap_high_skill, weap_mid_skill, weap_low_skill = None, None, None
         offhand_high_skill, offhand_mid_skill, offhand_low_skill = None, None, None
@@ -109,8 +120,8 @@ class SkillHandler():
         dodge_high_rs, dodge_mid_rs, dodge_low_rs = 0.0, 0.0, 0.0
 
         # Acquire the item(s) wielded.
-        if char.attributes.get('wielding'):
-            wielding  = char.attributes.get('wielding')
+        if owner.attributes.has('wielding'):
+            wielding  = owner.attributes.get('wielding')
             l_wield = wielding.get('left')
             r_wield = wielding.get('right')
             b_wield = wielding.get('both')
@@ -118,23 +129,23 @@ class SkillHandler():
             if b_wield:
                 if b_wield.attributes.has('skillset'):
                     item_skillset = b_wield.attributes.get('skillset')
-                    weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(char, item_skillset, rs_only=True)
-                    weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(char, item_skillset, skills_only=True)
+                    weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
+                    weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
             if r_wield:
                 if r_wield.attributes.has('skillset'):
                     item_skillset = r_wield.attributes.get('skillset')
-                    weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(char, item_skillset, rs_only=True)
-                    weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(char, item_skillset, skills_only=True)
+                    weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
+                    weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
             if l_wield:
                 if l_wield.attributes.has('skillset'):
                     item_skillset = l_wield.attributes.get('skillset')
-                    offhand_high_rs, offhand_mid_rs, offhand_low_rs = self.return_defense_skills(char, item_skillset, rs_only=True)
-                    offhand_high_skill, offhand_mid_skill, offhand_low_skill = self.return_defense_skills(char, item_skillset, skills_only=True)
+                    offhand_high_rs, offhand_mid_rs, offhand_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
+                    offhand_high_skill, offhand_mid_skill, offhand_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
 
         # Get all dodge rank scores
-        if char.attributes.get('martial arts'):
-            dodge_high_skill, dodge_mid_skill, dodge_low_skill = self.return_defense_skills(char, 'martial arts', skills_only=True)
-            dodge_high_rs, dodge_mid_rs, dodge_low_rs = self.return_defense_skills(char, 'martial arts', rs_only=True)
+        if owner.attributes.has('martial arts'):
+            dodge_high_skill, dodge_mid_skill, dodge_low_skill = self.return_defense_skills('martial arts', skills_only=True)
+            dodge_high_rs, dodge_mid_rs, dodge_low_rs = self.return_defense_skills('martial arts', rs_only=True)
         
         high_skills = [weap_high_skill, offhand_high_skill, dodge_high_skill]
         mid_skills = [weap_mid_skill, offhand_mid_skill, dodge_mid_skill]
@@ -204,27 +215,31 @@ class SkillHandler():
             return o_rs, d_rs
 
     def return_damage_type(self, skillset, skill):
-        if skillset in skillsets.skillsets:
+        if skillset in skillsets.VIABLE_SKILLSETS:
             if skill in skillsets.skillsets[skillset]:
                 damage_type = skillsets.skillsets[skillset][skill]['damage_type']
                 return damage_type
 
     def return_default_aim(self, skillset, skill):
-        if skillset in skillsets.skillsets:
+        if skillset in skillsets.VIABLE_SKILLSETS:
             if skill in skillsets.skillsets[skillset]:
                 default_aim = skillsets.skillsets[skillset][skill]['default_aim']
                 return default_aim
 
-    def learn_skillset(self, char, skillset):
-        # Check if the skillset is not already learned and if not, create it.
-        if not char.attributes.has(skillset):
-            self.generate_fresh_skillset(char, skillset)
-            char.msg(f"You learn {skillset}.")
-        else:
-            char.msg(f"You already know {skillset}!")
+    def learn_skillset(self, skillset):
+        owner = self.owner
 
-    def generate_fresh_skillset(self, char, skillset, starting_rank=1):
-        # store lists of baseline skills for each skillset
+        # Check if the skillset is not already learned and if not, create it.
+        if skillset not in self.skillset_dics:
+            self.generate_fresh_skillset(skillset)
+            owner.msg(f"You learn {skillset}.")
+        else:
+            owner.msg(f"You already know {skillset}!")
+
+    def generate_fresh_skillset(self, skillset, starting_rank=1):
+        owner = self.owner
+
+        # Store dictionaries of baseline skills for each skillset.
         base_dic = {'base ranks': starting_rank, 'bonus ranks': 0, 'current ap': 0}
         staves = {'end jab': 0, 'parting jab': 0, 'parting swat': 0, 'simple strike': 0, 'swat': 0, 
                     'parting smash': 0, 'pivot smash': 0, 'side strike': 0, 'snapstrike': 0, 'stepping spin': 0, 
@@ -236,19 +251,27 @@ class SkillHandler():
 
         # setup all the fresh new skills and set them to 0 in a new skillset
         if skillset == 'staves':
-            char.attributes.add(skillset, {**base_dic, **staves})
+            owner.attributes.add(skillset, {**base_dic, **staves})
+            self.skillset_dics[skillset] = {**base_dic, **staves}
         elif skillset == 'holy':
-            char.attributes.add(skillset, {**base_dic, **holy})
+            owner.attributes.add(skillset, {**base_dic, **holy})
+            self.skillset_dics[skillset] = {**base_dic, **holy}
         elif skillset == 'martial arts':
-            char.attributes.add(skillset, {**base_dic, **marts})
+            owner.attributes.add(skillset, {**base_dic, **marts})
+            self.skillset_dics[skillset] = {**base_dic, **marts}
         elif skillset == 'rat':
-            char.attributes.add(skillset, {**base_dic, **rat})
+            owner.attributes.add(skillset, {**base_dic, **rat})
+            self.skillset_dics[skillset] = {**base_dic, **rat}
 
-    def grant_ap(self, char, skillset):
-        if char.attributes.get(skillset):
-            skillset_dic = char.attributes.get(skillset)
-            base_ranks = skillset_dic.get('base ranks')
-            current_ap = skillset_dic.get('current ap')
+    def grant_ap(self, skillset):
+        owner = self.owner
+
+        if skillset in self.skillset_dics:
+            owner_skillset_saverdic = owner.attributes.get(skillset)
+
+            base_ranks = self.skillset_dics[skillset]['base ranks']
+            current_ap = self.skillset_dics[skillset]['current ap']
+
             desired_rank = base_ranks + 1
             ap_gain = self.generate_ap()
             total_ap = current_ap + ap_gain
@@ -257,26 +280,39 @@ class SkillHandler():
 
             if total_ap >= ap_req: # Level up!
                 ap_diff = total_ap - ap_req
-                skillset_dic['current ap'] = ap_diff
-                skillset_dic['base ranks'] = base_ranks + 1
-                char.msg(f"You have reached the base rank of {skillset_dic['base ranks']} in {skillset}!")
-            else:
-                skillset_dic['current ap'] = total_ap
-                char.msg(f"You have gained {ap_gain} AP toward your {skillset} skillset with {ap_req - total_ap} AP remaining to level.")
 
-    def return_skill_rank(self, char, skillset, skill):
+                owner_skillset_saverdic['current ap'] = ap_diff
+                self.skillset_dics[skillset]['current ap'] = ap_diff
+
+                owner_skillset_saverdic['base ranks'] = base_ranks + 1
+                self.skillset_dics[skillset]['base ranks'] = base_ranks + 1
+
+                owner.msg(f"You have reached the base rank of {self.skillset_dics[skillset]['base ranks']} in {skillset}!")
+            else:
+                owner_skillset_saverdic['current ap'] = total_ap
+                self.skillset_dics[skillset]['current ap'] = total_ap
+
+                owner.msg(f"You have gained {ap_gain} AP toward your {skillset} skillset with {ap_req - total_ap} AP remaining to level.")
+
+    def return_skill_rank(self, skillset, skill):
+        """
+        Looks to see if the owner posesses a specified skillset.
+        Generates a dictionary specific to that skillset and adds the base and bonus ranks.
+        Uses the total skillset ranks as a base rank for the skill.
+        Final skill rank is a result of the skill rank added to the total skillset ranks.
+        """
         skill_rank = 0
-        if char.attributes.has(skillset):
-            skillset_dic = char.attributes.get(skillset)
-            skillset_base_rank = skillset_dic.get('base ranks')
-            skillset_bonus_rank = skillset_dic.get('bonus ranks')
+        if skillset in self.skillset_dics:
+            skillset_dic = self.skillset_dics[skillset]
+            skillset_base_rank = skillset_dic['base ranks']
+            skillset_bonus_rank = skillset_dic['bonus ranks']
             skillset_rank = skillset_base_rank + skillset_bonus_rank
             if skill in skillset_dic:
-                skill_bonus_rank = skillset_dic.get(skill)
+                skill_bonus_rank = skillset_dic[skill]
                 skill_rank = skillset_rank + skill_bonus_rank
         return skill_rank
 
-    def generate_skill_list(self, char):
+    def generate_skill_list(self):
         """
         Desired Outcome
 
@@ -319,7 +355,6 @@ class SkillHandler():
 
         skillset_string_list = []
 
-        skillset_dic = None
         skill_base_rank = 0
         skill_bonus_rank = 0
         skill_rank = 0
@@ -366,20 +401,19 @@ class SkillHandler():
             defense_skill_string_list = []
             utility_skill_string_list = []
 
-            if char.attributes.get(i): # If the skillset exists on the character.
-                skillset_dic = char.attributes.get(i) # Store that skillset's dictionary.
-                base_ranks = skillset_dic.get('base ranks')
-                bonus_ranks = skillset_dic.get('bonus ranks')
+            if i in self.skillset_dics: # If the skillset exists on the character.
+                base_ranks = self.skillset_dics[i]['base ranks']
+                bonus_ranks = self.skillset_dics[i]['bonus ranks']
                 skill_base_rank = base_ranks + bonus_ranks
-                current_ap = skillset_dic.get('current ap')
+                current_ap = self.skillset_dics[i]['current ap']
                 next_rank_ap_req = self.ap_required(base_ranks + 1)
                 ap_remaining = next_rank_ap_req - current_ap
 
                 # Build skill lists
                 for x in skillsets.VIABLE_SKILLS:
-                    if x in skillset_dic: # If the skill exists on the character.
-                        skill_bonus_rank = skillset_dic.get(x) # Store that skill's bonus
-                        skill_rank = self.return_skill_rank(char, i, x)
+                    if x in self.skillset_dics[i]: # If the skill exists on the character.
+                        skill_bonus_rank = self.skillset_dics[i][x] # Store that skill's bonus
+                        skill_rank = self.return_skill_rank(i, x)
                         skill_difficulty = skillsets.skillsets[i][x]['difficulty']
                         skill_rank_score = self.return_rank_score(skill_rank, skill_difficulty)
 
@@ -434,7 +468,7 @@ class SkillHandler():
         full_skillsets_string = ''.join(skillset_string_list)
 
         # Current total defensive rank scores.
-        high_def_rs, mid_def_rs, low_def_rs = self.defense_layer_calc(char, rs_only=True)
+        high_def_rs, mid_def_rs, low_def_rs = self.defense_layer_calc(rs_only=True)
         def_rs = f"\n\nCurrent total defensive RS - High: {high_def_rs}    Mid: {mid_def_rs}    Low: {low_def_rs}\n"
 
         result = f"{header}{full_skillsets_string}{def_rs}\n{footer}"

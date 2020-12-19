@@ -1,4 +1,3 @@
-from evennia.utils.create import create_object
 from evennia.prototypes.spawner import spawn
 
 class EquipmentHandler:

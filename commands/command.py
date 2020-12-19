@@ -8,14 +8,13 @@ import re
 
 from evennia import Command as BaseCommand
 from evennia import logger
-from evennia.commands.default.building import ObjManipCommand
 from evennia import InterruptCommand
-from evennia.utils.evmenu import EvMenu
 from evennia.utils import create, inherits_from
+from evennia.utils.evmenu import EvMenu
 
-from world.skills import skillsets
-from world.generic_str import article
+
 from world import general_mechanics as gen_mec
+from world.skills import skillsets
 
 
 class Command(BaseCommand):
@@ -79,7 +78,7 @@ class CmdLearnSkillset(Command):
             caller.msg('Usage: learn <skillset> <skill>')
             return
 
-        skillsets.learn_skillset(self.caller, self.args)
+        caller.skill.learn_skillset(caller, self.args)
 
 class CmdGrantSP(Command):
     key = '@grant-sp'
@@ -161,7 +160,7 @@ class CmdSkills(Command):
 
     def func(self):
         caller = self.caller
-        result = skillsets.generate_skill_list(caller)
+        result = caller.skill.generate_skill_list(caller)
         caller.msg(result)
 
 class CmdInventory(Command):

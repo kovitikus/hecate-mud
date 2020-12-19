@@ -1,7 +1,6 @@
 import time, datetime, random
 from evennia import utils, search_script
 from evennia.utils import gametime, inherits_from
-from typeclasses.rooms import Room
 from evennia.prototypes.prototypes import search_prototype
 
 def check_roundtime(owner):

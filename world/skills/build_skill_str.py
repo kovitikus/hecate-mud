@@ -1,6 +1,5 @@
 import random
 from world import generic_str
-from world.skills import skillsets
 
 article = generic_str.article
 pronoun = generic_str.pronoun
@@ -123,7 +122,7 @@ def create_attack_desc(attacker, target, skillset, skill, weapon, damage_type, d
     return attacker_desc, target_desc, others_desc
 
 def create_defense_desc(target, aim, c_a_name, art_weap, weapon, t_name):
-    high_skills, mid_skills, low_skills = skillsets.defense_layer_calc(target, skills_only=True)
+    high_skills, mid_skills, low_skills = target.skill.defense_layer_calc(skills_only=True)
     def_skills = []
     miss_chance = 20
     targ_weap = None
@@ -157,7 +156,7 @@ def create_defense_desc(target, aim, c_a_name, art_weap, weapon, t_name):
         if i != None:
             layer_count += 1
             def_skills.append(i)
-    
+    # TODO: What the heck am I rolling here for? The combat outcome should already be determined. Investigate.
     roll = random.randint(0, 100)
 
     if roll > miss_chance and layer_count > 0:

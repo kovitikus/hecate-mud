@@ -6,7 +6,6 @@ from world.skills.combat_handler import CombatHandler
 from world.skills.skill_handler import SkillHandler
 from world.items.equipment_handler import EquipmentHandler
 from world.npcs.merchant_handler import MerchantHandler
-from world.skills import skillsets
 
 
 class Character(DefaultCharacter):
