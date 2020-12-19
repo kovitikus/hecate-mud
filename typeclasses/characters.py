@@ -1,12 +1,19 @@
 from evennia import DefaultCharacter
 from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
+
 from world.skills.combat_handler import CombatHandler
+from world.skills.skill_handler import SkillHandler
 from world.items.equipment_handler import EquipmentHandler
 from world.npcs.merchant_handler import MerchantHandler
 from world.skills import skillsets
 
+
 class Character(DefaultCharacter):
+
+    @lazy_property
+    def skill(self):
+        return SkillHandler(self)
 
     @lazy_property
     def combat(self):
@@ -23,7 +30,6 @@ class Character(DefaultCharacter):
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
         
         self.equip.generate_equipment()
-
 
         # Statuses
         self.attributes.add('approached', [])
@@ -206,7 +212,7 @@ class OOC_Character(Character):
 class Player_Character(Character):
     def at_object_creation(self):
         super().at_object_creation()
-        skillsets.generate_fresh_skillset(self, 'martial arts')
+        self.skill.generate_fresh_skillset(self, 'martial arts')
 
 class NPC(Character):
     pass

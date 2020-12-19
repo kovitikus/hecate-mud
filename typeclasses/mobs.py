@@ -1,11 +1,9 @@
+from evennia.utils.utils import lazy_property
+
 from typeclasses.characters import Character
-from world.skills import skillsets
 from world.skills.combat_handler import CombatHandler
 from world.mobs.mob_handler import MobHandler
-from evennia.utils.utils import lazy_property
-from evennia.utils.search import search_object
-from evennia import utils
-from evennia import TICKER_HANDLER as tickerhandler
+
 
 class DefaultMob(Character):
     def at_object_creation(self):
@@ -38,7 +36,7 @@ class Rat(Creature):
     def at_object_creation(self):
         super().at_object_creation()
         rank = 10
-        skillsets.generate_fresh_skillset(self, 'rat', starting_rank=rank)
+        self.skill.generate_fresh_skillset(self, 'rat', starting_rank=rank)
 
 class Dummy(DefaultMob):
     def revive(self):
