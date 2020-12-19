@@ -1,13 +1,17 @@
 from evennia.utils.utils import lazy_property
 
 from typeclasses.characters import Character
-from world.skills.combat_handler import CombatHandler
 from world.mobs.mob_handler import MobHandler
 
 
 class DefaultMob(Character):
+    @lazy_property
+    def mob(self):
+        return MobHandler(self)
+
     def at_object_creation(self):
         super().at_object_creation()
+
     def on_death(self):
         name = self.key
         location = self.location
@@ -17,12 +21,6 @@ class DefaultMob(Character):
         else:
             location.msg_contents(f'{name} breathes a final breath and expires.')
             location.spawn.spawn_timer()
-    @lazy_property
-    def combat(self):
-        return CombatHandler(self)
-    @lazy_property
-    def mob(self):
-        return MobHandler(self)
 
 class Humanoid(DefaultMob):
     def at_object_creation(self):
