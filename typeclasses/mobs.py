@@ -34,7 +34,7 @@ class Rat(Creature):
     def at_object_creation(self):
         super().at_object_creation()
         rank = 10
-        self.skill.generate_fresh_skillset(self, 'rat', starting_rank=rank)
+        self.skill.generate_fresh_skillset('rat', starting_rank=rank)
 
 class Dummy(DefaultMob):
     def revive(self):

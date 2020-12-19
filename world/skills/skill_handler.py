@@ -263,7 +263,7 @@ class SkillHandler():
             owner.attributes.add(skillset, {**base_dic, **rat})
             self.skillset_dics[skillset] = {**base_dic, **rat}
 
-    def grant_ap(self, skillset):
+    def grant_action_points(self, skillset):
         owner = self.owner
 
         if skillset in self.skillset_dics:
