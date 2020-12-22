@@ -122,8 +122,8 @@ class SkillHandler():
         # Acquire the item(s) wielded.
         if owner.attributes.has('wielding'):
             wielding  = owner.attributes.get('wielding')
-            l_wield = wielding.get('left')
-            r_wield = wielding.get('right')
+            main_wield = wielding.get('main')
+            off_wield = wielding.get('off')
             b_wield = wielding.get('both')
         
             if b_wield:
@@ -131,14 +131,14 @@ class SkillHandler():
                     item_skillset = b_wield.attributes.get('skillset')
                     weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
                     weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
-            if r_wield:
-                if r_wield.attributes.has('skillset'):
-                    item_skillset = r_wield.attributes.get('skillset')
+            if main_wield:
+                if main_wield.attributes.has('skillset'):
+                    item_skillset = main_wield.attributes.get('skillset')
                     weap_high_rs, weap_mid_rs, weap_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
                     weap_high_skill, weap_mid_skill, weap_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
-            if l_wield:
-                if l_wield.attributes.has('skillset'):
-                    item_skillset = l_wield.attributes.get('skillset')
+            if off_wield:
+                if off_wield.attributes.has('skillset'):
+                    item_skillset = off_wield.attributes.get('skillset')
                     offhand_high_rs, offhand_mid_rs, offhand_low_rs = self.return_defense_skills(item_skillset, rs_only=True)
                     offhand_high_skill, offhand_mid_skill, offhand_low_skill = self.return_defense_skills(item_skillset, skills_only=True)
 

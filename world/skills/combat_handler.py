@@ -191,9 +191,9 @@ class CombatHandler:
             if wielded.get('both'):
                 both_weap = wielded.get('both')
                 art_weap = article(both_weap.name)
-            elif wielded.get('right'):
-                right_weap = wielded.get('right')
-                art_weap = article(right_weap.name)
+            elif wielded.get('main'):
+                main_weap = wielded.get('main')
+                art_weap = article(main_weap.name)
             else:
                 art_weap = article(weapon)
 
@@ -309,11 +309,11 @@ class CombatHandler:
             if targ_wield.get('both'):
                 targ_weap = targ_wield['both']
                 art_targ_weap = article(targ_weap.name)
-            if targ_wield.get('right'):
-                targ_weap = targ_wield['right']
+            if targ_wield.get('main'):
+                targ_weap = targ_wield['main']
                 art_targ_weap = article(targ_weap.name)
-            if targ_wield.get('left'):
-                targ_offhand = targ_wield['left']
+            if targ_wield.get('off'):
+                targ_offhand = targ_wield['off']
                 art_targ_offhand = article(targ_offhand.name)
 
 
