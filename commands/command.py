@@ -502,44 +502,75 @@ class CmdGet(Command):
     Pick up something.
 
     Usage:
-      get <obj>
+      get <object>
+      get <object> from <container>
 
     Gets an object from your inventory or location and places it in your hands.
     """
-    key = "get"
-    # aliases = ["take",]
+    key = 'get'
     locks = "cmd:all()"
-    
 
-    def func(self):
-        """Implements the command."""
-        #TODO: Fix the missing echo when picking up an item while wielding in both hands.
-        #TODO: Allow auto-stow of items in hand and continue to pick up obj if more than one exists in location.
+    def parse(self):
         caller = self.caller
+
         if not self.args:
-            caller.msg("Get what?")
-            return
-        args = self.args.strip()
+            caller.msg("Usage: get <object> | get <object> from <container>")
+            raise InterruptCommand
+        args = self.args
 
-        main_wield, off_wield, both_wield  = caller.db.wielding.values()
-        main_hand, off_hand = caller.db.hands.values()
-        
+        if 'from' in args:
+            obj_arg = args.split('from', 1)[0].strip()
+            container_arg = args.split('from', 1)[1].strip()
 
-        obj = caller.search(args, location=[caller.location, caller], quiet=True)
-        if not obj:
-            self.caller.msg(f"|r{args} cannot be found.|n")
-            return
-        if len(obj):
-            obj = obj[0]
+            container = caller.search(container_arg, quiet=True)[0]
+            if not container:
+                caller.msg(f"Could not find {container_arg}.")
+                raise InterruptCommand
+            else:
+                if not container.tags.get('container'):
+                    caller.msg(f"You can't get {obj_arg} from {container.name}.")
+                    raise InterruptCommand
+                self.container = container
+                obj = caller.search(obj_arg, location=container, quiet=True)[0]
+                if not obj:
+                    caller.msg(f"Could not find {obj_arg}.")
+                    raise InterruptCommand
+                else:
+                    self.caller_possess = True if obj.location == caller else False
+                    self.obj = obj
+        else:
+            obj_arg = args.strip()
+            obj = caller.search(obj_arg, quiet=True)[0]
+            if not obj:
+                caller.msg(f"Could not find {obj_arg}.")
+                raise InterruptCommand
+            else:
+                self.caller_possess = True if obj.location == caller else False
+                self.container = None
+                self.obj = obj
+
         if caller == obj:
             caller.msg("You can't get yourself.")
-            return
+            raise InterruptCommand
+
         if not obj.access(caller, 'get'):
             if obj.db.get_err_msg:
                 caller.msg(obj.db.get_err_msg)
             else:
                 caller.msg("You can't get that.")
-            return
+            raise InterruptCommand
+
+    def func(self):
+        """Implements the command."""
+        #TODO: Allow auto-stow of items in hand and continue to pick up obj if more than one exists in location.
+        caller = self.caller
+        obj = self.obj
+        container = self.container
+        main_wield, off_wield, both_wield  = caller.db.wielding.values()
+        main_hand, off_hand = caller.db.hands.values()
+        caller_msg = ''
+        others_msg = ''
+        
         if obj in [main_hand, off_hand]:
             caller.msg(f"You are already carrying {obj.name}.")
             return
@@ -548,39 +579,70 @@ class CmdGet(Command):
         if not obj.at_before_get(caller):
             return
         
-        # Check if wielding a single weapon/shield in off hand and stow it.
-        if off_wield:
-            caller.msg(f"You stop wielding {off_hand.name} and stow it away.")
-            caller.db.hands['off'] = None
-            caller.db.wielding['off'] = None
+        # TODO: Check for free inventory slots.
+        # inventory_dic = dict(caller.db.inventory)
+        # if inventory_dic['occupied_slots'] < inventory_dic['max_slots']:
+        #     free_slot = True
 
-        # If both hands have objects, stow the dominate hand.
-        if main_hand and off_hand:
-            caller.msg(f"You stow away {main_hand.name}.")
-            caller.location.msg_contents(f"{caller.name} stows away {main_hand.name}.", exclude=caller)
-            caller.db.hands['main'] = None
+        # All restriction checks passed, move the object to the caller.
+        obj.move_to(caller, quiet=True, move_hooks=False)
 
-        # Wielding with both hands technically only holds the item in the main hand (for now).
-        # So we already know the off hand is free to get items.
+        #---------------------------[Hand Logic]---------------------------#
+        # Items should prefer an open hand first and foremost.
+        # When both hands are occupied, but neither are wielding, prefer the dominate hand.
+        # Offhand should be used as a last resort, as this is a shield
+        #------------------------------------------------------------------#
+        
         if both_wield:
-            caller.msg(f"You stop wielding {both_wield.name}.")
-            caller.location.msg_contents(f"{caller.name} stops wielding {both_wield.name}.", exclude=caller)
+            use_main_hand = False
+            use_off_hand = True
+            caller_msg = f"You stop wielding {both_wield.name}."
+            others_msg = f"{caller.name} stops wielding {both_wield.name}."
             caller.db.wielding['both'] = None
 
-        # Decide the location of the item and echo it.
-        elif obj.location == caller:
-            caller.msg(f"You get {obj.name} from your inventory.")
-            caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
-        elif obj.location == caller.location:
-            caller.msg(f"You pick up {obj.name}.")
-            caller.location.msg_contents(f"{caller.name} picks up {obj.name}.", exclude=caller)
+        if main_hand == None:
+            use_main_hand = True
+        elif off_hand == None:
+            use_off_hand = True
+        elif main_hand and off_hand is not None: # Both hands are full.
+            if main_wield and off_wield is not None: # Both hands are wielding, prefer main hand to preserve shield.
+                use_main_hand = True
+                caller_msg = f"You stop wielding and stow away {main_hand.name}."
+                others_msg = f"{caller.name} stops wielding and stows away {main_hand.name}."
+                caller.db.wielding['main'] = None
+                caller.db.hands['main'] = None
+            elif main_wield == None:
+                use_main_hand = True
+                caller.db.wielding['main'] = None
+                caller.db.hands['main'] = None
+            elif off_wield == None:
+                use_off_hand = True
+                caller.db.wielding['off'] = None
+                caller.db.hands['off'] = None
 
-        if main_hand and not off_hand:
-            caller.db.hands['off'] = obj
-        else:
+        if use_main_hand:
             caller.db.hands['main'] = obj
+        elif use_off_hand:
+            caller.db.hands['off'] = obj
+
+        # TODO: Add an extra occupied inventory slot count.
+        # caller.db.inventory_slots['occupied_slots'] +=1
+
+        # Determine the nature of the object's origin.
+        caller_msg = f"{caller_msg}\nYou get {obj.name}"
+        others_msg = f"{others_msg}\n{caller.name} gets {obj.name}"
+        if self.caller_possess:
+            caller_msg = f"{caller_msg} from your inventory"
+            others_msg = f"{others_msg} from their inventory"
+        if container is not None:
+            caller_msg = f"{caller_msg} from {container.name}"
+            others_msg = f"{others_msg} from {container.name}"
+        caller_msg = f"{caller_msg}."
+        others_msg = f"{others_msg}."
         
-        obj.move_to(caller, quiet=True)
+        # Send out messages.
+        caller.msg(caller_msg)
+        caller.location.msg_contents(others_msg, exclude=caller)
 
         # calling at_get hook method
         obj.at_get(caller)
@@ -820,6 +882,7 @@ class CmdWield(Command):
                 caller.msg(f"You wield {obj.name} in both hands.")
                 caller.location.msg_contents(f"{caller.name} wields {obj.name} in both hands.", exclude=caller)
                 caller.db.wielding['both'] = obj
+                caller.db.hands['main'] = obj
         elif obj.location == caller.location:
             caller.msg(f"You must be carrying a weapon to wield it.")
             return
