@@ -38,15 +38,12 @@ class Exit(DefaultExit):
 
 class Door(Exit):
     def at_object_creation(self):
-        if not self.attributes.has('open'):
-            self.attributes.add('open', True)
-        if not self.attributes.has('desc'):
-            self.attributes.add('desc', 'a door')
+        self.attributes.add('open', True)
+        self.attributes.add('desc', 'a door')
 
 class Stair(Exit):
     def at_object_creation(self):
-        if not self.attributes.has('desc'):
-            self.attributes.add('desc', 'a stairway')
+        self.attributes.add('desc', 'a stairway')
 
 class Ladder(Exit):
     def at_object_creation(self):
