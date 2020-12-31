@@ -4,8 +4,9 @@ from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 
 from world.skills.combat_handler import CombatHandler
 from world.skills.skill_handler import SkillHandler
-from world.items.equipment_handler import EquipmentHandler
 from world.npcs.merchant_handler import MerchantHandler
+from world.characters.equipment_handler import EquipmentHandler
+from world.characters.inventory_handler import InventoryHandler
 
 
 class Character(DefaultCharacter):
@@ -17,6 +18,10 @@ class Character(DefaultCharacter):
     @lazy_property
     def combat(self):
         return CombatHandler(self)
+
+    @lazy_property
+    def inv(self):
+        return InventoryHandler(self)
         
     @lazy_property
     def equip(self):
