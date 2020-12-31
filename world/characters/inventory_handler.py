@@ -89,6 +89,39 @@ class InventoryHandler():
         # calling at_get hook method
         obj.at_get(owner)
 
+    def stow_object(self, obj):
+        owner = self.owner
+        main_hand, off_hand = owner.db.hands.values()
+        wielding = owner.db.wielding
+        main_wield, off_wield, both_wield  = wielding.values()
+        
+        if obj in [main_hand, off_hand]:
+            # If the stowed object is currently wielded, stop wielding it and stow it.
+            if obj in [main_wield, off_wield, both_wield]:
+                owner.msg(f"You stop wielding {obj.name} and stow it away.")
+                owner.location.msg_contents(f"{owner.name} stops wielding {obj.name} and stows it away.", exclude=owner)
+                if obj == off_wield:
+                    wielding['off'] = None
+                elif obj == main_wield:
+                    wielding['main'] = None
+                else:
+                    wielding['both'] = None
+            else:
+                owner.msg(f"You stow away {obj.name}.")
+                owner.location.msg_contents(f"{owner.name} stows away {obj.name}.", exclude=owner)
+
+            if obj == off_hand:
+                owner.db.hands['off'] = None
+            else:
+                owner.db.hands['main'] = None
+        elif obj.location == owner.location:
+            owner.msg(f"You pick up {obj.name} and stow it away.")
+            owner.location.msg_contents(f"{owner.name} picks up {obj.name} and stows it away.", exclude=owner)
+            obj.move_to(owner, quiet=True)
+
+        # calling at_get hook method
+        obj.at_get(owner)
+
     def drop_object(self, obj):
         owner = self.owner
         main_hand, off_hand = owner.db.hands.values()

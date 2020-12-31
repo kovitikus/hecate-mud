@@ -564,67 +564,42 @@ class CmdStow(Command):
 
     key = 'stow'
     locks = 'cmd:all()'
-    
 
-    def func(self):
-        """implements the command."""
+    def parse(self):
         caller = self.caller
         if not self.args:
             caller.msg("Stow what?")
-            return
+            raise InterruptCommand
         args = self.args.strip()
 
-        main_hand, off_hand = caller.db.hands.values()
-        wielding = caller.db.wielding
-        main_wield, off_wield, both_wield  = wielding.values()
-        
         obj = caller.search(args, location=[caller.location, caller],
                             nofound_string=f"You can't find {args}.",
                             multimatch_string=f"There are more than one {args}.")
         if not obj:
-            return
+            raise InterruptCommand
+
         if caller == obj:
             caller.msg("You can't get yourself.")
-            return
+            raise InterruptCommand
+        if obj.location == caller:
+            caller.msg(f"You already have {obj.name} in your inventory.")
+            raise InterruptCommand
+
         if not obj.access(caller, 'get'):
             if obj.db.get_err_msg:
                 caller.msg(obj.db.get_err_msg)
             else:
                 caller.msg("You can't get that.")
-            return
+            raise InterruptCommand
 
         # calling at_before_get hook method
         if not obj.at_before_get(caller):
-            return
-        
-        if obj in [main_hand, off_hand]:
-            # If the stowed object is currently wielded, stop wielding it and stow it.
-            if obj in [main_wield, off_wield, both_wield]:
-                caller.msg(f"You stop wielding {obj.name} and stow it away.")
-                caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and stows it away.", exclude=caller)
-                if obj == off_wield:
-                    wielding['off'] = None
-                elif obj == main_wield:
-                    wielding['main'] = None
-                else:
-                    wielding['both'] = None
-            else:
-                caller.msg(f"You stow away {obj.name}.")
-                caller.location.msg_contents(f"{caller.name} stows away {obj.name}.", exclude=caller)
-            if obj == off_hand:
-                caller.db.hands['off'] = None
-            else:
-                caller.db.hands['main'] = None
-        elif obj.location == caller.location:
-            caller.msg(f"You pick up {obj.name} and stow it away.")
-            caller.location.msg_contents(f"{caller.name} picks up {obj.name} and stows it away.", exclude=caller)
-            obj.move_to(caller, quiet=True)
-        elif obj.location == caller:
-            caller.msg(f"You already have {obj.name} in your inventory.")
-            return
+            raise InterruptCommand
 
-        # calling at_get hook method
-        obj.at_get(caller)
+        self.obj = obj
+
+    def func(self):
+        self.caller.inv.stow_object(self.obj)
 
 class CmdWield(Command):
     """
