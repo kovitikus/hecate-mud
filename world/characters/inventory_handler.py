@@ -88,3 +88,44 @@ class InventoryHandler():
 
         # calling at_get hook method
         obj.at_get(owner)
+
+    def drop_object(self, obj):
+        owner = self.owner
+        main_hand, off_hand = owner.db.hands.values()
+        wielding = owner.db.wielding
+        main_wield, off_wield, both_wield  = wielding.values()
+        
+        
+
+        # Call the object script's at_before_drop() method.
+        if not obj.at_before_drop(owner):
+            return
+
+        
+        if obj in [main_hand, off_hand]:
+            # If the object is currently wielded, stop wielding it and drop it.
+            if obj in [main_wield, off_wield, both_wield]:
+                owner.msg(f"You stop wielding {obj.name} and drop it.")
+                owner.location.msg_contents(f"{owner.name} stops wielding {obj.name} and drops it.", exclude=owner)
+                if off_wield:
+                    wielding['off'] = None
+                else:
+                    wielding['main'], wielding['both'] = None, None
+            else:
+                owner.msg(f"You drop {obj.name}.")
+                owner.location.msg_contents(f"{owner.name} drops {obj.name}.", exclude=owner)
+            if obj == off_hand:
+                owner.db.hands['off'] = None
+            else:
+                owner.db.hands['main'] = None
+        elif obj.location == owner:
+            owner.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
+            owner.location.msg_contents(f"{owner.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=owner)
+        elif obj.location == owner.location:
+            owner.msg(f"{obj.name} is already on the ground.")
+            return
+
+        obj.move_to(owner.location, quiet=True)
+
+        # Call the object script's at_drop() method.
+        obj.at_drop(owner)

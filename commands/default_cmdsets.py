@@ -57,7 +57,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(combat_cmds.Retreat())
         self.add(combat_cmds.CmdStaveSwat())
         self.add(combat_cmds.CmdHeal())
-        self.add(command.CmdTakeFrom())
         self.add(command.CmdPut())
         self.add(command.CmdSkills())
         self.add(command.CmdEquip())

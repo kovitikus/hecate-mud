@@ -416,46 +416,6 @@ class CmdLie(Command):
             db.lying = True
             caller.msg("You lie down.")
 
-class CmdTakeFrom(Command):
-    """
-    Usage:
- 
-        take <item> from <container>
-    
-    Gets an item from the container, if it's in there.
-    """
-    key = 'take'
- 
-    def parse(self):
-        # get args into 2 variables
-        self.item_arg, self.container_arg = self.args.split("from")
-        self.item_arg = self.item_arg.strip()
-        self.container_arg = self.container_arg.strip()
-     
-           
- 
-    def func(self):
-        caller = self.caller
-        container_arg = self.container_arg
-        item_arg = self.item_arg
-
-        container = caller.search(container_arg, location=caller.location, quiet=True) # Check if container is in the room.
-        if container:
-            if len(container):
-                container = container[0]
-            item = caller.search(item_arg, location=container, quiet=True) # Check if the item is in the container.
-            if item:
-                if len(item):
-                    item = item[0]
-                item.move_to(caller, quiet=True) #move the item to the caller inventory
-                caller.msg(f"You take {item} from {container}.")
-                caller.location.msg_contents(f"{caller.name} takes {item} from {container}.", exclude=caller)
-            else:
-                caller.msg(f"{item_arg} isn't in {container}!")
-        else:
-            caller.msg(f"{container_arg} doesn't exist!")
-            return
-
 class CmdPut(Command):
     """
     Usage: 
@@ -508,6 +468,7 @@ class CmdGet(Command):
     Gets an object from your inventory or location and places it in your hands.
     """
     key = 'get'
+    aliases = 'take'
     locks = "cmd:all()"
 
     def parse(self):
@@ -574,62 +535,23 @@ class CmdDrop(Command):
 
     key = "drop"
     locks = "cmd:all()"
-    
-
-    def func(self):
-        """Implement command"""
-
+    def parse(self):
         caller = self.caller
+
         if not self.args:
             caller.msg("Drop what?")
-            return
+            raise InterruptCommand
         args = self.args.strip()
 
-        main_hand, off_hand = caller.db.hands.values()
-
-        wielding = caller.db.wielding
-        main_wield, off_wield, both_wield  = wielding.values()
-        
-        obj = caller.search(args, location=[caller, caller.location], quiet=True)
+        obj = caller.search(args, quiet=True)[0]
         if not obj:
             caller.msg(f"|rYou are not in possession of {args}.|n")
-            return
+            raise InterruptCommand
+        else:
+            self.obj = obj
 
-        if len(obj):
-            obj = obj[0]
-
-        # Call the object script's at_before_drop() method.
-        if not obj.at_before_drop(caller):
-            return
-
-        
-        if obj in [main_hand, off_hand]:
-            # If the object is currently wielded, stop wielding it and drop it.
-            if obj in [main_wield, off_wield, both_wield]:
-                caller.msg(f"You stop wielding {obj.name} and drop it.")
-                caller.location.msg_contents(f"{caller.name} stops wielding {obj.name} and drops it.", exclude=caller)
-                if off_wield:
-                    wielding['off'] = None
-                else:
-                    wielding['main'], wielding['both'] = None, None
-            else:
-                caller.msg(f"You drop {obj.name}.")
-                caller.location.msg_contents(f"{caller.name} drops {obj.name}.", exclude=caller)
-            if obj == off_hand:
-                caller.db.hands['off'] = None
-            else:
-                caller.db.hands['main'] = None
-        elif obj.location == caller:
-            caller.msg(f"You pull {obj.name} from your inventory and drop it on the ground.")
-            caller.location.msg_contents(f"{caller.name} pulls {obj.name} from their inventory and drops it on the ground.", exclude=caller)
-        elif obj.location == caller.location:
-            caller.msg(f"The {obj.name} is already on the ground.")
-            return
-
-        obj.move_to(caller.location, quiet=True)
-
-        # Call the object script's at_drop() method.
-        obj.at_drop(caller)
+    def func(self):
+        self.caller.inv.drop_object(self.obj)
 
 class CmdStow(Command):
     """
