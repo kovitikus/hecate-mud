@@ -196,48 +196,10 @@ class CmdInventory(Command):
         self.args = self.args.lstrip()
         args = self.args
 
-        self.arg_type = get_arg_type(args)
+        self.arg_type = get_inventory_arg_type(args)
 
     def func(self):
-        """check inventory"""
-        arg_type = self.arg_type
-        caller = self.caller
-        items = caller.contents
-        main_hand, off_hand = caller.db.hands.values()
-        equip_items = caller.db.equipment.values()
-
-        # Remove hands and append all other items to a new list.
-        filtered_items = []
-        for i in items:
-            if i not in [main_hand, off_hand]:
-                if i not in equip_items:
-                    filtered_items.append(i)
-
-        if not filtered_items:
-            string = "Your inventory is empty."
-        else:
-            # if arg_type == 0:
-                # Generate summary
-                # Count the number of items in the inventory.
-                # Show the maximum number of inventory slots.
-                # Show each category that has an item and how many items are in the category
-                # Show currency.
-            if arg_type == 1:
-                table = self.styled_table(border="header")
-                string = get_all_items(filtered_items, table)
-            else:
-                final_list = get_inv_final_list(filtered_items, arg_type)
-
-                table = self.styled_table(border="header")
-                for item in final_list:
-                    table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-                
-                category_string = get_category_string(arg_type)
-
-                string = f"|wYou are carrying:\n{category_string}\n{table}"
-        # Add currency
-        string = f"{string}\n{gen_mec.return_currency(caller)}"
-        caller.msg(string)
+        self.caller.inv.get_inventory(self.arg_type)
 
 class CmdEquip(Command):
     """
@@ -1064,7 +1026,7 @@ class CmdSplit(Command):
         caller.msg(msg)
 
 
-def get_arg_type(args):
+def get_inventory_arg_type(args):
     arg_type = 0 # Default inventory summary.
 
     all_list = ['all', '1']
@@ -1105,156 +1067,3 @@ def get_arg_type(args):
     elif args in misc_list:
         arg_type = 12
     return arg_type
-
-def get_inv_final_list(filtered_items, arg_type):
-    final_list = []
-    for item in filtered_items:
-        if arg_type == 2 and item.tags.get('favorite'):
-            final_list.append(item)
-        elif arg_type == 3 and item.tags.get('weapon'):
-            final_list.append(item)
-        elif arg_type == 4 and item.tags.get('armor'):
-            final_list.append(item)
-        elif arg_type == 5 and item.tags.get('clothing'):
-            final_list.append(item)
-        elif arg_type == 6 and item.tags.get('container'):
-            final_list.append(item)
-        elif arg_type == 7 and item.tags.get('jewelry'):
-            final_list.append(item)
-        elif arg_type == 8 and item.tags.get('relic'):
-            final_list.append(item)
-        elif arg_type == 9 and item.tags.get('consumable'):
-            final_list.append(item)
-        elif arg_type == 10 and item.tags.get('quest'):
-            final_list.append(item)
-        elif arg_type == 11 and item.tags.get('craft'):
-            final_list.append(item)
-        elif arg_type == 12 and item.tags.get('misc'):
-            final_list.append(item)
-    return final_list
-
-def get_category_string(arg_type):
-    if arg_type == 0:
-        category_string = '|cSummary:|n'
-    elif arg_type == 1:
-        category_string = '|cAll Items:|n'
-    elif arg_type == 2:
-        category_string = '|cFavorites:|n'
-    elif arg_type == 3:
-        category_string = '|cWeapons:|n'
-    elif arg_type == 4:
-        category_string = '|cArmor:|n'
-    elif arg_type == 5:
-        category_string = '|cClothing:|n'
-    elif arg_type == 6:
-        category_string = '|cContainers:|n'
-    elif arg_type == 7:
-        category_string = '|cJewelry:|n'
-    elif arg_type == 8:
-        category_string = '|cRelics:|n'
-    elif arg_type == 9:
-        category_string = '|cConsumables:|n'
-    elif arg_type == 10:
-        category_string = '|cQuest Items:|n'
-    elif arg_type == 11:
-        category_string = '|cCrafting Materials:|n'
-    elif arg_type == 12:
-        category_string = '|cMisc.|n'
-    return category_string
-
-def get_all_items(filtered_items, table):
-    fav_list = []
-    weap_list = []
-    arm_list = []
-    cloth_list = []
-    contain_list = []
-    jewel_list = []
-    relic_list = []
-    consume_list = []
-    quest_list = []
-    craft_list = []
-    misc_list = []
-
-    # Sort all items based on category into appropriate lists.
-    for item in filtered_items:
-        if item.tags.get('favorite'):
-            fav_list.append(item)
-        elif item.tags.get('weapon'):
-            weap_list.append(item)
-        elif item.tags.get('armor'):
-            arm_list.append(item)
-        elif item.tags.get('clothing'):
-            cloth_list.append(item)
-        elif item.tags.get('container'):
-            contain_list.append(item)
-        elif item.tags.get('jewelry'):
-            jewel_list.append(item)
-        elif item.tags.get('relic'):
-            relic_list.append(item)
-        elif item.tags.get('consumable'):
-            consume_list.append(item)
-        elif item.tags.get('quest'):
-            quest_list.append(item)
-        elif item.tags.get('craft'):
-            craft_list.append(item)
-        elif item.tags.get('misc'):
-            misc_list.append(item)
-
-    # Generate table rows for each populated list based on category.
-    if fav_list:
-        category_string = get_category_string(2)
-        table.add_row(f"{category_string}")
-        for item in fav_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if weap_list:
-        category_string = get_category_string(3)
-        table.add_row(f"{category_string}")
-        for item in weap_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if arm_list:
-        category_string = get_category_string(4)
-        table.add_row(f"{category_string}")
-        for item in arm_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if cloth_list:
-        category_string = get_category_string(5)
-        table.add_row(f"{category_string}")
-        for item in cloth_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if contain_list:
-        category_string = get_category_string(6)
-        table.add_row(f"{category_string}")
-        for item in contain_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if jewel_list:
-        category_string = get_category_string(7)
-        table.add_row(f"{category_string}")
-        for item in jewel_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if relic_list:
-        category_string = get_category_string(8)
-        table.add_row(f"{category_string}")
-        for item in relic_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if consume_list:
-        category_string = get_category_string(9)
-        table.add_row(f"{category_string}")
-        for item in consume_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if quest_list:
-        category_string = get_category_string(10)
-        table.add_row(f"{category_string}")
-        for item in quest_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if craft_list:
-        category_string = get_category_string(11)
-        table.add_row(f"{category_string}")
-        for item in craft_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    if misc_list:
-        category_string = get_category_string(12)
-        table.add_row(f"{category_string}")
-        for item in misc_list:
-            table.add_row(f"|C{item.name}|n {item.db.desc or ''}")
-    string = f"|wYou are carrying:\n{table}"
-    return string
