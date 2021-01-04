@@ -288,37 +288,7 @@ class CmdInhand(Command):
     aliases = 'inh'
     
     def func(self):
-        caller = self.caller
-
-        main_wield, off_wield, both_wield  = caller.db.wielding.values()
-        main_hand, off_hand = caller.db.hands.values()
-        main_desc, off_desc = caller.db.hands_desc.values()
-
-        if off_hand:
-            off_item = off_hand.name
-        else:
-            off_item = 'nothing'
-
-        if main_hand:
-            main_item = main_hand.name
-        else:
-            main_item = 'nothing'
-
-        if not off_hand and not main_hand:
-            caller.msg(f"Your hands are empty.")
-            return
-        
-        
-        if off_wield and not main_wield:
-            caller.msg(f"You are holding {main_item} in your {main_desc} hand and wielding {off_item} in your {off_desc} hand .")
-        elif main_wield and not off_wield:
-            caller.msg(f"You are wielding {main_item} in your {main_desc} hand and holding {off_item} in your {off_desc} hand.")
-        elif off_wield and main_wield:
-            caller.msg(f"You are wielding {main_item} in your {main_desc} hand and {off_item} in your {off_desc} hand.")
-        elif both_wield:
-            caller.msg(f"You are wielding {both_wield.name} in both hands.")
-        else:
-            caller.msg(f"You are holding {main_item} in your {main_desc} hand and {off_item} in your {off_desc} hand.")
+        self.caller.inv.inhand()
 
 class CmdStand(Command):
     key = 'stand'

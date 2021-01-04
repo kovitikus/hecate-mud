@@ -170,6 +170,39 @@ class InventoryHandler():
         # Call the object script's at_drop() method.
         obj.at_drop(owner)
 
+    def inhand(self):
+        owner = self.owner
+
+        main_wield, off_wield, both_wield  = owner.db.wielding.values()
+        main_hand, off_hand = owner.db.hands.values()
+        main_desc, off_desc = owner.db.hands_desc.values()
+
+        if off_hand:
+            off_item = off_hand.name
+        else:
+            off_item = 'nothing'
+
+        if main_hand:
+            main_item = main_hand.name
+        else:
+            main_item = 'nothing'
+
+        if not off_hand and not main_hand:
+            owner.msg(f"Your hands are empty.")
+            return
+        
+        
+        if off_wield and not main_wield:
+            owner.msg(f"You are holding {main_item} in your {main_desc} hand and wielding {off_item} in your {off_desc} hand .")
+        elif main_wield and not off_wield:
+            owner.msg(f"You are wielding {main_item} in your {main_desc} hand and holding {off_item} in your {off_desc} hand.")
+        elif off_wield and main_wield:
+            owner.msg(f"You are wielding {main_item} in your {main_desc} hand and {off_item} in your {off_desc} hand.")
+        elif both_wield:
+            owner.msg(f"You are wielding {both_wield.name} in both hands.")
+        else:
+            owner.msg(f"You are holding {main_item} in your {main_desc} hand and {off_item} in your {off_desc} hand.")
+
     def get_inventory(self, arg_type):
         owner = self.owner
         items = owner.contents
@@ -191,6 +224,7 @@ class InventoryHandler():
                 # Count the number of items in the inventory.
                 # Show the maximum number of inventory slots.
                 # Show each category that has an item and how many items are in the category
+                # Show items in hands.
                 # Show currency.
             if arg_type == 1:
                 table = EvTable(border="header")
