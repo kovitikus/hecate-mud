@@ -121,23 +121,7 @@ class CmdTest(Command):
 
     def func(self):
         caller = self.caller
-        #caller.msg("Command is currently disabled.")
-
-        char = create.create_object(typeclass='typeclasses.characters.Character', key='char1')
-        if char:
-            caller.msg('Character was created.')
-        equip_dic = char.attributes.get('equipment')
-        caller.msg(f"This is the test character's current equipment: {str(equip_dic)}")
-        bag = equip_dic.get('inventory_container')
-        caller.msg(f"This is the bag we have equipped: {bag}")
-        bag_max_slots = bag.db.max_slots
-        char_max_slots = char.db.inventory_slots['max_slots']
-        caller.msg(f"The bag's max slots: {bag_max_slots}")
-        caller.msg(f"The character's max inventory slots: {char_max_slots}")
-        success = char.delete()
-        if success:
-            caller.msg(f"Character was successfully deleted!")
-        
+        caller.msg("Command is currently disabled.")
         
         # caller.msg("This should be an image!")
         # caller.msg(image="https://i.imgur.com/2Wo1BpT.png")
@@ -454,7 +438,7 @@ class CmdGet(Command):
             raise InterruptCommand
 
     def func(self):
-        self.caller.inv.get_object(self.obj, self.container, self.caller_possess)
+        self.caller.item.get_object(self.obj, self.container, self.caller_possess)
 
 class CmdDrop(Command):
     """
@@ -483,7 +467,7 @@ class CmdDrop(Command):
             self.obj = obj
 
     def func(self):
-        self.caller.inv.drop_object(self.obj)
+        self.caller.item.drop_object(self.obj)
 
 class CmdStow(Command):
     """
@@ -531,7 +515,7 @@ class CmdStow(Command):
         self.obj = obj
 
     def func(self):
-        self.caller.inv.stow_object(self.obj)
+        self.caller.item.stow_object(self.obj)
 
 class CmdWield(Command):
     """
