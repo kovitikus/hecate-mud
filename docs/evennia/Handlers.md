@@ -1,7 +1,9 @@
 #### Introduction
-A handler is a Python object that you attach to other objects, granting access to methods located on the handler. A handler lives only in memory and therefore does not survive a server reload, neither does the information stored within. 
+A handler is a Python object that you attach to other objects, granting access to methods located on the handler. A handler lives only in memory and therefore does not survive a server reload; neither does the information stored within. 
 
-When your game is reloaded, all existing handler objects are destroyed. When the server starts up, all existing objects will no handlers on them. Handlers spawn for the first time when called upon within code via calling a handler's method. This handler will stay spawned on this object and will fulfill the object's quests, until any arbitrary event destroys it; in which case a new one will spawn the next it's needed.
+All existing handler objects are destroyed when the server is reloaded. When the server starts up again, all existing objects will not have handlers on them. 
+
+Handlers spawn for the first time when they are called upon within code by calling a handler's method. This handler will stay spawned on this object and will fulfill the object's requests, until any arbitrary event destroys it; in which case a new one will spawn in it's place.
 
 References between the handler and object must be created to enable a handler and object to communicate with each other freely. 
 
