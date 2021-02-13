@@ -2,7 +2,7 @@
 ```python
 from evennia.utils.utils import inherits_from
 
-def get_nearby_rooms(location):
+def get_connected_rooms(location):
     room_list = []
     location_contents = location.contents
     
