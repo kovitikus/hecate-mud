@@ -13,7 +13,7 @@ def get_nearby_rooms(location):
     return room_list
 ```
 
-#### Explaination
+#### Explanation
 Check all items in the target location, looking for exits using [`inherits_from`](https://github.com/evennia/evennia/blob/master/evennia/utils/utils.py#L941)
 
 ```python
