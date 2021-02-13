@@ -87,3 +87,7 @@ Essentially we've traded adding an extra line of code that gets info from the da
 That's all you really need to know about handlers. They are very simple mechanisms that allow you to dynamically add functionality to objects. It's useful to keep all of your logic compartmentalized within handlers, so that you have a central location for changing the behaviors. 
 
 Handlers can be used for just about anything. They offer a bit more basic functionality over simply dumping loose functions into a module.
+
+***
+
+*For discussion of this article, [click here](https://github.com/kovitikus/hecate/issues/33).*
