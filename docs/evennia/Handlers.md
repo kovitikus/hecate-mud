@@ -1,7 +1,10 @@
 #### Introduction
-A handler is a Python object that you attach to other objects, granting access to methods located on the handler. A handler lives only in memory and therefore does not survive a server reload; neither does the information stored within. 
+A handler is a Python object that you attach to other objects, granting access to methods located on the handler. A handler lives only in memory and therefore does not survive a server reload; neither does the information stored within.
 
-All existing handler objects are destroyed when the server is reloaded. When the server starts up again, all existing objects will not have handlers on them. 
+> **Question:** Should I worry about how many handler objects are created on my server?
+> **Answer:** No. The only portion of them that is "alive" per say is the data you store on the instance of that specific handler. Handlers get all of their instructions from the same copy of the code loaded into memory. The python object is really just a reference back to the code. Computers these days have more than sufficient RAM to handle these requests and purchasing more is always cheap. Add as many handlers to your game as you desire.
+
+All existing handler objects are destroyed when the server is reloaded. When the server restarts, all handlers remain non-existent until the code is called to spawn them. 
 
 Handlers spawn for the first time when they are called upon within code by calling a handler's method. This handler will stay spawned on this object and will fulfill the object's requests, until any arbitrary event destroys it; in which case a new one will spawn in it's place.
 
@@ -76,7 +79,7 @@ A handler should pre-load data that it uses frequently. The best way to manage y
 
 There's a catch though. You now have to "save" your information twice instead of once. You'll still do your normal database save; such as `owner.db.hp = 10`, but you'll also need to add `self.hp = 10` as well.
 
-Essentially we've traded adding an extra line of code that gets info from the database to an extra line of code that saves to the handler. So long as you always adjust the handler's version of the variable alongside the database change, your handler data should always be equal to the database. 
+Essentially we've traded adding an extra line of code that gets info from the database for an extra line of code that saves to the handler instead. So long as you always adjust the handler's version of the variable alongside the database change, your handler data should always be equal to the database. 
 
 > **TIP:** [Unit testing](https://www.evennia.com/docs/latest/Unit-Testing.html) would be a good candidate for checking that your data matches your expectations.
 
