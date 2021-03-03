@@ -1,8 +1,8 @@
 Rooms are grouped together by zone tag.
 
-Each time a human moves a character into a room, the room checks to see if its zone tag is already on the occupied list. 
+Each time a player moves a character into a room, the room checks to see if its zone tag is already on the occupied list. 
 
-If not, then a tag is to the room added as 
+If not, then a tag is added to the room. 
 ``('zonename', category='occupied')``
 
 ```python
@@ -13,7 +13,7 @@ def at_object_leave(self. moved_obj, target_location)
     self.room.set_room_vacant()
 ```
 
-Inside of the room handler, there are two methods that go through the motions of managing the occupancy.
+Inside of the RoomHandler, there are two methods that go through the motions of managing the occupancy.
 
 In setting the room to occupied, the first thing we want to do is check to see if the room and zone are already marked as occupied.
 ```python
