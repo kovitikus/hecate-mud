@@ -23,7 +23,7 @@ class InstanceHandler:
 
         for _ in range(1, room_qty):
             room_key = self.generate_room_key()
-            self.rooms_list.append(create_object(typeclass="typeclasses.rooms.Room", key=room_key))
+            self.rooms_list.append(create_object(typeclass="rooms.rooms.Room", key=room_key))
 
         # Generate the exits for each room by tracking the current room and the previous room.
 

@@ -155,13 +155,13 @@ class Account(DefaultAccount):
 
             if account and settings.MULTISESSION_MODE < 2:
                 # Load the appropriate Character class
-                character_typeclass = 'typeclasses.characters.OOC_Character'
+                character_typeclass = 'characters.characters.OOC_Character'
                 # character_home = kwargs.get("home")
                 Character = class_from_module(character_typeclass)
                 name = account.key
                 possessive = '\'' if name[-1] == 's' else '\'s'
                 homeroom = create_object(
-                    typeclass='typeclasses.rooms.OOC_Quarters',
+                    typeclass='rooms.rooms.OOC_Quarters',
                     key=f"{name}{possessive} Quarters"
                 )
 

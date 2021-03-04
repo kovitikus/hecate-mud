@@ -1,7 +1,7 @@
 MERCHANT = {
     'prototype_key': 'merchant',
     'key': 'merchant',
-    'typeclass': 'typeclasses.characters.Merchant',
+    'typeclass': 'characters.characters.Merchant',
     'tags': ('merchant', 'npc')
 }
 

@@ -39,7 +39,7 @@ class MobHandler:
     def choose_attack(self, target):
         owner = self.owner
 
-        if utils.inherits_from(owner, 'typeclasses.mobs.Rat'):
+        if utils.inherits_from(owner, 'mobs.mobs.Rat'):
             skillset = 'rat'
             skill_list = ['claw', 'bite']
             skill = random.choice(skill_list)

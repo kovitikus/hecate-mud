@@ -131,7 +131,7 @@ class Torch(Lighting):
             self.death(room, held_by)
             return
         
-        if inherits_from(held_by, "typeclasses.characters.Character"):
+        if inherits_from(held_by, "characters.characters.Character"):
             held_by.msg(f"Your {self.name} flickers.")
             room.msg_contents(f"{held_by.name}'s {self.name} flickers.", exclude=held_by)
         else:
@@ -141,7 +141,7 @@ class Torch(Lighting):
 
     def death(self, room, held_by):
         tickerhandler.remove(30, self.on_burn_tick, persistent=True)
-        if inherits_from(held_by, "typeclasses.characters.Character"):
+        if inherits_from(held_by, "characters.characters.Character"):
             held_by.msg(f"Your {self.name} torch dies out and it collapses into a tiny pile of ash.")
             room.msg_contents(f"{held_by.name}'s {self.name} dies out and it collapses into a tiny pile of ash.", exclude=held_by)
         else:
@@ -156,8 +156,8 @@ class Torch(Lighting):
         held_by = self.location
         room = None
 
-        if inherits_from(held_by, 'typeclasses.characters.Character'):
+        if inherits_from(held_by, 'characters.characters.Character'):
             room = held_by.location
-        elif inherits_from(held_by, 'typeclasses.rooms.Room'):
+        elif inherits_from(held_by, 'rooms.rooms.Room'):
             room = held_by
         return room, held_by

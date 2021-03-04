@@ -50,7 +50,7 @@ class Room(DefaultRoom):
                 exits.append(con)
                 exit_name.append(key)
                 destinations.append(con.destination.get_display_name(looker))
-            elif inherits_from(con, "typeclasses.characters.Character"):
+            elif inherits_from(con, "characters.characters.Character"):
                 characters.append(f"|c{key}|n")
 
         short_desc = f"You arrive at {self.get_display_name(looker)}."
@@ -63,14 +63,14 @@ class Room(DefaultRoom):
             exits_string = f"You see "
             for x in exits:
                 x_alias = x.aliases.all()
-                if inherits_from(x, "typeclasses.exits.Door"):
+                if inherits_from(x, "rooms.exits.Door"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     elif exits_len == num:
                         exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     else:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
-                elif inherits_from(x, "typeclasses.exits.Stair"):
+                elif inherits_from(x, "rooms.exits.Stair"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     elif exits_len == num:
@@ -110,7 +110,7 @@ class Room(DefaultRoom):
                 exits.append(con)
                 exit_name.append(key)
                 destinations.append(con.destination.name)
-            elif inherits_from(con, "typeclasses.characters.Character"):
+            elif inherits_from(con, "characters.characters.Character"):
                 characters.append(f"|c{key}|n")
             else:
                 # things can be pluralized
@@ -125,14 +125,14 @@ class Room(DefaultRoom):
             exits_string = "    You see "
             for x in exits:
                 x_alias = x.aliases.all()
-                if inherits_from(x, "typeclasses.exits.Door"):
+                if inherits_from(x, "rooms.exits.Door"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     elif exits_len == num:
                         exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
                     else:
                         exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
-                elif inherits_from(x, "typeclasses.exits.Stair"):
+                elif inherits_from(x, "rooms.exits.Stair"):
                     if exits_len == 1:
                         exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     elif exits_len == num:
@@ -187,20 +187,20 @@ class OOC_Room(Room):
 class OOC_Quarters(Room):
     def at_object_creation(self):
         self.db.desc = "This compact room leaves much to be desired. It has a bunk large enough for one  person and an adjoining basic bathroom facility."
-        portal_room = create_object(typeclass="typeclasses.rooms.OOC_Room",
-                                    key="Portal Room")
+        portal_room = create_object(typeclass='rooms.rooms.OOC_Room',
+                                    key='Portal Room')
         # Make exits connecting the Portal Room with the Workshop
-        exit_to_portal_room = create_object(typeclass="typeclasses.exits.Exit",
-                                            key="north", aliases="n", destination=portal_room,
+        exit_to_portal_room = create_object(typeclass='rooms.exits.Exit',
+                                            key='north', aliases='n', destination=portal_room,
                                             location=self, home=self)
-        exit_to_workshop = create_object(typeclass="typeclasses.exits.Exit",
-                                            key="south", aliases="s", destination=self,
+        exit_to_workshop = create_object(typeclass='rooms.exits.Exit',
+                                            key='south', aliases='s', destination=self,
                                             location=portal_room, home=portal_room)
 
         # Connect the portal room to the Common Room
-        common_room = search_object("Common Room")
-        exit_to_common_room = create_object(typeclass="typeclasses.exits.Exit",
-                                            key="north", aliases="n", destination=common_room[0],
+        common_room = search_object('Common Room')
+        exit_to_common_room = create_object(typeclass='rooms.exits.Exit',
+                                            key='north', aliases='n', destination=common_room[0],
                                             location=portal_room, home=portal_room)
 
 

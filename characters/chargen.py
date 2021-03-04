@@ -139,7 +139,7 @@ def _set_appearance(self, raw_string, **kwargs):
 def gender(self, raw_string, **kwargs):
     text = "Choose your gender."
     options = []
-    for g in adjectives._FIGURE['gender']:
+    for g in character_adjectives._FIGURE['gender']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'gender', 'choice': f'{g}'})})
     return text, options
@@ -147,7 +147,7 @@ def gender(self, raw_string, **kwargs):
 def height(self, raw_string, **kwargs):
     text = 'Choose your height.'
     options = []
-    for g in adjectives._FIGURE['height']:
+    for g in character_adjectives._FIGURE['height']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'height', 'choice': f'{g}'})})
     return text, options
@@ -155,7 +155,7 @@ def height(self, raw_string, **kwargs):
 def build(self, raw_string, **kwargs):
     text = 'Choose your build.'
     options = []
-    for g in adjectives._FIGURE['build']:
+    for g in character_adjectives._FIGURE['build']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'build', 'choice': f'{g}'})})
     return text, options
@@ -163,7 +163,7 @@ def build(self, raw_string, **kwargs):
 def face(self, raw_string, **kwargs):
     text = 'Choose an adjective that describes your face.'
     options = []
-    for g in adjectives._FACIAL['face']:
+    for g in character_adjectives._FACIAL['face']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'face', 'choice': f'{g}'})})
     return text, options
@@ -171,7 +171,7 @@ def face(self, raw_string, **kwargs):
 def eye_color(self, raw_string, **kwargs):
     text = 'Choose your eye color.'
     options = []
-    for g in adjectives._FACIAL['eye_color']:
+    for g in character_adjectives._FACIAL['eye_color']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'eye_color', 'choice': f'{g}'})})
     return text, options
@@ -179,7 +179,7 @@ def eye_color(self, raw_string, **kwargs):
 def nose(self, raw_string, **kwargs):
     text = 'Choose and adjective that describes your nose.'
     options = []
-    for g in adjectives._FACIAL['nose']:
+    for g in character_adjectives._FACIAL['nose']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'nose', 'choice': f'{g}'})})
     return text, options
@@ -187,7 +187,7 @@ def nose(self, raw_string, **kwargs):
 def lips(self, raw_string, **kwargs):
     text = 'Choose an adjective that describes your lips.'
     options = []
-    for g in adjectives._FACIAL['lips']:
+    for g in character_adjectives._FACIAL['lips']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'lips', 'choice': f'{g}'})})
     return text, options
@@ -195,7 +195,7 @@ def lips(self, raw_string, **kwargs):
 def chin(self, raw_string, **kwargs):
     text = 'Choose an adjective that describes your chin.'
     options = []
-    for g in adjectives._FACIAL['chin']:
+    for g in character_adjectives._FACIAL['chin']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'chin', 'choice': f'{g}'})})
     return text, options
@@ -203,7 +203,7 @@ def chin(self, raw_string, **kwargs):
 def skin_color(self, raw_string, **kwargs):
     text = 'Choose your skin color.'
     options = []
-    for g in adjectives._FACIAL['skin_color']:
+    for g in character_adjectives._FACIAL['skin_color']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'skin_color', 'choice': f'{g}'})})
     return text, options
@@ -211,7 +211,7 @@ def skin_color(self, raw_string, **kwargs):
 def hair_color(self, raw_string, **kwargs):
     text = 'Choose your hair color.'
     options = []
-    for g in adjectives._HAIR['hair_color']:
+    for g in character_adjectives._HAIR['hair_color']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'hair_color', 'choice': f'{g}'})})
     return text, options
@@ -219,7 +219,7 @@ def hair_color(self, raw_string, **kwargs):
 def texture(self, raw_string, **kwargs):
     text = 'Choose an adjective that describes your hair\'s texture.'
     options = []
-    for g in adjectives._HAIR['texture']:
+    for g in character_adjectives._HAIR['texture']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'texture', 'choice': f'{g}'})})
     return text, options
@@ -227,7 +227,7 @@ def texture(self, raw_string, **kwargs):
 def length(self, raw_string, **kwargs):
     text = 'Choose your hair\'s length.'
     options = []
-    for g in adjectives._HAIR['length']:
+    for g in character_adjectives._HAIR['length']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'length', 'choice': f'{g}'})})
     return text, options
@@ -235,7 +235,7 @@ def length(self, raw_string, **kwargs):
 def style(self, raw_string, **kwargs):
     text = 'Choose your hairstyle.'
     options = []
-    for g in adjectives._HAIR['style']:
+    for g in character_adjectives._HAIR['style']:
         options.append({"desc": f"{g}",
                         "goto": (_set_appearance, {'prev_node': 'style', 'choice': f'{g}'})})
     return text, options
@@ -271,7 +271,7 @@ def _create_char(self, raw_string, **kwargs):
     self.msg(f"You currently have a total of {chars_len} characters.")
 
     #Add the new character object to the chars attribute as next number in the character list.
-    self.db.chars[str(chars_len)] = create_object(typeclass="typeclasses.characters.Player_Character", key=name, home=None,
+    self.db.chars[str(chars_len)] = create_object(typeclass="characters.characters.Player_Character", key=name, home=None,
     attributes=[('figure', {'gender': gender, 'height': height, 'build': build}),
                 ('facial', {'face': face, 'eye_color': eye_color, 'nose': nose, 'lips': lips, 'chin': chin, 'skin_color': skin_color}),
                 ('hair', {'hair_color': hair_color, 'texture': texture, 'length': length, 'style': style})])

@@ -85,7 +85,7 @@ GLOBAL_SCRIPTS = {
     # 'key': {'typeclass': 'typeclass.path.here',
     #         'repeats': -1, 'interval': 50, 'desc': 'Example script'},
     'time_cycle': {
-        'typeclass': 'typeclasses.time_cycle.TimeCycle',
+        'typeclass': 'world.time_cycle.TimeCycle',
         'repeats': -1,
         'interval': 1,
         'desc': 'Tracks global timed events.',
@@ -126,6 +126,16 @@ except ImportError:
 
 # Modules that contain prototypes for use with the spawner mechanism.
 PROTOTYPE_MODULES = [
-    "world.npcs.npc_prototypes",
-    "world.items.item_prototypes",
-    "world.mobs.mob_prototypes"]
+    "npcs.npc_prototypes",
+    "items.item_prototypes",
+    "mobs.mob_prototypes"]
+
+
+# Typeclass and base for all objects (fallback)
+BASE_OBJECT_TYPECLASS = "items.objects.Object"
+# Typeclass for character objects linked to an account (fallback)
+BASE_CHARACTER_TYPECLASS = "characters.characters.Character"
+# Typeclass for rooms (fallback)
+BASE_ROOM_TYPECLASS = "rooms.rooms.Room"
+# Typeclass for Exit objects (fallback).
+BASE_EXIT_TYPECLASS = "rooms.exits.Exit"

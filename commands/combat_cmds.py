@@ -74,7 +74,7 @@ class CmdStaveSwat(BaseCommand):
         if not caller.db.standing:
             caller.msg("You must be standing to attack!")
             return
-        if not both_wield or not both_wield.is_typeclass('typeclasses.objects.Staves'):
+        if not both_wield or not both_wield.is_typeclass('items.objects.Staves'):
             caller.msg("You must be wielding a stave to do that!")
             return
         target = caller.search(self.args, quiet=True)

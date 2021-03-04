@@ -40,7 +40,7 @@ def set_roundtime(owner):
 def unbusy(owner):
     owner.msg('|yYou are no longer busy.|n')
     owner.db.busy = False
-    if inherits_from(owner, 'typeclasses.mobs.DefaultMob'):
+    if inherits_from(owner, 'mobs.mobs.DefaultMob'):
         owner.mob.check_for_target()
 
 def roll_die(sides=100):
@@ -171,7 +171,7 @@ def group_objects(objects, obj_loc):
         are_coins = False
         #Check to see if all quantity stack objects are coins.
         for obj in qty_stack_objects:
-            if obj.is_typeclass('typeclasses.objects.Coin', exact=True):
+            if obj.is_typeclass('items.objects.Coin', exact=True):
                 are_coins = True
             else:
                 msg = "You can't group coins with non-coins!"
@@ -186,7 +186,7 @@ def group_objects(objects, obj_loc):
         inv_quantity = 0
         if same_name:
             inv_stack = utils.create.create_object(key=f'a pile of {inv_stack_objects[0].name}es', 
-                typeclass='typeclasses.objects.StackInventory', 
+                typeclass='items.objects.StackInventory', 
                 location=obj_loc)
             if inv_stack:
                 for obj in inv_stack_objects:
@@ -197,7 +197,7 @@ def group_objects(objects, obj_loc):
                 return msg
 
 def ungroup_objects(obj, obj_loc):
-    if obj.is_typeclass('typeclasses.objects.StackQuantity'):
+    if obj.is_typeclass('items.objects.StackQuantity'):
         if obj.tags.get('coin', category='currency'):
             plat, gold, silver, copper = return_obj_coin(obj)
             multi_coin = 0
@@ -207,32 +207,32 @@ def ungroup_objects(obj, obj_loc):
             if multi_coin >= 2:
                 if plat > 0:
                     plat_pile = utils.create.create_object(key='a pile of platinum coins', location=obj_loc,
-                                                typeclass='typeclasses.objects.Coin')
+                                                typeclass='items.objects.Coin')
                     if plat_pile:
                         plat_pile.db.coin['plat'] = plat
                         obj.db.coin['plat'] = 0
                 if gold > 0:
                     gold_pile = utils.create.create_object(key='a pile of gold coins', location=obj_loc,
-                                                typeclass='typeclasses.objects.Coin')
+                                                typeclass='items.objects.Coin')
                     if gold_pile:
                         gold_pile.db.coin['gold'] = gold
                         obj.db.coin['gold'] = 0
                 if silver > 0:
                     silver_pile = utils.create.create_object(key='a pile of silver coins', location=obj_loc,
-                                                typeclass='typeclasses.objects.Coin')
+                                                typeclass='items.objects.Coin')
                     if silver_pile:
                         silver_pile.db.coin['silver'] = silver
                         obj.db.coin['silver'] = 0
                 if copper > 0:
                     copper_pile = utils.create.create_object(key='a pile of copper coins', location=obj_loc,
-                                                typeclass='typeclasses.objects.Coin')
+                                                typeclass='items.objects.Coin')
                     if copper_pile:
                         copper_pile.db.coin['copper'] = copper
                         obj.db.coin['copper'] = 0
                 msg = f"You ungroup {obj.name} into separate piles of coins."
                 obj.delete()
                 return msg
-    elif obj.is_typeclass('typeclasses.objects.StackInventory'):
+    elif obj.is_typeclass('items.objects.StackInventory'):
         stack_contents = obj.contents
         for x in stack_contents:
             x.move_to(obj_loc, quiet=True, move_hooks=False)
@@ -248,7 +248,7 @@ def split_pile(split_type, pile, obj_loc, quantity=0, qty_obj=None):
         # The original pile always contains the higher quantity of items, if not evenly split.
         pass
     elif split_type == 'from':
-        if pile.is_typeclass('typeclasses.objects.StackQuantity'):
+        if pile.is_typeclass('items.objects.StackQuantity'):
             # This is a pile of coins, or other similar pile.
             if pile.tags.get('coin', category='currency'):
                 currency = pile.attributes.get('coin')
@@ -265,7 +265,7 @@ def split_pile(split_type, pile, obj_loc, quantity=0, qty_obj=None):
                     msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
                     return msg
             pass
-        elif pile.is_typeclass('typeclasses.objects.StackInventory'):
+        elif pile.is_typeclass('items.objects.StackInventory'):
             # Object has contents
             qty_obj_names = []
 
@@ -274,7 +274,7 @@ def split_pile(split_type, pile, obj_loc, quantity=0, qty_obj=None):
             if len(qty_objects) >= quantity:
                 num = 1
                 while num <= quantity:
-                    obj = qty_objects.pop
+                    obj = qty_objects.pop()
                     qty_obj_names.append(obj.name)
                     obj.move_to(obj_loc, quiet=True, move_hooks=False)
                     num += 1
@@ -304,7 +304,7 @@ def all_same(items):
                 
 def stack_coins(obj_loc, qty_stack_objects, stacked_obj_names):
     qty_stack = utils.create.create_object(key=f'a pile of coins', 
-            typeclass='typeclasses.objects.StackQuantity', 
+            typeclass='items.objects.StackQuantity', 
             location=obj_loc)
     if qty_stack:
         qty_stack.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})

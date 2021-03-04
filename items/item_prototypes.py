@@ -4,7 +4,7 @@ FOOD = {
     'prototype_key': 'food',
     'prototype_desc': 'Food items.',
     'prototype_tags': 'food',
-    'typeclass': 'typeclasses.objects.Object',
+    'typeclass': 'items.objects.Object',
     'tags': ('food', 'consumable')
 }
 
@@ -54,7 +54,7 @@ DRINK = {
     'prototype_key': 'drink',
     'prototype_desc': 'Drink items.',
     'prototype_tags': 'drink',
-    'typeclass': 'typeclasses.objects.Object',
+    'typeclass': 'items.objects.Object',
     'tags': ('drink', 'consumable')
 }
 
@@ -75,20 +75,20 @@ WATER = {
 LIGHTING = {
     'prototype_key': 'lighting',
     'key': 'lighting',
-    'typeclass': 'typeclasses.objects.Lighting'
+    'typeclass': 'items.objects.Lighting'
 }
 
 TORCH = {
     'prototype_parent': 'lighting',
     'key': 'torch',
-    'typeclass': 'typeclasses.objects.Torch'
+    'typeclass': 'items.objects.Torch'
 }
 
 CRUDELY_MADE_TORCH = {
     'prototype_parent': 'lighting',
     'prototype_key': 'CRUDELY_MADE_TORCH',
     'key': 'crudely-made torch',
-    'typeclass': 'typeclasses.objects.Torch',
+    'typeclass': 'items.objects.Torch',
     'price': 10,
     'fuel': 90,
     'burn_rate': 30
@@ -97,7 +97,7 @@ CRUDELY_MADE_TORCH = {
 INVENTORY_CONTAINER = {
     'prototype_key': 'inventory_container',
     'key': 'inventory_container',
-    'typeclass': 'typeclasses.objects.InventoryContainer'
+    'typeclass': 'items.objects.InventoryContainer'
 }
 
 INVENTORY_BAG = {
@@ -109,7 +109,7 @@ BAIT = {
     'prototype_key': 'bait',
     'prototype_desc': 'Fishing bait',
     'prototype_tags': 'bait',
-    'typeclass': 'typeclasses.objects.Object',
+    'typeclass': 'items.objects.Object',
     'tags': ('bait', 'fishing')
 }
 

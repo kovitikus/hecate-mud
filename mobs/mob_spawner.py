@@ -38,5 +38,5 @@ class MobSpawner:
         room = self.room
         # Search for all mob typeclasses and disable them.
         for obj in room.get_contents():
-            if obj.inherits_from('typeclasses.mobs.DefaultMob'):
+            if obj.inherits_from('mobs.mobs.DefaultMob'):
                 obj.delete()

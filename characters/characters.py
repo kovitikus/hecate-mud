@@ -86,10 +86,10 @@ class Character(DefaultCharacter):
             return
         
         # Determine which traversal string will be generated.
-        if inherits_from(var_exit, "typeclasses.exits.Door"):
+        if inherits_from(var_exit, "rooms.exits.Door"):
             self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
             others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
-        elif inherits_from(var_exit, "typeclasses.exits.Stair"):
+        elif inherits_from(var_exit, "rooms.exits.Stair"):
             if var_exit.name in ['up', 'down']:
                 self_str = f"You depart, climbing {var_exit.name} {var_exit.db.desc}."
                 others_str = f"{self.name} departs, climbing {var_exit.name} {var_exit.db.desc}."
@@ -146,9 +146,9 @@ class Character(DefaultCharacter):
         
         # Determine which traversal string will be generated.
         if origin:
-            if inherits_from(origin_exit, "typeclasses.exits.Door"):
+            if inherits_from(origin_exit, "rooms.exits.Door"):
                 others_str = f"{self.name} walks in through {origin_exit.db.desc}, from the {origin_exit.name}."
-            elif inherits_from(origin_exit, "typeclasses.exits.Stair"):
+            elif inherits_from(origin_exit, "rooms.exits.Stair"):
                 if origin_exit.name in ['up', 'down']:
                     others_str = f"{self.name} arrives, climbing {'down' if origin_exit.name == 'up' else 'up'} {origin_exit.db.desc}."
                 else:

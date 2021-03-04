@@ -50,7 +50,7 @@ class CmdCharGen(Command):
 
     def func(self):
         caller = self.caller
-        EvMenu(caller, "world.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
+        EvMenu(caller, "characters.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
        auto_quit=True, auto_look=True, auto_help=True)
 
 class CmdLearnSkillset(Command):
@@ -569,7 +569,7 @@ class CmdWield(Command):
         
         if obj in [main_hand, off_hand]:
             if hands_req == 1:
-                if inherits_from(obj, 'typeclasses.objects.OffHand'): #For wielding shields.
+                if inherits_from(obj, 'items.objects.OffHand'): #For wielding shields.
                     if obj == main_hand and not main_wield:
                         if off_hand: # If theres any item in the off hand, stow it first.
                             caller.db.hands['off'] = None
@@ -584,7 +584,7 @@ class CmdWield(Command):
                     caller.msg(f"You wield {obj.name} in your {off_desc} hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their {off_desc} hand.", exclude=caller)
                     caller.db.wielding['off'] = obj
-                elif obj == off_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
+                elif obj == off_hand and not inherits_from(obj, 'items.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You swap the contents of your hands and wield {obj.name} in your {main_desc} hand.")
                     caller.location.msg_contents(f"{caller.name} swaps the content of their hands "
                                                     f"and wields {obj.name} in their {main_desc} hand.", exclude=caller)
@@ -593,7 +593,7 @@ class CmdWield(Command):
                         caller.db.hands['main'] = None
                         caller.db.hands['off'] = obj
                     caller.db.wielding['main'] = obj
-                elif obj == main_hand and not inherits_from(obj, 'typeclasses.objects.OffHand'): # Make sure the item is a main hand wield.
+                elif obj == main_hand and not inherits_from(obj, 'items.objects.OffHand'): # Make sure the item is a main hand wield.
                     caller.msg(f"You wield {obj.name} in your {main_desc} hand.")
                     caller.location.msg_contents(f"{caller.name} wields {obj.name} in their {main_desc} hand.", exclude=caller)
                     caller.db.wielding['main'] = obj
@@ -713,7 +713,7 @@ class CmdLight(Command):
             obj = caller.search(args, quiet=True)
             obj = obj[0]
             if obj:
-                if not inherits_from(obj, 'typeclasses.objects.Lighting'):
+                if not inherits_from(obj, 'items.objects.Lighting'):
                     caller.msg(f"{obj.get_display_name(caller)} cannot be lit!")
                     raise InterruptCommand
                 else:
@@ -738,7 +738,7 @@ class CmdStock(Command):
     def func(self):
         room_contents = self.caller.location.contents
         for i in room_contents:
-            if i.is_typeclass('typeclasses.characters.Merchant'):
+            if i.is_typeclass('characters.characters.Merchant'):
                 self.caller.msg(i.merch.return_stock())
 
 class CmdBuy(Command):
@@ -778,7 +778,7 @@ class CmdBuy(Command):
         caller = self.caller
         room_contents = caller.location.contents
         for i in room_contents:
-            if i.is_typeclass('typeclasses.characters.Merchant'):
+            if i.is_typeclass('characters.characters.Merchant'):
                 caller.msg(i.merch.sell_item(caller, self.item, quantity=self.quantity))
 
 class CmdConvertCoin(Command):
