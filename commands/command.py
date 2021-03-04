@@ -12,8 +12,6 @@ from evennia import InterruptCommand
 from evennia.utils import create, inherits_from
 from evennia.utils.evmenu import EvMenu
 
-
-from misc import general_mechanics as gen_mec
 from skills import skillsets
 
 
@@ -807,13 +805,13 @@ class CmdConvertCoin(Command):
         result_type = self.result_type
 
         if coin_type == 'plat':
-            result_value = gen_mec.convert_coin(plat=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin(plat=coin_value, result_type=result_type)
         elif coin_type == 'gold':
-            result_value = gen_mec.convert_coin(gold=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin(gold=coin_value, result_type=result_type)
         elif coin_type == 'silver':
-            result_value = gen_mec.convert_coin(silver=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin(silver=coin_value, result_type=result_type)
         elif coin_type == 'copper':
-            result_value = gen_mec.convert_coin(copper=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
 class CmdGroup(Command):
@@ -865,7 +863,7 @@ class CmdGroup(Command):
             caller.msg(f"Only 1 {args} was found!")
             return
         else:
-            msg = gen_mec.group_objects(objects, obj_loc)
+            msg = caller.item.group_objects(objects, obj_loc)
             caller.msg(msg)
 
 class CmdUngroup(Command):
@@ -902,7 +900,7 @@ class CmdUngroup(Command):
 
         obj = caller.search(args)
         if obj:
-            msg = gen_mec.ungroup_objects(obj, self.obj_loc)
+            msg = caller.item.ungroup_objects(obj, self.obj_loc)
             caller.msg(msg)
 
 class CmdSplit(Command):
@@ -973,9 +971,9 @@ class CmdSplit(Command):
         pile = caller.search(pile, location=pile_loc, quiet=True)[0]
         if pile is not None:
             if split_type == 'default':
-                msg = gen_mec.split_pile(split_type, pile, pile_loc)
+                msg = caller.item.split_pile(split_type, pile, pile_loc)
             elif split_type == 'from':
-                msg = gen_mec.split_pile(split_type, pile, pile_loc, self.quantity, self.qty_obj)
+                msg = caller.item.split_pile(split_type, pile, pile_loc, self.quantity, self.qty_obj)
 
         caller.msg(msg)
 
