@@ -1,9 +1,9 @@
 import random
 
-from world import generic_str
-from world import general_mechanics as gen_mec
+from misc import generic_str
+from misc import general_mechanics as gen_mec
 
-from world.skills import skillsets
+from skills import skillsets
 
 
 class CombatHandler:

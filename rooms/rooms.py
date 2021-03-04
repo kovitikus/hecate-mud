@@ -12,7 +12,7 @@ from evennia.utils import inherits_from
 from evennia.utils.create import create_object
 from evennia.utils.utils import list_to_string, lazy_property
 
-from world.mobs.mob_spawner import MobSpawner
+from mobs.mob_spawner import MobSpawner
 
 
 class Room(DefaultRoom):

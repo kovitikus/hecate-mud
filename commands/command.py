@@ -13,8 +13,8 @@ from evennia.utils import create, inherits_from
 from evennia.utils.evmenu import EvMenu
 
 
-from world import general_mechanics as gen_mec
-from world.skills import skillsets
+from misc import general_mechanics as gen_mec
+from skills import skillsets
 
 
 class Command(BaseCommand):

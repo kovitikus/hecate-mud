@@ -4,8 +4,9 @@ from evennia.utils import create
 from evennia.utils import logger
 from evennia.utils import ansi
 from evennia.utils.utils import inherits_from
-from world.generic_str import article
-from world import general_mechanics as gen_mec
+
+from misc.generic_str import article
+from misc import general_mechanics as gen_mec
 
 class Object(DefaultObject):
     def get_numbered_name(self, count, looker, **kwargs):

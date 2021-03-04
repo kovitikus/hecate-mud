@@ -2,12 +2,12 @@ from evennia import DefaultCharacter
 from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
 
-from world.skills.combat_handler import CombatHandler
-from world.skills.skill_handler import SkillHandler
-from world.npcs.merchant_handler import MerchantHandler
-from world.items.item_handler import ItemHandler
-from world.characters.equipment_handler import EquipmentHandler
-from world.characters.inventory_handler import InventoryHandler
+from skills.combat_handler import CombatHandler
+from skills.skill_handler import SkillHandler
+from npcs.merchant_handler import MerchantHandler
+from items.item_handler import ItemHandler
+from characters.equipment_handler import EquipmentHandler
+from characters.inventory_handler import InventoryHandler
 
 
 class Character(DefaultCharacter):

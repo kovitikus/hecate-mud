@@ -1,6 +1,8 @@
 import random
 
 from evennia.utils.create import create_object
+
+
 class InstanceHandler:
     def __init__(self, owner):
         self.owner = owner

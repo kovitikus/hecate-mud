@@ -89,8 +89,3 @@ class Script(DefaultScript):
 
     """
     pass
-
-class ScriptMob(Script):
-  def __init__(self, owner):
-    self.owner = owner
-  pass

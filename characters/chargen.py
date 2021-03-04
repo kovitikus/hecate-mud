@@ -1,5 +1,6 @@
 from evennia import create_object
-from world import adjectives
+
+from characters import character_adjectives
 
 def main(self, raw_string, **kwargs):
     #Initilize values

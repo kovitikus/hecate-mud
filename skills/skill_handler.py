@@ -1,4 +1,4 @@
-from world.skills import skillsets
+from skills import skillsets
 
 class SkillHandler():
     def __init__(self, owner):

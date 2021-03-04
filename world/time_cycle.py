@@ -1,7 +1,7 @@
 import datetime
 
 from typeclasses.scripts import Script
-from typeclasses.rooms import Room
+from rooms.rooms import Room
 
 class TimeCycle(Script):
     def at_script_creation(self):

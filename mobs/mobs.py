@@ -1,7 +1,7 @@
 from evennia.utils.utils import lazy_property
 
-from typeclasses.characters import Character
-from world.mobs.mob_handler import MobHandler
+from characters.characters import Character
+from mobs.mob_handler import MobHandler
 
 
 class DefaultMob(Character):

@@ -1,5 +1,6 @@
 from evennia.utils.evtable import EvTable
-from world import general_mechanics as gen_mec
+
+from misc import general_mechanics as gen_mec
 
 class InventoryHandler():
     def __init__(self, owner):

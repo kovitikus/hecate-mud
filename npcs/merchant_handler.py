@@ -1,7 +1,7 @@
 from evennia.prototypes.spawner import spawn
 
-from world import general_mechanics as gen_mec
-from world.items import item_prototypes
+from misc import general_mechanics as gen_mec
+from items import item_prototypes
 
 class MerchantHandler:
     def __init__(self, owner):
