@@ -1,3 +1,4 @@
+from characters.currency_handler import CurrencyHandler
 from evennia import DefaultCharacter
 from evennia.utils.create import create_object
 from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
@@ -8,6 +9,7 @@ from npcs.merchant_handler import MerchantHandler
 from items.item_handler import ItemHandler
 from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
+from characters.currency_handler import CurrencyHandler
 
 
 class Character(DefaultCharacter):
@@ -31,6 +33,10 @@ class Character(DefaultCharacter):
     @lazy_property
     def item(self):
         return ItemHandler(self)
+
+    @lazy_property
+    def currency(self):
+        return CurrencyHandler(self)
 
     def at_object_creation(self):
         # Stats
