@@ -1,7 +1,5 @@
 from evennia.utils.evtable import EvTable
 
-from misc import general_mechanics as gen_mec
-
 class InventoryHandler():
     def __init__(self, owner):
         self.owner = owner
@@ -78,7 +76,7 @@ class InventoryHandler():
 
                 string = f"|wYou are carrying:\n{category_string}\n{table}"
         # Add currency
-        string = f"{string}\n{gen_mec.return_currency(owner)}"
+        string = f"{string}\n{owner.currency.return_currency(owner)}"
         owner.msg(string)
     
     def get_inv_final_list(self, filtered_items, arg_type):

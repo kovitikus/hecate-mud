@@ -7,7 +7,6 @@ from evennia.utils.utils import inherits_from, lazy_property
 
 from characters.currency_handler import CurrencyHandler
 from misc.generic_str import article
-from misc import general_mechanics as gen_mec
 
 class Object(DefaultObject):
     @lazy_property
@@ -50,7 +49,7 @@ class Coin(Object):
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            currency = gen_mec.return_currency(self)
+            currency = self.currency.return_currency(self)
             looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
 
 class InventoryContainer(Container):
@@ -67,7 +66,7 @@ class StackQuantity(Object):
         self.attributes.add('quantity', 0)
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            currency = gen_mec.return_currency(self)
+            currency = self.currency.return_currency(self)
             looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
 
 class StackInventory(Object):

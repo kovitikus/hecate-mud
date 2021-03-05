@@ -43,8 +43,16 @@ class Character(DefaultCharacter):
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
         self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
-        
-        self.equip.generate_equipment()
+        equip_dic = {'head': None, 'neck': None, 'shoulders': None, 'chest': None, 'arms': None, 'hands': None,
+                            'fingers': None, 'waist': None, 'thighs': None, 'calves': None, 
+                            'feet': None, 'inventory_container': None}
+        self.attributes.add('equipment', equip_dic)
+
+        # Avoids execution of this code on initial setup of superuser.
+        # Prototype spawner attempts to set objects' home specifically to DEFAULT_HOME, which is Limbo.
+        # In the initial_setup module, Limbo isn't created until after the superuser. https://pastebin.com/Qs4gwwZe
+        if not self.dbref == '#1':
+            self.equip.generate_equipment()
 
         # Statuses
         self.attributes.add('approached', [])

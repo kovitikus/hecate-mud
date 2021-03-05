@@ -27,15 +27,14 @@ class EquipmentHandler:
                 2 slots for 1H weapons for dual wielding.
         '''
         owner = self.owner
-        if not owner.attributes.has('equipment'):
-            basic_bag = spawn('inventory_bag')
-            if basic_bag:
-                basic_bag = basic_bag[0]
-                basic_bag.move_to(owner)
-                equip_dic = {'head': None, 'neck': None, 'shoulders': None, 'chest': None, 'arms': None, 'hands': None,
-                            'fingers': None, 'waist': None, 'thighs': None, 'calves': None, 'feet': None, 'inventory_container': basic_bag}
-                owner.attributes.add('equipment', equip_dic)
-                owner.db.inventory_slots['max_slots'] = basic_bag.db.max_slots
+        if owner.attributes.has('equipment'):
+            if owner.db.equipment['inventory_container'] == None:
+                basic_bag = spawn('inventory_bag')
+                if basic_bag:
+                    basic_bag = basic_bag[0]
+                    basic_bag.move_to(owner)
+                    owner.db.equipment['inventory_container'] = basic_bag
+                    owner.db.inventory_slots['max_slots'] = basic_bag.db.max_slots
     
     def list_equipment(self):
         owner = self.owner
@@ -73,5 +72,3 @@ class EquipmentHandler:
         Feet: {feet}
         Inventory Container: {inventory_container}
         """)
-
-        

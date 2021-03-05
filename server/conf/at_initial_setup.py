@@ -1,3 +1,5 @@
+from evennia.utils.search import search_object
+
 """
 At_initial_setup module template
 
@@ -16,4 +18,9 @@ does what you expect it to.
 
 
 def at_initial_setup():
-    pass
+    # Search by dbref to find the #1 superuser
+    char = search_object('#1', use_dbref=True)[0]
+    char.equip.generate_equipment()
+
+    room = search_object('#2', use_dbref=True)[0]
+    room.key = 'Common Room'
