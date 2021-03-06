@@ -1,3 +1,4 @@
+from evennia.utils import create
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object
 
@@ -21,8 +22,8 @@ does what you expect it to.
 
 def at_initial_setup():
     # Search by dbref to find the #1 superuser
-    char = search_object('#1', use_dbref=True)[0]
-    char.equip.generate_equipment()
+    char1 = search_object('#1', use_dbref=True)[0]
+    char1.equip.generate_equipment()
 
     room = search_object('#2', use_dbref=True)[0]
     room.key = 'Default Home'
@@ -31,5 +32,19 @@ def at_initial_setup():
                     'and the object\'s current room is destroyed. '
                     'Player_Character typeclasses are not allowed to enter this room in a move_to check.')
 
-    #Create the superuser's home room.
-    room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.name}\'s Office')
+    # Create the superuser's home room.
+    rm3 = create_object(typeclass='rooms.rooms.OOC_Room', key='Main Office')
+    char1.home = rm3
+    rm3.tags.add('main_office', category='ooc_room')
+
+    # Create the Common Room. This is where all portals will lead when entering public OOC areas.
+    rm4 = create_object(typeclass='rooms.rooms.OOC_Room', key='Common Room')
+    rm4.tags.add('common_room', category='ooc_room')
+    rm4.tags.add(category='public_ooc')
+
+    # Connect the main office and common room with exits.
+    exit_rm3_rm4 = create_object(typeclass='rooms.exits.Door', key='a dark mahogany door', location=rm3, destination=rm4)
+    exit_rm3_rm4.tags.add(category='ooc_exit')
+
+    exit_rm4_rm3 = create_object(typeclass='rooms.exits.Door', key='a dark mahogany door', location=rm4, destination=rm3)
+    exit_rm4_rm3.tags.add(category='ooc_exit')
