@@ -1,4 +1,6 @@
+from evennia.utils.create import create_object
 from evennia.utils.search import search_object
+
 
 """
 At_initial_setup module template
@@ -23,4 +25,10 @@ def at_initial_setup():
     char.equip.generate_equipment()
 
     room = search_object('#2', use_dbref=True)[0]
-    room.key = 'Common Room'
+    room.key = 'Default Home'
+    room.db.desc = ('The place where things go when their home isn\'t' 
+                    'explicity set in the source code, by a builder, '
+                    'or when an object\'s home is destroyed')
+
+    #Create the superuser's home room.
+    room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.get_display_name()}\'s Office')
