@@ -88,7 +88,6 @@ class Room(DefaultRoom):
             short_desc = f"{short_desc} {exits_string}"
         return short_desc
 
-
     def return_appearance(self, looker, **kwargs):
         """
         This formats a description. It is the hook a 'look' command
