@@ -31,4 +31,4 @@ def at_initial_setup():
                     'or when an object\'s home is destroyed')
 
     #Create the superuser's home room.
-    room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.get_display_name()}\'s Office')
+    room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.name}\'s Office')
