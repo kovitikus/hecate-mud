@@ -26,9 +26,9 @@ def at_initial_setup():
 
     room = search_object('#2', use_dbref=True)[0]
     room.key = 'Default Home'
-    room.db.desc = ('This is where objects travel to when their home location isn\'t ' 
+    room.db.desc = ('This is the room where objects travel to when their home location isn\'t ' 
                     'explicity set in the source code or by a builder, '
-                    'and the object\'s home is destroyed. '
+                    'and the object\'s current room is destroyed. '
                     'Player_Character typeclasses are not allowed to enter this room in a move_to check.')
 
     #Create the superuser's home room.
