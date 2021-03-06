@@ -176,7 +176,17 @@ class Character(DefaultCharacter):
         
     def at_after_move(self, source_location):
         """
-        This hook's default behavior is to look at the room after it moves to it.
+        Once the self object has settled in at it's new location, this hook is called.
+
+        This hook's default behavior is to look at the room, returning the desc attribute on the room to the self object.
+        ---
+        I've instead changed it to call an attribute on the room that holds a short description.
+        This is a custom system that returns an abbrevieted glance at the room and the most critical information.
+
+        Example:
+            You arrive at <destination name>. <Person/NPC> <is/are> here. You see <exit name> to the 
+                                                    <exit direction>, an <exit name> to the <exit direction>,
+                                                                        and <exit name> to the <exit direction>.
         """
         # Force the character to be greeted with the room's short description.
         if not source_location:
