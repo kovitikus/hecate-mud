@@ -28,7 +28,8 @@ def at_initial_setup():
     room.key = 'Default Home'
     room.db.desc = ('The place where things go when their home location isn\'t ' 
                     'explicity set in the source code, by a builder, '
-                    'or when an object\'s home is destroyed.')
+                    'or when an object\'s home is destroyed. '
+                    'Player_Character typeclasses are not allowed to enter this room in a move_to check.')
 
     #Create the superuser's home room.
     room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.name}\'s Office')
