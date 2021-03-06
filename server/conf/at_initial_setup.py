@@ -26,9 +26,9 @@ def at_initial_setup():
 
     room = search_object('#2', use_dbref=True)[0]
     room.key = 'Default Home'
-    room.db.desc = ('The place where things go when their home isn\'t' 
+    room.db.desc = ('The place where things go when their home location isn\'t ' 
                     'explicity set in the source code, by a builder, '
-                    'or when an object\'s home is destroyed')
+                    'or when an object\'s home is destroyed.')
 
     #Create the superuser's home room.
     room3 = create_object(typeclass='rooms.rooms.Room', key=f'{char.name}\'s Office')
