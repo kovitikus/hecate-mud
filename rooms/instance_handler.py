@@ -17,7 +17,7 @@ class InstanceHandler:
     # A portal will open in the owner's current location, leading to the first room.
     # Another portal is added to the final room that returns to the original location.
 
-    def generate_rooms(self):
+    def generate_dungeon_rooms(self):
         # Each instance will, for now, contain a possibility of 3-5 rooms.
         room_qty = random.randrange(3-5)
         # Save the data to the handler.
@@ -68,5 +68,9 @@ class InstanceHandler:
     def get_exit_key(self):
         room_key = self.room_key
         if room_key == 'forest':
+            pass
         elif room_key == 'sewer':
+            pass
         elif room_key == 'cave':
+            pass
+        pass
