@@ -36,6 +36,7 @@ def at_initial_setup():
     rm3 = create_object(typeclass='rooms.rooms.OOC_Room', key='Main Office')
     char1.home = rm3
     rm3.tags.add('main_office', category='ooc_room')
+    char1.move_to(rm3)
 
     # Create the Common Room. This is where all portals will lead when entering public OOC areas.
     rm4 = create_object(typeclass='rooms.rooms.OOC_Room', key='Common Room')
@@ -43,8 +44,10 @@ def at_initial_setup():
     rm4.tags.add(category='public_ooc')
 
     # Connect the main office and common room with exits.
-    exit_rm3_rm4 = create_object(typeclass='rooms.exits.Door', key='a dark mahogany door', location=rm3, destination=rm4)
+    exit_rm3_rm4 = create_object(typeclass='rooms.exits.Door', key='north', aliases = ['n', 'nor', 'nort', 'door'], 
+                                    location=rm3, destination=rm4, desc='a mahogany door')
     exit_rm3_rm4.tags.add(category='ooc_exit')
 
-    exit_rm4_rm3 = create_object(typeclass='rooms.exits.Door', key='a dark mahogany door', location=rm4, destination=rm3)
+    exit_rm4_rm3 = create_object(typeclass='rooms.exits.Door', key='south', aliases=['s', 'sou', 'sout', 'door'],
+                                    location=rm4, destination=rm3, desc='a mahogany door')
     exit_rm4_rm3.tags.add(category='ooc_exit')
