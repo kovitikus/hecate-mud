@@ -1,7 +1,100 @@
-from evennia import Command as BaseCommand
+from evennia import Command as BaseCommand, InterruptCommand
 
 from misc import general_mechanics as gen_mec
 
+class CmdFollow(BaseCommand):
+    """
+    Follows a specified target, automatically attempting to travel with them when they traverse an exit.
+
+    Using 'follow' by itself when already following a leader will force your character to stop following.
+
+    Usage:
+        follow <target>
+
+    Example:
+        > follow alephate
+        > follow ale
+
+        > fol
+        You stop following Alephate.
+
+    Aliases:
+        follo, foll, fol
+    """
+    key = 'follow'
+    aliases = ['follo', 'foll', 'fol']
+
+    def func(self):
+        caller = self.caller
+        leader = caller.db.leader
+
+        # Check for unfollow.
+        if not self.args:
+            if leader == None:
+                caller.msg("You must specify a target to follow.")
+                return
+            else:
+                caller.msg(f"You stop following {leader.get_display_name(caller)}.")
+                leader.msg(f"{caller.get_display_name(leader)} stops following you.")
+                caller.location.msg_contents(f"{caller.name} stops following {leader.name}.")
+                caller.db.leader = None
+                return
+
+        # Find and follow a target.
+        args = self.args.strip()
+        target = caller.search(args)[0]
+        if not target:
+            caller.msg(f"Could not find {args}.")
+            return
+        else:
+            caller.db.leader = target
+            caller.msg(f"You follow {target.get_display_name(caller)}.")
+            target.db.followers.append(target)
+            target.msg(f"{caller.get_display_name(target)} follows you.")
+            caller.location.msg_contents(f"{caller.name} follows {target.name}.", exclude=[caller, target])
+
+class CmdAbandon(BaseCommand):
+    """
+    Abandons a specified target, if that target is following you.
+
+    Usage:
+        abandon Karen
+
+    Aliases:
+        aban, aband, abando
+    """
+    key = 'abandon'
+    aliases = ['aban', 'aband,', 'abando']
+    
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("You must specify a target to abandon.")
+        args = self.args
+
+        target = caller.search(args)[0]
+        if not target:
+            caller.msg(f"{args} not found. Specify a valid target to abandon.")
+        else:
+            caller.db.followers.remove(target)
+
+class CmdDisband(BaseCommand):
+    """
+    Abandons all followers.
+
+    Usage:
+        disband
+
+    Aliases:
+        dis, disb, disba, disban
+    """
+    key = 'disband'
+    aliases = ['dis', 'disb', 'disba', 'disban']
+
+    def func(self):
+        self.caller.db.followers = []
+
+# Exit Commands
 class CmdNorth(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
@@ -92,7 +185,6 @@ class CmdSouth(BaseCommand):
             caller.msg("There is no exit to the south.")
             return
 
-
 class CmdSouthwest(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
@@ -147,6 +239,7 @@ class CmdNorthwest(BaseCommand):
             caller.msg("There is no exit to the northwest.")
             return
 
+
 # Travel Options
 class CmdAbandonFailedTraveller(BaseCommand):
     """
@@ -169,13 +262,15 @@ class CmdAbandonFailedTraveller(BaseCommand):
 
     key = 'abandonfailedtraveller'
     aliases = 'abft'
-    abft_on = ['1', 'yes', 'y', 'true', 't']
-    abft_off = ['0', 'no', 'n', 'false', 'f']
+    
 
     def func(self):
-        if self.args in self.abft_on:
+        abft_on = ['1', 'yes', 'y', 'true', 't']
+        abft_off = ['0', 'no', 'n', 'false', 'f']
+
+        if self.args in abft_on:
             self.caller.account.db.abandon_failed_traveller = True
-        elif self.args in self.abft_off:
+        elif self.args in abft_off:
             self.caller.account.db.abandon_failed_traveller = False
         else:
             self.caller.msg(f"Your request to update {self.key} requires a valid option. Use \"help abft\" for more info.")
