@@ -44,10 +44,10 @@ def at_initial_setup():
     rm4.tags.add(category='public_ooc')
 
     # Connect the main office and common room with exits.
-    exit_rm3_rm4 = create_object(typeclass='rooms.exits.Door', key='north', aliases = ['n', 'nor', 'nort', 'door'], 
+    exit_rm3_rm4 = create_object(typeclass='travel.exits.Door', key='north', aliases = ['n', 'nor', 'nort', 'door'], 
                                     location=rm3, destination=rm4, desc='a mahogany door')
     exit_rm3_rm4.tags.add(category='ooc_exit')
 
-    exit_rm4_rm3 = create_object(typeclass='rooms.exits.Door', key='south', aliases=['s', 'sou', 'sout', 'door'],
+    exit_rm4_rm3 = create_object(typeclass='travel.exits.Door', key='south', aliases=['s', 'sou', 'sout', 'door'],
                                     location=rm4, destination=rm3, desc='a mahogany door')
     exit_rm4_rm3.tags.add(category='ooc_exit')

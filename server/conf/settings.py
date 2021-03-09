@@ -138,4 +138,4 @@ BASE_CHARACTER_TYPECLASS = "characters.characters.Character"
 # Typeclass for rooms (fallback)
 BASE_ROOM_TYPECLASS = "rooms.rooms.Room"
 # Typeclass for Exit objects (fallback).
-BASE_EXIT_TYPECLASS = "rooms.exits.Exit"
+BASE_EXIT_TYPECLASS = "travel.exits.Exit"
