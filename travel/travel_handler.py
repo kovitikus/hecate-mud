@@ -13,8 +13,8 @@ class TravelHandler:
         self.all_travellers_cleared = True
         self.cleared_travellers = []
 
-        # TODO: This abandon option requires a menu for the player to manage their account options. 
-        # It is currently set to false by default in the Account typeclass at_object_creation.
+        # This option allows the player to abandon a party member if they fail to traverse with the rest of the party.
+        # Its value is set by the player via the 'abandonfailedtraveler' or 'abft' command in the travel_cmds.py module.
         self.abandon_failed_traveller = owner.account.db.abandon_failed_traveller
 
         self.find_exit(direction)
