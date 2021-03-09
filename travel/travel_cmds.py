@@ -2,7 +2,7 @@ from evennia import Command as BaseCommand
 
 from misc import general_mechanics as gen_mec
 
-class North(BaseCommand):
+class CmdNorth(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -20,7 +20,7 @@ class North(BaseCommand):
             caller.msg("There is no exit to the north.")
             return
 
-class Northeast(BaseCommand):
+class CmdNortheast(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -38,7 +38,7 @@ class Northeast(BaseCommand):
             caller.msg("There is no exit to the northeast.")
             return
 
-class East(BaseCommand):
+class CmdEast(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -56,7 +56,7 @@ class East(BaseCommand):
             caller.msg("There is no exit to the east.")
             return
 
-class Southeast(BaseCommand):
+class CmdSoutheast(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -74,7 +74,7 @@ class Southeast(BaseCommand):
             caller.msg("There is no exit to the southeast.")
             return
 
-class South(BaseCommand):
+class CmdSouth(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -93,7 +93,7 @@ class South(BaseCommand):
             return
 
 
-class Southwest(BaseCommand):
+class CmdSouthwest(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -111,7 +111,7 @@ class Southwest(BaseCommand):
             caller.msg("There is no exit to the southwest.")
             return
 
-class West(BaseCommand):
+class CmdWest(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -129,7 +129,7 @@ class West(BaseCommand):
             caller.msg("There is no exit to the west.")
             return
 
-class Northwest(BaseCommand):
+class CmdNorthwest(BaseCommand):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -146,3 +146,36 @@ class Northwest(BaseCommand):
         if not success:
             caller.msg("There is no exit to the northwest.")
             return
+
+# Travel Options
+class CmdAbandonFailedTraveller(BaseCommand):
+    """
+    Turns on or off the ability to abandon any object following you, 
+        if that object does not have permission to enter the destination.
+
+    Usage:
+        abandonfailedtraveller 1|0|yes|no|y|n|true|false|t|f
+
+    Example:
+        abft1
+        abftn
+        abandonfailedtraveller false
+        abft 1
+        abft no
+
+    Alias:
+        abft 
+    """
+
+    key = 'abandonfailedtraveller'
+    aliases = 'abft'
+    abft_on = ['1', 'yes', 'y', 'true', 't']
+    abft_off = ['0', 'no', 'n', 'false', 'f']
+
+    def func(self):
+        if self.args in self.abft_on:
+            self.caller.account.db.abandon_failed_traveller = True
+        elif self.args in self.abft_off:
+            self.caller.account.db.abandon_failed_traveller = False
+        else:
+            self.caller.msg(f"Your request to update {self.key} requires a valid option. Use \"help abft\" for more info.")
