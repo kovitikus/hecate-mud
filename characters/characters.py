@@ -54,6 +54,10 @@ class Character(DefaultCharacter):
         if not self.dbref == '#1':
             self.equip.generate_equipment()
 
+        # Follow and lead behaviors for traversing an exit as a group.
+        self.attributes.add('leader', None)
+        self.attributes.add('followers', [])
+
         # Statuses
         self.attributes.add('approached', [])
         self.attributes.add('ko', False)
