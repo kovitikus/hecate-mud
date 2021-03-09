@@ -1,3 +1,4 @@
+from rooms.travel_handler import TravelHandler
 from characters.currency_handler import CurrencyHandler
 from evennia import DefaultCharacter
 from evennia.utils.create import create_object
@@ -10,9 +11,14 @@ from items.item_handler import ItemHandler
 from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
 from characters.currency_handler import CurrencyHandler
+from rooms.travel_handler import TravelHandler
 
 
 class Character(DefaultCharacter):
+
+    @lazy_property
+    def travel(self):
+        return TravelHandler(self)
 
     @lazy_property
     def skill(self):
