@@ -1,3 +1,5 @@
+from evennia.utils.utils import inherits_from
+
 from misc import general_mechanics as gen_mec
 
 # Handles the traversal of objects to/from other objects.
@@ -29,10 +31,16 @@ class TravelHandler:
             return True
 
 #-------------------------------------------------------------------
-    def find_exit(self):
+    def find_exit(self, dest=None):
         for x in self.owner.location.contents:
-            if x.db.card_dir == self.direction:
+            if not dest:
+                if x.db.card_dir == self.direction:
+                    self.exit_obj = x
+                    return
+            elif x.destination == dest:
                 self.exit_obj = x
+            else:
+                self.exit_obj = 'somewhere'
 
     def check_traveller_access(self):
         owner = self.owner
@@ -95,3 +103,38 @@ class TravelHandler:
             else:
                 obj.msg(f"You follow {owner.get_display_name(obj)} as they travel to {exit_obj.get_display_name(obj)}.")
                 exit_obj.at_traverse(obj, exit_obj.destination)
+
+    def travel_one_way(self):
+        if not hasattr(self.exit_obj, 'destination'):
+            self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=(self.owner, ))
+            return True
+
+    def traveller_depart(self):
+        pass
+
+    def pick_traversal_string(self):
+        exit_obj = self.exit_obj
+        owner_name = self.owner.name
+        exit_name = exit_obj.name
+        card_dir = exit_obj.db.card_dir
+
+        # Determine which traversal string will be generated.
+        if inherits_from(exit_obj, "travel.exits.Door"):
+            self_str = f"You walk away through {exit_name}, to the {exit_obj.name}."
+            others_str = f"{owner_name} walks away through {exit_name}, to the {exit_obj.name}."
+        elif inherits_from(exit_obj, "travel.exits.Stair"):
+            if exit_obj.name in ['up', 'down']:
+                self_str = f"You depart, climbing {card_dir} {exit_obj.db.desc}."
+                others_str = f"{owner_name} departs, climbing {exit_obj.name} {exit_obj.db.desc}."
+            else:
+                self_str = f"You depart, climbing {card_dir} to the {exit_obj.db.desc}."
+                others_str = f"{owner_name} departs, climbing {card_dir} to the {exit_obj.db.desc}."
+        else:
+            self_str = f"You walk away to {exit_obj.destination.name}, to the {card_dir}."
+            others_str = f"{owner_name} walks away to {exit_obj.destination.name}, to the {card_dir}."
+        self.self_str = self_str
+        self.others_str = others_str
+
+    def send_traversal_string(self):
+        self.owner.msg(self.self_str)
+        self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
