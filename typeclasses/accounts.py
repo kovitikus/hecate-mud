@@ -51,6 +51,7 @@ class Account(DefaultAccount):
         self.attributes.add("_playable_characters", [], lockstring=lockstring)
         self.attributes.add("_saved_protocol_flags", {}, lockstring=lockstring)
         self.tags.add("new_account")
+        self.attributes.add('abandon_failed_traveller', False)
 
     @classmethod
     def create(cls, *args, **kwargs):
