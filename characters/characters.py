@@ -99,31 +99,13 @@ class Character(DefaultCharacter):
             return
         location = self.location
         origin = location or "nowhere"
-        exits = [o for o in location.contents if o.location is location and o.destination is destination]
-        var_exit = exits[0] if exits else "somewhere"
 
-        # If the player is teleported or travels through a 1 way exit, give a generic announcement.
-        if not hasattr(var_exit, 'destination'):
-            location.msg_contents(f"{self.name} departs to {var_exit}.", exclude=(self, ))
+        self.travel.find_exit(dest=destination)
+        if self.travel.travel_one_way: # If the player is teleported.
             return
+        self.travel.pick_traversal_string()
+        self.travel.send_traversal_string()
         
-        # Determine which traversal string will be generated.
-        if inherits_from(var_exit, "travel.exits.Door"):
-            self_str = f"You walk away through {var_exit.db.desc}, to the {var_exit.name}."
-            others_str = f"{self.name} walks away through {var_exit.db.desc}, to the {var_exit.name}."
-        elif inherits_from(var_exit, "travel.exits.Stair"):
-            if var_exit.name in ['up', 'down']:
-                self_str = f"You depart, climbing {var_exit.name} {var_exit.db.desc}."
-                others_str = f"{self.name} departs, climbing {var_exit.name} {var_exit.db.desc}."
-            else:
-                self_str = f"You depart, climbing {var_exit.name} to the {var_exit.db.desc}."
-                others_str = f"{self.name} departs, climbing {var_exit.name} to the {var_exit.db.desc}."
-        else:
-            self_str = f"You walk away to {var_exit.destination.name}, to the {var_exit.name}."
-            others_str = f"{self.name} walks away to {var_exit.destination.name}, to the {var_exit.name}."
-
-        self.msg(self_str)
-        location.msg_contents(others_str, exclude=(self, ))
 
     def announce_move_to(self, source_location, msg=None, mapping=None, **kwargs):
         """
