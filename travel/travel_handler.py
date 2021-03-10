@@ -7,6 +7,44 @@ class TravelHandler:
     def __init__(self, owner):
         self.owner = owner
 
+#---------------------
+# General Methods
+    def find_exit(self, dest=None):
+        for x in self.owner.location.contents:
+            if not dest:
+                if x.db.card_dir == self.direction:
+                    self.exit_obj = x
+                    return
+            elif x.destination == dest:
+                self.exit_obj = x
+            else:
+                self.exit_obj = 'somewhere'
+
+    def card_dir_name(self, card_dir):
+        if card_dir == 'n':
+            card_dir = 'north'
+        elif card_dir == 'ne':
+            card_dir = 'northeast'
+        elif card_dir == 'e':
+            card_dir = 'east'
+        elif card_dir == 'se':
+            card_dir = 'southeast'
+        elif card_dir == 's':
+            card_dir = 'south'
+        elif card_dir == 'sw':
+            card_dir = 'southwest'
+        elif card_dir == 'w':
+            card_dir = 'west'
+        elif card_dir == 'nw':
+            card_dir = 'northwest'
+        elif card_dir == 'up':
+            card_dir = 'upwards'
+        elif card_dir == 'down':
+            card_dir == 'downwards'
+        return card_dir
+
+#-------------------
+# Cardinal Exit Traversal
     def traverse_cardinal_exit(self, direction):
         owner = self.owner
         self.direction = direction
@@ -30,18 +68,8 @@ class TravelHandler:
             self.traverse_exit()
             return True
 
-#-------------------------------------------------------------------
-    def find_exit(self, dest=None):
-        for x in self.owner.location.contents:
-            if not dest:
-                if x.db.card_dir == self.direction:
-                    self.exit_obj = x
-                    return
-            elif x.destination == dest:
-                self.exit_obj = x
-            else:
-                self.exit_obj = 'somewhere'
-
+#---------------------
+# Logic for grouped object movement.
     def check_traveller_access(self):
         owner = self.owner
         exit_obj = self.exit_obj
@@ -104,13 +132,12 @@ class TravelHandler:
                 obj.msg(f"You follow {owner.get_display_name(obj)} as they travel to {exit_obj.get_display_name(obj)}.")
                 exit_obj.at_traverse(obj, exit_obj.destination)
 
+#---------------------------------------------------------------------
+# announce_move_from hook on Character typeclass
     def travel_one_way(self):
         if not hasattr(self.exit_obj, 'destination'):
             self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=(self.owner, ))
             return True
-
-    def traveller_depart(self):
-        pass
 
     def pick_traversal_string(self):
         exit_obj = self.exit_obj
@@ -118,23 +145,144 @@ class TravelHandler:
         exit_name = exit_obj.name
         card_dir = exit_obj.db.card_dir
 
-        # Determine which traversal string will be generated.
-        if inherits_from(exit_obj, "travel.exits.Door"):
-            self_str = f"You walk away through {exit_name}, to the {exit_obj.name}."
-            others_str = f"{owner_name} walks away through {exit_name}, to the {exit_obj.name}."
-        elif inherits_from(exit_obj, "travel.exits.Stair"):
-            if exit_obj.name in ['up', 'down']:
-                self_str = f"You depart, climbing {card_dir} {exit_obj.db.desc}."
-                others_str = f"{owner_name} departs, climbing {exit_obj.name} {exit_obj.db.desc}."
-            else:
-                self_str = f"You depart, climbing {card_dir} to the {exit_obj.db.desc}."
-                others_str = f"{owner_name} departs, climbing {card_dir} to the {exit_obj.db.desc}."
-        else:
-            self_str = f"You walk away to {exit_obj.destination.name}, to the {card_dir}."
-            others_str = f"{owner_name} walks away to {exit_obj.destination.name}, to the {card_dir}."
-        self.self_str = self_str
-        self.others_str = others_str
+        # Generate a string from the exits list based on the exit type and if a direction exists.
+        owner = self.owner
+        exit_str = None
 
+        # Check for special exit typeclasses.
+        if exit_obj.db.card_dir is not None:
+            if exit_obj.tags.get('door', category='exits'):
+                self.door_str()
+            elif exit_obj.tags.get('stair', category='exits'):
+                self.stair_str()
+            elif exit_obj.tags.get('ladder', category='exits'):
+                self.ladder_str()
+        else:
+            # Exit object has no direction and therefore doesn't require typeclass consideration.
+            self.self_str = f"You depart by way of 045{exit_obj.get_display_name(owner)}|n"
+            self.others_str = f"{owner.name} departs by way of |045{exit_obj.name}|n"
+
+    # Door Strings
+    def door_str(self):
+        owner = self.owner
+        exit_obj = self.exit_obj
+
+        if exit_obj.db.card_dir is not None:
+            if exit_obj.db.card_dir in ['up', 'dwn']:
+                self.self_str = (f"You climb |350{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                                    f"through |045{exit_obj.get_display_name(owner)}|n.")
+                self.others_str = (f"{owner.name} climbs |350{self.card_dir_name(exit_obj.db.card_dir)}|n " # upwards, downwards
+                                    f"through |045{exit_obj.name}|n.")
+            else:
+                self.self_str = (f"You head |350{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                                    f"through |045{exit_obj.get_display_name(owner)}|n.")
+                self.others_str = (f"{owner.name} heads |350{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                                    f"through |045{exit_obj.name}|n.")
+    # Stair Strings
+    def stair_str(self):
+        owner = self.owner
+        exit_obj = self.exit_obj
+
+        if exit_obj.db.card_dir is not None:
+            if exit_obj.db.card_dir in ['up', 'dwn']:
+                self.self_str = (f"You climb |045{exit_obj.get_display_name(owner)}|n "
+                            f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
+                            f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+            else:
+                self.self_str = (f"You climb |045{exit_obj.get_display_name(owner)}|n "
+                            f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
+                            f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+    # Ladder Strings
+    def ladder_str(self):
+        owner = self.owner
+        exit_obj = self.exit_obj
+
+        if exit_obj.db.card_dir is not None:
+            if exit_obj.db.card_dir in ['up', 'dwn']:
+                self.self_str = (f"You climb |045{exit_obj.get_display_name(owner)}|n "
+                            f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
+                            f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+            else:
+                self.self_str = (f"You climb |045{exit_obj.get_display_name(owner)}|n "
+                            f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
+                            f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+
+    #-------------------------------------------
+    # Sends the final string to the specified objects.
     def send_traversal_string(self):
         self.owner.msg(self.self_str)
         self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
+
+#-----
+# announce_move_to hook on Character typeclass (WIP)
+    def fabricated_object(self):
+        pass
+
+#-------------------------
+# Generate a summary description of a location, its occupants, and exits.
+# It is called from the Character typeclass by the at_after_move() hook.
+    def location_summary(self):
+        """
+        You arrive at <location name>. <Person/NPC> <is/are> here. You see <exit name> to the 
+        <exit direction>, and <exit name> to the <exit direction>.
+        """
+        owner = self.owner
+        location = owner.location
+        characters = []
+        exits = []
+        char_str = ''
+        exit_str = ''
+        msg = ''
+
+        # Generate lists of characters and exits in the room.
+        for i in location:
+            if inherits_from(i, 'characters.characters.Character'):
+                characters.append(i)
+            elif inherits_from(i, 'travel.exits.Exit'):
+                exits.append(i)
+
+        # Parse list of characters.
+        if len(characters) > 1:
+            char_str = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(characters))
+        elif len(characters) == 1:
+            char_str = f'{characters[0].get_display_name(owner)}'
+        else:
+            char_str = False
+
+        # Parse list of exits.
+        if len(exits) > 0:
+            exit_str = self.exits_to_string(exits)
+        else:
+            # No exits were found.
+            no_exit_str = "There are no obvious exits."
+            exit_str = False
+
+        # Generate final outgoing message.
+        msg = f"You arrive at {location.get_display_name(owner)}."
+        msg = f"{msg}{'' if char_str == False else char_str}" # Characters string addition.
+        msg = f"{msg} {no_exit_str if exit_str == False else exit_str}"
+        return msg
+
+
+    # Generate a string from a list of exits.
+    def exits_to_string(self, exits):
+        owner = self.owner
+        exit_str = ''
+        for i in exits:
+            exit_str = f"{exit_str}{self.exit_str_gen(i)} "
+        return exit_str
+
+    # Decides if an exit requires a direction in its string.
+    def exit_str_gen(self, exit_obj):
+        owner = self.owner
+        if exit_obj.db.card_dir is not None:
+            exit_str = (f"|045{exit_obj.get_display_name(owner)}|n heading "
+                        f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n") # north, east, southwest, etc
+        else: # Exit has no direction.
+            exit_str = f"|045{exit_obj.get_display_name(owner)}|n"
+
+        return exit_str
