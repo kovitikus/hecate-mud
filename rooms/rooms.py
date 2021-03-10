@@ -31,63 +31,6 @@ class Room(DefaultRoom):
         if not self.attributes.has('crowd'):
             self.attributes.add('crowd', False)
 
-    def short_desc(self, looker, **kwargs):
-        """
-        You arrive at <destination name>. <Person/NPC> <is/are> here. You see <exit name> to the 
-        <exit direction>, and <exit name> to the <exit direction>.
-        """
-        #TODO: Group together exits with the same <exit name>
-        #       You see <exit name> to the west, south, and north.
-        if not looker:
-            return
-        # Get and identify all visible objects.
-        visible = (con for con in self.contents if con != looker and
-                   con.access(looker, "view"))
-        exits, exit_name, destinations, characters = [], [], [], []
-        for con in visible:
-            key = con.get_display_name(looker)
-            if con.destination:
-                exits.append(con)
-                exit_name.append(key)
-                destinations.append(con.destination.get_display_name(looker))
-            elif inherits_from(con, "characters.characters.Character"):
-                characters.append(f"|c{key}|n")
-
-        short_desc = f"You arrive at {self.get_display_name(looker)}."
-        if characters:
-            short_desc = f"{short_desc} {list_to_string(characters)} {'is' if len(characters) == 1 else 'are'} here."
-        
-        if exits:
-            num = 1
-            exits_len = len(exits)
-            exits_string = f"You see "
-            for x in exits:
-                x_alias = x.aliases.all()
-                if inherits_from(x, "travel.exits.Door"):
-                    if exits_len == 1:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
-                    elif exits_len == num:
-                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
-                    else:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
-                elif inherits_from(x, "travel.exits.Stair"):
-                    if exits_len == 1:
-                        exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
-                    elif exits_len == num:
-                        exits_string += f"and |045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
-                    else:
-                        exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n, "
-                else:
-                    if exits_len == 1:
-                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
-                    elif exits_len == num:
-                        exits_string += f"and |045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
-                    else:
-                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n, "
-                num += 1
-            short_desc = f"{short_desc} {exits_string}"
-        return short_desc
-
     def return_appearance(self, looker, **kwargs):
         """
         This formats a description. It is the hook a 'look' command
