@@ -100,10 +100,11 @@ class Character(DefaultCharacter):
         location = self.location
         origin = location or "nowhere"
 
+        # Tells the handler to find an exit and store that exit on itself as self.exit_obj
         self.travel.find_exit(dest=destination)
-        if self.travel.travel_one_way: # If the player is teleported.
+        if self.travel.travel_one_way(): # If the player is teleported.
             return
-        self.travel.pick_traversal_string()
+        self.travel.pick_traversal_string() #Chooses the departing exit string.
         self.travel.send_traversal_string()
         
 
@@ -138,6 +139,7 @@ class Character(DefaultCharacter):
         origin = source_location
         destination = self.location
         exits = []
+
         if origin:
             exits = [o for o in destination.contents if o.location is destination and o.destination is origin]
             origin_exit = exits[0] if exits else "somewhere"
@@ -181,7 +183,7 @@ class Character(DefaultCharacter):
         # Force the character to be greeted with the room's short description.
         if not source_location:
             return
-        self.msg(f"{self.location.short_desc(self)}")
+        self.msg(f"{self.travel.location_summary()}")
 
     def return_appearance(self, looker, **kwargs):
         if not looker:
