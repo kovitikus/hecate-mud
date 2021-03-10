@@ -255,13 +255,14 @@ class CmdAbandonFailedTraveller(BaseCommand):
         abandonfailedtraveller false
         abft 1
         abft no
+        abandonfailedtraveler t
 
     Alias:
-        abft 
+        abft, abandonfailedtraveler
     """
 
     key = 'abandonfailedtraveller'
-    aliases = 'abft'
+    aliases = ['abft', 'abandonfailedtraveler']
     
 
     def func(self):
