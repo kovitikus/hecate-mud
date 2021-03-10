@@ -1,3 +1,4 @@
+from unicodedata import category
 from evennia.utils.utils import inherits_from
 
 from misc import general_mechanics as gen_mec
@@ -236,7 +237,7 @@ class TravelHandler:
         else:
             return False
 
-    # doc str
+    # Determine arrival string based on exit type.
     def pick_arrival_string(self, origin):
         # Arrival string direction must be the opposite of the origin_exit cardinal direction.
         # A character walking to the east will arrive in its destination from the west.
@@ -248,27 +249,44 @@ class TravelHandler:
             if origin_exit.tags.get('door', category='exits'):
                 self.arrive_door_str()
             elif origin_exit.tags.get('stair', category='exits'):
-                self.arrive_stair_str() #TODO: finish other exit types.
+                self.arrive_stair_str()
+            elif origin_exit.tags.get('ladder', category='exits'):
+                self.arrive_ladder_str()
         else:
-            others_str = f"{self.name} arrives."
+            self.others_str = f"{self.name} arrives."
 
-    # doc str
+    # Door Strings
     def arrive_door_str(self):
         origin_exit = self.origin_exit
         if origin_exit.name in ['up', 'down']:
-            others_str = (f"{self.name} arrives, climbing |350{self.card_dir_name(origin_exit.db.card_dir)}|n "
+            self.others_str = (f"{self.name} arrives, climbing |350{self.card_dir_name(origin_exit.db.card_dir)}|n "
                             f"through {origin_exit.name}.")
         else:
-            others_str = (f"{self.name} enters by way of {origin_exit.name} from the "
+            self.others_str = (f"{self.name} arrives from {origin_exit.name} to the "
                             f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n")
-    # doc str
+    # Stair Strings
     def arrive_stair_str(self):
-        pass
+        origin_exit = self.origin_exit
+        if origin_exit.name in ['up', 'down']:
+            self.others_str = (f"{self.name} arrives, climbing {origin_exit.name} "
+                                f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n ")
+        else:
+            self.others_str = (f"{self.name} arrives from {origin_exit.name} to the "
+                            f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n")
+    # Ladder Strings
+    def arrive_ladder_str(self):
+        origin_exit = self.origin_exit
+        if origin_exit.name in ['up', 'down']:
+            self.others_str = (f"{self.name} arrives, climbing {origin_exit.name} "
+                                f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n ")
+        else:
+            self.others_str = (f"{self.name} arrives from {origin_exit.name} to the "
+                            f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n")
     
     # doc str
     def send_arrival_string(self):
-        self.owner.msg(self.self_str)
         self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
+
 #-------------------------
 # at_after_move() hook on Character typeclass
     # Generate a summary description of a location, its occupants, and exits.
