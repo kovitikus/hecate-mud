@@ -41,11 +41,14 @@ class Door(Exit):
     def at_object_creation(self):
         self.attributes.add('open', True)
         self.attributes.add('desc', 'a door')
+        self.tags.add('door', category='exits')
 
 class Stair(Exit):
     def at_object_creation(self):
         self.attributes.add('desc', 'a stairway')
+        self.tags.add('stair', category='exits')
 
 class Ladder(Exit):
     def at_object_creation(self):
         self.attributes.add('desc', 'a ladder')
+        self.tags.add('ladder', category='exits')
