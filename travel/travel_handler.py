@@ -134,12 +134,13 @@ class TravelHandler:
 
 #---------------------------------------------------------------------
 # announce_move_from hook on Character typeclass
+    # doc str
     def travel_one_way(self):
         if not hasattr(self.exit_obj, 'destination'):
             self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=(self.owner, ))
             return True
-
-    def pick_traversal_string(self):
+    # doc str
+    def pick_departure_string(self):
         exit_obj = self.exit_obj
         owner_name = self.owner.name
         exit_name = exit_obj.name
@@ -152,18 +153,18 @@ class TravelHandler:
         # Check for special exit typeclasses.
         if exit_obj.db.card_dir is not None:
             if exit_obj.tags.get('door', category='exits'):
-                self.door_str()
+                self.depart_door_str()
             elif exit_obj.tags.get('stair', category='exits'):
-                self.stair_str()
+                self.depart_stair_str()
             elif exit_obj.tags.get('ladder', category='exits'):
-                self.ladder_str()
+                self.depart_ladder_str()
         else:
             # Exit object has no direction and therefore doesn't require typeclass consideration.
             self.self_str = f"You depart by way of 045{exit_obj.get_display_name(owner)}|n"
             self.others_str = f"{owner.name} departs by way of |045{exit_obj.name}|n"
 
     # Door Strings
-    def door_str(self):
+    def depart_door_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
 
@@ -179,7 +180,7 @@ class TravelHandler:
                 self.others_str = (f"{owner.name} heads |350{self.card_dir_name(exit_obj.db.card_dir)}|n "
                                     f"through |045{exit_obj.name}|n.")
     # Stair Strings
-    def stair_str(self):
+    def depart_stair_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
 
@@ -195,7 +196,7 @@ class TravelHandler:
                 self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
                             f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
     # Ladder Strings
-    def ladder_str(self):
+    def depart_ladder_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
 
@@ -211,20 +212,66 @@ class TravelHandler:
                 self.others_str = (f"{owner.name} climbs |045{exit_obj.name}|n "
                             f"to the |350{self.card_dir_name(exit_obj.db.card_dir)}|n.")
 
-    #-------------------------------------------
     # Sends the final string to the specified objects.
-    def send_traversal_string(self):
+    def send_departure_string(self):
         self.owner.msg(self.self_str)
         self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
 
-#-----
+#-------------------------------------------------------
 # announce_move_to hook on Character typeclass (WIP)
-    def fabricated_object(self):
-        pass
+    # doc str
+    def find_origin_exit(self, origin, destination):
+        exits = []
+        for o in destination.contents:
+            if o.location is destination and o.destination is origin:
+                exits.append(o)
+        self.origin_exit = exits[0] if exits else "somewhere"
 
+    # doc str
+    def origin_exit_missing_destination(self, origin, location):
+        if not hasattr(self.origin_exit, 'destination'):
+            if origin:
+                location.msg_contents(f"{self.name} arrives from {origin.name}.", exclude=(self, ))
+            return True
+        else:
+            return False
+
+    # doc str
+    def pick_arrival_string(self, origin):
+        # Arrival string direction must be the opposite of the origin_exit cardinal direction.
+        # A character walking to the east will arrive in its destination from the west.
+        # A character arriving by way of climbing down some stairs from above.
+        origin_exit = self.origin_exit
+        self.others_str = ''
+
+        if origin:
+            if origin_exit.tags.get('door', category='exits'):
+                self.arrive_door_str()
+            elif origin_exit.tags.get('stair', category='exits'):
+                self.arrive_stair_str() #TODO: finish other exit types.
+        else:
+            others_str = f"{self.name} arrives."
+
+    # doc str
+    def arrive_door_str(self):
+        origin_exit = self.origin_exit
+        if origin_exit.name in ['up', 'down']:
+            others_str = (f"{self.name} arrives, climbing |350{self.card_dir_name(origin_exit.db.card_dir)}|n "
+                            f"through {origin_exit.name}.")
+        else:
+            others_str = (f"{self.name} enters by way of {origin_exit.name} from the "
+                            f"|350{self.card_dir_name(origin_exit.db.card_dir)}|n")
+    # doc str
+    def arrive_stair_str(self):
+        pass
+    
+    # doc str
+    def send_arrival_string(self):
+        self.owner.msg(self.self_str)
+        self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
 #-------------------------
-# Generate a summary description of a location, its occupants, and exits.
-# It is called from the Character typeclass by the at_after_move() hook.
+# at_after_move() hook on Character typeclass
+    # Generate a summary description of a location, its occupants, and exits.
     def location_summary(self):
         """
         You arrive at <location name>. <Person/NPC> <is/are> here. You see <exit name> to the 
@@ -266,7 +313,6 @@ class TravelHandler:
         msg = f"{msg}{'' if char_str == False else char_str}" # Characters string addition.
         msg = f"{msg} {no_exit_str if exit_str == False else exit_str}"
         return msg
-
 
     # Generate a string from a list of exits.
     def exits_to_string(self, exits):

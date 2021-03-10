@@ -104,8 +104,8 @@ class Character(DefaultCharacter):
         self.travel.find_exit(dest=destination)
         if self.travel.travel_one_way(): # If the player is teleported.
             return
-        self.travel.pick_traversal_string() #Chooses the departing exit string.
-        self.travel.send_traversal_string()
+        self.travel.pick_departure_string() #Chooses the departing exit string.
+        self.travel.send_departure_string()
         
 
     def announce_move_to(self, source_location, msg=None, mapping=None, **kwargs):
@@ -137,34 +137,19 @@ class Character(DefaultCharacter):
             return
 
         origin = source_location
-        destination = self.location
+        location = self.location
         exits = []
 
         if origin:
-            exits = [o for o in destination.contents if o.location is destination and o.destination is origin]
-            origin_exit = exits[0] if exits else "somewhere"
-
+            self.travel.find_origin_exit(origin, location)
+            
         # If the player is teleported or travels through a 1 way exit, give a generic announcement.
-        if not hasattr(origin_exit, 'destination'):
-            if origin:
-                destination.msg_contents(f"{self.name} arrives from {origin_exit}.", exclude=(self, ))
+        if self.travel.origin_exit_missing_destination(origin, location):
             return
-        
-        # Determine which traversal string will be generated.
-        if origin:
-            if inherits_from(origin_exit, "travel.exits.Door"):
-                others_str = f"{self.name} walks in through {origin_exit.db.desc}, from the {origin_exit.name}."
-            elif inherits_from(origin_exit, "travel.exits.Stair"):
-                if origin_exit.name in ['up', 'down']:
-                    others_str = f"{self.name} arrives, climbing {'down' if origin_exit.name == 'up' else 'up'} {origin_exit.db.desc}."
-                else:
-                    others_str = f"{self.name} arrives, climbing {origin_exit.db.desc} from the {origin_exit.name}."
-            else:
-                others_str = f"{self.name} walks in from {origin.name}, from the {origin_exit.name}."
-        else:
-            others_str = f"{self.name} arrives."
 
-        destination.msg_contents(others_str, exclude=(self, ))
+        # Determine which traversal string will be generated.
+        self.travel.pick_arrival_string(origin)
+        self.travel.send_arrival_string()
         
     def at_after_move(self, source_location):
         """
