@@ -2,7 +2,7 @@ from evennia import CmdSet
 
 from travel import travel_cmds
 
-class travelCmdSet(CmdSet):
+class TravelCmdSet(CmdSet):
     key = "card_dir"
     def at_cmdset_creation(self):
         self.add(travel_cmds.CmdNorth())

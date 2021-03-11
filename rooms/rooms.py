@@ -1,9 +1,3 @@
-"""
-Room
-
-Rooms are simple containers that has no location of their own.
-
-"""
 from collections import defaultdict
 
 from evennia import DefaultRoom
@@ -26,10 +20,8 @@ class Room(DefaultRoom):
     properties and methods available on all Objects.
     """
     def at_object_creation(self):
-        if not self.attributes.has('short_desc'):
-            self.attributes.add('short_desc', '|rShort Description Not Set!|n')
-        if not self.attributes.has('crowd'):
-            self.attributes.add('crowd', False)
+        self.attributes.add('crowd', False)
+
 
     def return_appearance(self, looker, **kwargs):
         """
