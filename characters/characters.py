@@ -59,6 +59,7 @@ class Character(DefaultCharacter):
             self.equip.generate_equipment()
 
         # Follow and lead behaviors for traversing an exit as a group.
+        self.cmdset.add('travel.travel_cmdset.TravelCmdSet')
         self.attributes.add('leader', None)
         self.attributes.add('followers', [])
 
@@ -101,7 +102,7 @@ class Character(DefaultCharacter):
         origin = location or "nowhere"
 
         # Tells the handler to find an exit and store that exit on itself as self.exit_obj
-        self.travel.find_exit(dest=destination)
+        self.travel.find_exit_by_destination(destination)
         if self.travel.travel_one_way(): # If the player is teleported.
             return
         self.travel.pick_departure_string() #Chooses the departing exit string.
