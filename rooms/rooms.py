@@ -59,27 +59,28 @@ class Room(DefaultRoom):
             exits_string = "    You see "
             for x in exits:
                 x_alias = x.aliases.all()
-                if inherits_from(x, "travel.exits.Door"):
+                if x.tags.get('door', category='exits'):
                     if exits_len == 1:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += (f"|350{exit_name[num - 1]}|n to the "
+                                        f"|045{looker.travel.card_dir_name(x.db.card_dir)}|n.")
                     elif exits_len == num:
-                        exits_string += f"and |045{x.db.desc}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += f"and |350{exit_name[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     else:
-                        exits_string += f"|045{x.db.desc}|n to the |350{exit_name[num - 1]}|n, "
-                elif inherits_from(x, "travel.exits.Stair"):
+                        exits_string += f"|350{exit_name[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n, "
+                elif x.tags.get('stair', category='exits') or x.tags.get('ladder', category='exits'):
                     if exits_len == 1:
-                        exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
+                        exits_string += f"|350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     elif exits_len == num:
-                        exits_string += f"and |045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n."
+                        exits_string += f"and |350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     else:
-                        exits_string += f"|045{x.db.desc}|n leading |350{'upwards' if 'u' in x_alias else 'downwards'}|n, "
+                        exits_string += f"|350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n, "
                 else:
                     if exits_len == 1:
-                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += f"|350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     elif exits_len == num:
-                        exits_string += f"and |045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n."
+                        exits_string += f"and |350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     else:
-                        exits_string += f"|045{destinations[num - 1]}|n to the |350{exit_name[num - 1]}|n, "
+                        exits_string += f"|350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n, "
                 num += 1
         if characters or things:
             # handle pluralization of things (never pluralize characters)
