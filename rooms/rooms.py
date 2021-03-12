@@ -50,7 +50,7 @@ class Room(DefaultRoom):
                 # things can be pluralized
                 things[key].append(con)
         # get description, build string
-        location_name = f"    You see {self.get_display_name(looker)}."
+        location_name = f"    You see |530{self.get_display_name(looker)}|n."
         # if self.db.desc:
         #     location_desc = self.db.desc
         if exits:
@@ -61,26 +61,26 @@ class Room(DefaultRoom):
                 x_alias = x.aliases.all()
                 if x.tags.get('door', category='exits'):
                     if exits_len == 1:
-                        exits_string += (f"|350{exit_name[num - 1]}|n to the "
-                                        f"|045{looker.travel.card_dir_name(x.db.card_dir)}|n.")
+                        exits_string += (f"|530{exit_name[num - 1]}|n to the "
+                                        f"|340{looker.travel.card_dir_name(x.db.card_dir)}|n.")
                     elif exits_len == num:
-                        exits_string += f"and |350{exit_name[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
+                        exits_string += f"and |530{exit_name[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     else:
-                        exits_string += f"|350{exit_name[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n, "
+                        exits_string += f"|530{exit_name[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n, "
                 elif x.tags.get('stair', category='exits') or x.tags.get('ladder', category='exits'):
                     if exits_len == 1:
-                        exits_string += f"|350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n."
+                        exits_string += f"|530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     elif exits_len == num:
-                        exits_string += f"and |350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n."
+                        exits_string += f"and |530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n."
                     else:
-                        exits_string += f"|350{exit_name[num - 1]}|n leading |045{'upwards' if 'u' in x_alias else 'downwards'}|n, "
+                        exits_string += f"|530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n, "
                 else:
                     if exits_len == 1:
-                        exits_string += f"|350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
+                        exits_string += f"|530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     elif exits_len == num:
-                        exits_string += f"and |350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n."
+                        exits_string += f"and |530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
                     else:
-                        exits_string += f"|350{destinations[num - 1]}|n to the |045{looker.travel.card_dir_name(x.db.card_dir)}|n, "
+                        exits_string += f"|530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n, "
                 num += 1
         if characters or things:
             # handle pluralization of things (never pluralize characters)
@@ -121,7 +121,7 @@ class OOC_Room(Room):
 
 class OOC_Quarters(Room):
     def at_object_creation(self):
-        self.db.desc = "This compact room leaves much to be desired. It has a bunk large enough for one  person and an adjoining basic bathroom facility."
+        self.db.desc = "This compact room leaves much to be desired. It has a bunk large enough for one person and an adjoining basic bathroom facility."
         portal_room = create_object(typeclass='rooms.rooms.OOC_Room',
                                     key='Portal Room')
         # Make exits connecting the Portal Room with the Workshop
