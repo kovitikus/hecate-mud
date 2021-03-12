@@ -50,8 +50,9 @@ class TravelHandler:
         self.direction = direction
         self.exit_obj = None
 
+        # Determine if there are party members to add to the traveller list.
         x = None
-        if owner.attributes.has('followers'): # Determine if there are party members to add to the list.
+        if owner.attributes.has('followers'): 
             if len(owner.db.followers) > 0:
                 x = list(owner.db.followers)
         if x is not None:
@@ -61,13 +62,12 @@ class TravelHandler:
         
 
         # This option allows the player to abandon a party member if they fail to traverse with the rest of the party.
-        # Its value is set by the player via the 'abandonfailedtraveler' or 'abft' command in the travel_cmds.py module.
+        # Its value is set by the player via the 'abandonfailedtraveller' or 'abft' command in the travel_cmds.py module.
         self.abandon_failed_traveller = owner.account.db.abandon_failed_traveller
 
         self.find_exit_by_card_dir()
 
         if self.exit_obj:
-            
             self.check_traveller_access()
         else:
             return False
@@ -75,6 +75,8 @@ class TravelHandler:
         if self.all_travellers_cleared:
             self.traverse_exit()
             return True
+        else:
+            return False
 
 #---------------------
 # Logic for grouped object movement.
@@ -129,17 +131,16 @@ class TravelHandler:
     def traverse_exit(self):
         owner = self.owner
         travellers = self.travellers
-        follower_list = travellers
         exit_obj = self.exit_obj
 
         # Execute the traversal of all traveller objects.
         for obj in travellers:
             if owner == obj: # String we send to the character who initiated the travel.
-                temp_list = follower_list
+                temp_list = travellers
                 temp_list.remove(owner)
                 if len(temp_list) > 0: # Avoid sending an empty list.
                     temp_list = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(temp_list))
-                    owner.msg(f"You are followed by {follower_list} as you travel to {exit_obj.get_display_name(owner)}.")
+                    owner.msg(f"You are followed by {temp_list} as you travel to {exit_obj.get_display_name(owner)}.")
             else:
                 obj.msg(f"You follow {owner.get_display_name(obj)} as they travel to {exit_obj.get_display_name(obj)}.")
             exit_obj.at_traverse(obj, exit_obj.destination)
@@ -316,7 +317,7 @@ class TravelHandler:
 
         # Generate lists of characters and exits in the room.
         for i in location.contents:
-            if inherits_from(i, 'characters.characters.Character'):
+            if inherits_from(i, 'characters.characters.Character') and i is not owner:
                 characters.append(i)
             elif inherits_from(i, 'travel.exits.Exit'):
                 exits.append(i)
@@ -324,13 +325,19 @@ class TravelHandler:
         # Parse list of characters.
         if len(characters) > 1:
             char_str = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(characters))
+            char_str = f"{char_str} are here. "
         elif len(characters) == 1:
             char_str = f'{characters[0].get_display_name(owner)}'
+            char_str = f"{char_str} is here. "
         else:
             char_str = False
 
         # Parse list of exits.
         if len(exits) > 0:
+            if len(exits) == 1:
+                self.single_exit = True
+            else:
+                self.single_exit = False
             exit_str = self.exits_to_string(exits)
         else:
             # No exits were found.
@@ -338,26 +345,33 @@ class TravelHandler:
             exit_str = False
 
         # Generate final outgoing message.
-        msg = f"You arrive at {location.get_display_name(owner)}."
+        msg = f"You arrive at {location.get_display_name(owner)}. "
         msg = f"{msg}{'' if char_str == False else char_str}" # Characters string addition.
-        msg = f"{msg} {no_exit_str if exit_str == False else exit_str}"
+        if exit_str:
+            msg = f"{msg}You see {exit_str}."
+        else:
+            msg = f"{msg}{no_exit_str if exit_str == False else exit_str}"
         return msg
 
     # Generate a string from a list of exits.
     def exits_to_string(self, exits):
         owner = self.owner
         exit_str = ''
-        for i in exits:
-            exit_str = f"{exit_str}{self.exit_str_gen(i)} "
+        exit_str_list = []
+
+        if self.single_exit:
+            exit_str = f"|350{exits[0].get_display_name(owner)}|n to the |045{self.card_dir_name(exits[0].db.card_dir)}|n"
+        else: # 2 or more exits.
+            for i in exits:
+                if i.db.card_dir is not None: # Exit has a cardinal direction.
+                    exit_str = (f"|350{i.get_display_name(owner)}|n heading "
+                                f"|045{self.card_dir_name(i.db.card_dir)}|n") # north, east, southwest, etc
+                else: # Exit has no cardinal direction.
+                    exit_str = f"|350{i.get_display_name(owner)}|n"
+                exit_str_list.append(exit_str)
+            exit_str = gen_mec.comma_separated_string_list(exit_str_list)
         return exit_str
 
     # Decides if an exit requires a direction in its string.
     def exit_str_gen(self, exit_obj):
         owner = self.owner
-        if exit_obj.db.card_dir is not None:
-            exit_str = (f"|045{exit_obj.get_display_name(owner)}|n heading "
-                        f"|350{self.card_dir_name(exit_obj.db.card_dir)}|n") # north, east, southwest, etc
-        else: # Exit has no direction.
-            exit_str = f"|045{exit_obj.get_display_name(owner)}|n"
-
-        return exit_str
