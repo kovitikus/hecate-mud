@@ -188,9 +188,9 @@ class TravelHandler:
                 self.others_str = (f"{owner.name} climbs |045{self.card_dir_name(exit_obj.db.card_dir)}|n " # upwards, downwards
                                     f"through |350{exit_obj.name}|n.")
             else:
-                self.self_str = (f"You head |045{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.self_str = (f"You depart |045{self.card_dir_name(exit_obj.db.card_dir)}|n "
                                     f"through |350{exit_obj.get_display_name(owner)}|n.")
-                self.others_str = (f"{owner.name} heads |045{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.others_str = (f"{owner.name} departs |045{self.card_dir_name(exit_obj.db.card_dir)}|n "
                                     f"through |350{exit_obj.name}|n.")
     # Stair Strings
     def depart_stair_str(self):
@@ -272,27 +272,27 @@ class TravelHandler:
         origin_exit = self.origin_exit
         if origin_exit.name in ['up', 'down']:
             self.others_str = (f"{self.owner.name} arrives, climbing |045{self.card_dir_name(origin_exit.db.card_dir)}|n "
-                            f"through |350{origin_exit.name}.")
+                            f"through |350{origin_exit.name}|n.")
         else:
-            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name} to the "
+            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name}|n to the "
                             f"|045{self.card_dir_name(origin_exit.db.card_dir)}|n")
     # Stair Strings
     def arrive_stair_str(self):
         origin_exit = self.origin_exit
         if origin_exit.name in ['up', 'down']:
-            self.others_str = (f"{self.owner.name} arrives, climbing |350{origin_exit.name} "
+            self.others_str = (f"{self.owner.name} arrives, climbing |350{origin_exit.name}|n "
                                 f"|045{self.card_dir_name(origin_exit.db.card_dir)}|n ")
         else:
-            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name} to the "
+            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name}|n to the "
                             f"|045{self.card_dir_name(origin_exit.db.card_dir)}|n")
     # Ladder Strings
     def arrive_ladder_str(self):
         origin_exit = self.origin_exit
         if origin_exit.name in ['up', 'down']:
-            self.others_str = (f"{self.owner.name} arrives, climbing |350{origin_exit.name} "
+            self.others_str = (f"{self.owner.name} arrives, climbing |350{origin_exit.name}|n "
                                 f"|045{self.card_dir_name(origin_exit.db.card_dir)}|n ")
         else:
-            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name} to the "
+            self.others_str = (f"{self.owner.name} arrives from |350{origin_exit.name}|n to the "
                             f"|045{self.card_dir_name(origin_exit.db.card_dir)}|n")
     
     # doc str
