@@ -364,7 +364,7 @@ class TravelHandler:
         else: # 2 or more exits.
             for i in exits:
                 if i.db.card_dir is not None: # Exit has a cardinal direction.
-                    exit_str = (f"|350{i.get_display_name(owner)}|n heading "
+                    exit_str = (f"|350{i.get_display_name(owner)}|n to the "
                                 f"|045{self.card_dir_name(i.db.card_dir)}|n") # north, east, southwest, etc
                 else: # Exit has no cardinal direction.
                     exit_str = f"|350{i.get_display_name(owner)}|n"
