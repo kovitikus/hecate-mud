@@ -96,6 +96,11 @@ class Character(DefaultCharacter):
             origin: the location of the object before the move.
             destination: the location of the object after moving.
         """
+        # TODO: Check if the char is teleported out of a room with no exits.
+        # It currently gives an error:
+        #
+        # Couldn't perform move ('at_announce_move()'). Contact an admin. ('TravelHandler' object has no
+        # attribute 'exit_obj')
         if not self.location:
             return
         location = self.location
