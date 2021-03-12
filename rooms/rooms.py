@@ -125,18 +125,22 @@ class OOC_Quarters(Room):
         portal_room = create_object(typeclass='rooms.rooms.OOC_Room',
                                     key='Portal Room')
         # Make exits connecting the Portal Room with the Workshop
-        exit_to_portal_room = create_object(typeclass='travel.exits.Exit',
-                                            key='north', aliases='n', destination=portal_room,
+        quarters_to_portal = create_object(typeclass='travel.exits.Exit',
+                                            key=f'{portal_room.name}', aliases='portal', destination=portal_room,
                                             location=self, home=self)
-        exit_to_workshop = create_object(typeclass='travel.exits.Exit',
-                                            key='south', aliases='s', destination=self,
+        quarters_to_portal.db.card_dir = 'n'
+
+        portal_to_quarters = create_object(typeclass='travel.exits.Exit',
+                                            key=f'{self.name}', aliases=['quar', 'quart'], destination=self,
                                             location=portal_room, home=portal_room)
+        portal_to_quarters.db.card_dir = 's'
 
         # Connect the portal room to the Common Room
-        common_room = search_object('Common Room')
-        exit_to_common_room = create_object(typeclass='travel.exits.Exit',
-                                            key='north', aliases='n', destination=common_room[0],
+        common_room = search_object('Common Room')[0]
+        portal_to_common = create_object(typeclass='travel.exits.Exit',
+                                            key=f'{common_room.name}', aliases='common', destination=common_room,
                                             location=portal_room, home=portal_room)
+        portal_to_common.db.card_dir = 'n'
 
 
 class SewerRoom(Room):
