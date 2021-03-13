@@ -43,6 +43,9 @@ class Character(DefaultCharacter):
         return CurrencyHandler(self)
 
     def at_object_creation(self):
+        # Command Sets
+        self.cmdset.add("travel.travel_cmdset.TravelCmdSet", permanent=True)
+
         # Stats
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
         self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
