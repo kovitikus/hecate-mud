@@ -353,10 +353,14 @@ class TravelHandler:
 
         # Parse list of characters.
         if len(characters) > 1:
-            char_str = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(characters))
+            char_list = gen_mec.objects_to_display_names(characters, owner)
+            temp_list = []
+            for i in char_list:
+                temp_list.append(f"|c{i}|n")
+            char_str = gen_mec.comma_separated_string_list(temp_list)
             char_str = f"{char_str} are here. "
         elif len(characters) == 1:
-            char_str = f'{characters[0].get_display_name(owner)}'
+            char_str = f'|c{characters[0].get_display_name(owner)}|n'
             char_str = f"{char_str} is here. "
         else:
             char_str = False
