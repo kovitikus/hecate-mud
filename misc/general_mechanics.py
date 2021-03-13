@@ -65,6 +65,11 @@ def objects_to_strings(object_list):
     for i in object_list:
         string_list.append(i.name)
     return string_list
+def objects_to_display_names(objects, looker):
+    string_list = []
+    for i in objects:
+        string_list.append(i.get_display_name(looker))
+    return string_list
 
 def comma_separated_string_list(string_list):
     num = 1
