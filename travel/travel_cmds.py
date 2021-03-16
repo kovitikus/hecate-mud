@@ -1,8 +1,7 @@
-from evennia import Command as BaseCommand, InterruptCommand
-
+from commands.command import Command
 from misc import general_mechanics as gen_mec
 
-class CmdFollow(BaseCommand):
+class CmdFollow(Command):
     """
     Follows a specified target, automatically attempting to travel with them when they traverse an exit.
 
@@ -53,7 +52,7 @@ class CmdFollow(BaseCommand):
             target.msg(f"{caller.get_display_name(target)} follows you.")
             caller.location.msg_contents(f"{caller.name} follows {target.name}.", exclude=[caller, target])
 
-class CmdAbandon(BaseCommand):
+class CmdAbandon(Command):
     """
     Abandons a specified target, if that target is following you.
 
@@ -78,7 +77,7 @@ class CmdAbandon(BaseCommand):
         else:
             caller.db.followers.remove(target)
 
-class CmdDisband(BaseCommand):
+class CmdDisband(Command):
     """
     Abandons all followers.
 
@@ -95,7 +94,7 @@ class CmdDisband(BaseCommand):
         self.caller.db.followers = []
 
 # Exit Commands
-class CmdNorth(BaseCommand):
+class CmdNorth(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -113,7 +112,7 @@ class CmdNorth(BaseCommand):
             caller.msg("There is no exit to the north.")
             return
 
-class CmdNortheast(BaseCommand):
+class CmdNortheast(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -131,7 +130,7 @@ class CmdNortheast(BaseCommand):
             caller.msg("There is no exit to the northeast.")
             return
 
-class CmdEast(BaseCommand):
+class CmdEast(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -149,7 +148,7 @@ class CmdEast(BaseCommand):
             caller.msg("There is no exit to the east.")
             return
 
-class CmdSoutheast(BaseCommand):
+class CmdSoutheast(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -167,7 +166,7 @@ class CmdSoutheast(BaseCommand):
             caller.msg("There is no exit to the southeast.")
             return
 
-class CmdSouth(BaseCommand):
+class CmdSouth(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -185,7 +184,7 @@ class CmdSouth(BaseCommand):
             caller.msg("There is no exit to the south.")
             return
 
-class CmdSouthwest(BaseCommand):
+class CmdSouthwest(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -203,7 +202,7 @@ class CmdSouthwest(BaseCommand):
             caller.msg("There is no exit to the southwest.")
             return
 
-class CmdWest(BaseCommand):
+class CmdWest(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -221,7 +220,7 @@ class CmdWest(BaseCommand):
             caller.msg("There is no exit to the west.")
             return
 
-class CmdNorthwest(BaseCommand):
+class CmdNorthwest(Command):
     """
     Finds an exit object marked with the same cardinal direction and calls its at_traverse hook.
     """
@@ -241,7 +240,7 @@ class CmdNorthwest(BaseCommand):
 
 
 # Travel Options
-class CmdAbandonFailedTraveller(BaseCommand):
+class CmdAbandonFailedTraveller(Command):
     """
     Turns on or off the ability to abandon any object following you, 
         if that object does not have permission to enter the destination.
