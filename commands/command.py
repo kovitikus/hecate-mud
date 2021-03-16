@@ -41,19 +41,7 @@ class Command(BaseCommand):
         this hook returns anything but False/None, the command
         sequence is aborted.
         """
-        # Player's AFK time preference, in seconds.
-        if self.caller.attributes.has('afk_timer'):
-            afk_timer = self.caller.attributes.get('afk_timer')
-        else:
-            # Default AFK timer in seconds. (10 minutes)
-            afk_timer = 600
-        
-        # Player was AFK, but has returned to the keyboard.
-        if self.caller.db.afk == True:
-            self.caller.db.afk = False
-
-        tickerhandler.add(afk_timer, self.caller.status.afk, 
-                            idstring=f"{self.caller.dbid} afk_timer")
+        self.caller.status.afk_check()
 
 class CmdDesc(Command):
     key = "desc"
@@ -1029,6 +1017,37 @@ class CmdInstance(Command):
             caller.instance.inst_menu()
         else:
             return
+
+class CmdAFKTimer(Command):
+    """
+    Sets the character's AFK Timer in seconds.
+    The default value is 600s (10m).
+
+    Usage:
+        afktimer 900
+    """
+    key = 'afktimer'
+    aliases = 'afktime'
+
+    def func(self):
+        caller = self.caller
+
+        if not self.args:
+            caller.msg("You must enter an integer.")
+            return
+        else:
+            args = self.args.strip()
+            try:
+                args = int(args)
+            except:
+                self.caller.msg("The value must be an integer greater than 0.")
+                raise ValueError
+
+            if not caller.attributes.has('afk_timer'):
+                caller.attributes.add('afk_timer', args)
+            else:
+                caller.db.afk_timer = args
+
 
 def get_inventory_arg_type(args):
     arg_type = 0 # Default inventory summary.
