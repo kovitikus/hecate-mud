@@ -1,6 +1,8 @@
 from evennia.utils.utils import delay
 
 class StatusHandler:
+    afk_delay = None
+
     def __init__(self, owner):
         self.owner = owner
 
@@ -21,8 +23,11 @@ class StatusHandler:
         
         if owner.db.afk == True:
             self.afk_off()
+        
+        if self.afk_delay is not None:
+            self.afk_delay.cancel()
 
-        delay(afk_timer, self.afk_on)
+        self.afk_delay = delay(afk_timer, self.afk_on)
  
     #--------------------
     # AFK Helpers
