@@ -8,6 +8,8 @@ class StatusHandler:
 
 #--------------------
 # AFK status check
+    #-----------
+    # afk_check is called from the Command typeclass at_pre_cmd method.
     def afk_check(self):
         owner = self.owner
 
