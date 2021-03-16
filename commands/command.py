@@ -6,6 +6,7 @@ Commands describe the input the account can do to the game.
 """
 import re
 
+from evennia import TICKER_HANDLER as tickerhandler
 from evennia import Command as BaseCommand
 from evennia import logger
 from evennia import InterruptCommand
@@ -34,7 +35,25 @@ class Command(BaseCommand):
         - at_post_cmd(): Extra actions, often things done after
             every command, like prompts.
     """
-    pass
+    def at_pre_cmd(self):
+        """
+        This hook is called before self.parse() on all commands.  If
+        this hook returns anything but False/None, the command
+        sequence is aborted.
+        """
+        # Player's AFK time preference, in seconds.
+        if self.caller.attributes.has('afk_timer'):
+            afk_timer = self.caller.attributes.get('afk_timer')
+        else:
+            # Default AFK timer in seconds. (10 minutes)
+            afk_timer = 600
+        
+        # Player was AFK, but has returned to the keyboard.
+        if self.caller.db.afk == True:
+            self.caller.db.afk = False
+
+        tickerhandler.add(afk_timer, self.caller.status.afk, 
+                            idstring=f"{self.caller.dbid} afk_timer")
 
 class CmdDesc(Command):
     key = "desc"
@@ -48,8 +67,10 @@ class CmdCharGen(Command):
 
     def func(self):
         caller = self.caller
-        EvMenu(caller, "characters.chargen", startnode="main", cmd_on_exit="look", cmdset_mergetype="Replace", cmdset_priority=1,
-       auto_quit=True, auto_look=True, auto_help=True)
+        EvMenu(caller, "characters.chargen", startnode="main", 
+                cmd_on_exit="look", cmdset_mergetype="Replace", 
+                cmdset_priority=1, auto_quit=True, auto_look=True, 
+                auto_help=True)
 
 class CmdLearnSkillset(Command):
     key = 'learn'
@@ -977,6 +998,37 @@ class CmdSplit(Command):
 
         caller.msg(msg)
 
+class CmdInstance(Command):
+    """
+    Usage:
+        instance - Used by itself, the instance command returns a summary of the 
+                    character's currenly occupied or most recently occupied instance.
+
+        instance menu - Opens the menu that allows for management of instances,
+                        including creation, destruction, and resetting.
+    """
+    key = 'instance'
+    aliases = 'inst'
+    inst_summary = True
+    inst_menu = False
+
+    def parse(self):
+        if self.args:
+            self.inst_summary = False
+
+            args = self.args.strip()
+            if 'menu' in args:
+                inst_menu = True
+
+    def func(self):
+        caller = self.caller
+
+        if self.inst_summary:
+            caller.instance.inst_summary()
+        elif self.inst_menu:
+            caller.instance.inst_menu()
+        else:
+            return
 
 def get_inventory_arg_type(args):
     arg_type = 0 # Default inventory summary.
