@@ -67,6 +67,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdConvertCoin())
         self.add(command.CmdGroup())
         self.add(command.CmdUngroup())
+        self.add(command.CmdAFKTimer())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
