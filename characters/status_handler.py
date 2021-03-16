@@ -7,17 +7,16 @@ class StatusHandler:
         self.owner = owner
 
 #--------------------
-# AFK status check
+# AFK status check - https://i.imgur.com/U2EiL7F.png
     #-----------
     # afk_check is called from the Command typeclass at_pre_cmd method.
     def afk_check(self):
         owner = self.owner
 
-        # Default AFK timer in seconds. (10 minutes)
+        # Player's AFK timer in seconds. 
+        # Set by commands.command.CmdAFKTimer
         if not owner.attributes.has('afk_timer'):
-            owner.attributes.add('afk_timer', 600)
-
-        # Player's AFK time preference, in seconds.
+            owner.attributes.add('afk_timer', 600) #10 minutes
         afk_timer = owner.attributes.get('afk_timer')
 
         if not owner.attributes.has('afk'):
@@ -36,7 +35,7 @@ class StatusHandler:
     def afk_on(self):
         owner = self.owner
 
-        # Delay timer expired, player is present.
+        # Delay timer expired, player is unresponsive.
         owner.db.afk = True
         owner.msg("|yYou are now AFK.|n")
 
