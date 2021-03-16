@@ -1,6 +1,7 @@
 import time, datetime, random
 
 from evennia import utils, search_script
+from evennia.utils.utils import delay
 from evennia.utils import gametime, inherits_from
 from evennia.prototypes.prototypes import search_prototype
 
@@ -33,7 +34,7 @@ def check_roundtime(owner):
 
 def set_roundtime(owner):
     now = time.time()
-    utils.delay(2, unbusy, owner, persistent=True)
+    delay(2, unbusy, owner, persistent=True)
     owner.db.busy = True
     owner.db.roundtime = now
 
