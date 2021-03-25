@@ -1,4 +1,3 @@
-from unicodedata import category
 from evennia.utils.utils import inherits_from
 
 from misc import general_mechanics as gen_mec
