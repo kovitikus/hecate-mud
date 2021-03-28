@@ -1014,7 +1014,8 @@ class CmdInstance(Command):
         if self.inst_summary:
             caller.instance.inst_summary()
         elif self.inst_menu:
-            caller.instance.inst_menu()
+            EvMenu(caller, 'rooms.instance_menu', startnode='start_menu',
+                    cmdset_mergetype='Union')
         else:
             return
 
