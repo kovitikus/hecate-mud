@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 from evennia.utils.create import create_object
 from evennia.utils.evmenu import EvMenu
@@ -45,6 +46,8 @@ class InstanceHandler:
         self.rooms_list = []
         self.exits_list = []
 
+        self.creation_time = datetime.now()
+        self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
         self._get_room_qty()
 
         for _ in range(1, self.room_qty):
@@ -55,8 +58,7 @@ class InstanceHandler:
             self.room = create_object(typeclass='rooms.rooms.Room', key=self.room_key)
             self.rooms_list.append(self.room)
 
-        num = 1
-        for room in self.rooms_list:
+        for num, room in enumerate(self.rooms_list, start=1):
             self._get_exit_type()
             self._get_exit_key()
             if num == 1:
@@ -101,6 +103,10 @@ class InstanceHandler:
                 portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
                                             location=room, tags=[('portal', 'exits')], destination=self.origin_room)
                 self.exits_list.append(portal_to_origin)
+
+        if not self.owner.attributes.has('instances'):
+            self.owner.attributes.add('instances', {})
+        self.owner.db.instances[self.instance_id] = self.rooms_list
 
 #-------------
 # Helpers
