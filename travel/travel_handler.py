@@ -13,11 +13,13 @@ class TravelHandler:
         for x in self.owner.location.contents:
             if x.db.card_dir == self.direction:
                 self.exit_obj = x
+                break
 
     def find_exit_by_destination(self, destination):
         for x in self.owner.location.contents:
             if x.destination == destination:
                 self.exit_obj = x
+                break
 
     def card_dir_name(self, card_dir):
         if card_dir == 'n':
@@ -404,6 +406,7 @@ class TravelHandler:
             exit_str = gen_mec.comma_separated_string_list(exit_str_list)
         return exit_str
 
+    # TODO: (I don't even recall writing this or what it was for. Requires investigation.)
     # Decides if an exit requires a direction in its string.
     def exit_str_gen(self, exit_obj):
         owner = self.owner
