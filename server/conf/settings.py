@@ -90,6 +90,11 @@ GLOBAL_SCRIPTS = {
         'interval': 1,
         'desc': 'Tracks global timed events.',
         'persistent': True
+    },
+    'instance_ledger': {
+        'typeclass': 'typeclasses.scripts.Script',
+        'desc': 'Holds record of all current instances.',
+        'persistent': True
     }
 }
 
