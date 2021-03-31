@@ -37,18 +37,8 @@ class Exit(DefaultExit):
     def at_object_creation(self):
         self.attributes.add('card_dir', None)
 
-class Door(Exit):
-    def at_object_creation(self):
-        self.attributes.add('open', True)
-        self.attributes.add('desc', 'a door')
-        self.tags.add('door', category='exits')
-
-class Stair(Exit):
-    def at_object_creation(self):
-        self.attributes.add('desc', 'a stairway')
-        self.tags.add('stair', category='exits')
-
-class Ladder(Exit):
-    def at_object_creation(self):
-        self.attributes.add('desc', 'a ladder')
-        self.tags.add('ladder', category='exits')
+    def at_after_traverse(self, traversing_object, source_location, **kwargs):
+        if self.tags.get('enter_instance', category='exits'):
+            traversing_object.instance.enter_instance()
+        elif self.tags.get('exit_instance', category='exits'):
+            traversing_object.instance.exit_instance()
