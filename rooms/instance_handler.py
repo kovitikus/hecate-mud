@@ -6,10 +6,10 @@ from evennia.utils.evmenu import EvMenu
 
 
 class InstanceHandler:
-    randomize_room_type = False
-
     def __init__(self, owner):
         self.owner = owner
+        self.randomize_room_type = False
+        self.ledger = evennia.GLOBAL_SCRIPTS.instance_ledger
 
     # The instance handler should check for currently owned instances of the same request.
     # If an instance conflict is found, the player is prompted to choose between the old instance and new.
@@ -23,19 +23,12 @@ class InstanceHandler:
 #-------------
 # Instance Options
     # Called by rooms.instance_menu
-    def instance_menu(self, instance):
-        if instance == 'random':
+    def set_room_type(self, room_type):
+        if room_type == 'random':
             self.randomize_room_type = True
         else:
             self.randomize_room_type = False
-            if instance == 'forest':
-                self.room_type = 'forest'
-            elif instance == 'sewer':
-                self.room_type = 'sewer'
-            elif instance == 'cave':
-                self.room_type = 'cave'
-            elif instance == 'alley':
-                self.room_type = 'alley'
+            self.room_type = room_type
             
         self._generate_instance()
 
@@ -46,18 +39,25 @@ class InstanceHandler:
         self.rooms_list = []
         self.exits_list = []
 
-        self.creation_time = datetime.now()
-        self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
+        self._set_origin_room()
+        self._set_creation_time()
+        self._set_instance_id()
         self._get_room_qty()
+        self._generate_rooms()
+        self._generate_exits()
+        self._save_instance()
 
+    def _generate_rooms(self):
         for _ in range(1, self.room_qty):
             if self.randomize_room_type:
                 self._get_room_type()
             self._get_room_key()
 
             self.room = create_object(typeclass='rooms.rooms.Room', key=self.room_key)
+            self.room.tags.add(self.instance_id, category='instance_id')
             self.rooms_list.append(self.room)
 
+    def _generate_exits(self):
         for num, room in enumerate(self.rooms_list, start=1):
             self._get_exit_type()
             self._get_exit_key()
@@ -78,6 +78,7 @@ class InstanceHandler:
                 prev_room_exit = exit_to_next_room
 
             elif num > 1 and num < len(self.rooms_list):
+                # All rooms between first and last.
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
                                         location=room, tags=[self.exit_type])
                 self.exits_list.append(exit_to_next_room)
@@ -104,14 +105,25 @@ class InstanceHandler:
                                             location=room, tags=[('portal', 'exits')], destination=self.origin_room)
                 self.exits_list.append(portal_to_origin)
 
-        if not self.owner.attributes.has('instances'):
+        for exit in self.exits_list:
+            exit.tags.add(self.instance_id, category='instance_id')
+
+    def _save_instance(self):
+        if not self.ledger.attributes.has('instances'):
             self.owner.attributes.add('instances', {})
-        self.owner.db.instances[self.instance_id] = self.rooms_list
+        self.ledger.db.instances[self.instance_id] = {}
+        self.ledger.db.instances[self.instance_id]['rooms'] = self.rooms_list
 
 #-------------
 # Helpers
-    def set_origin_room(self, origin):
-        self.origin_room = origin
+    def _set_origin_room(self):
+        self.origin_room = self.owner.location
+
+    def _set_creation_time(self):
+        self.creation_time = datetime.now()
+
+    def _set_instance_id(self):
+        self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
 
     def _get_room_qty(self):
         # Each instance will, for now, contain a possibility of 3-5 rooms.
@@ -149,4 +161,23 @@ class InstanceHandler:
             pass
         elif room_key == 'cave':
             pass
+        pass
+
+#------------------------------
+# Character Enter and Exit: at_after_traverse() on the Exit typeclass.
+    # Exit tagged with ('enter_instance', category='exits')
+    def enter_instance(self):
+        # Determine the currently occupied room's instance_id.
+        if self.owner.location.tags.get(category='instance_id'):
+            instance_id = self.owner.location.tags.get(category='instance_id')
+
+        # Add character to instance occupant list.
+        if not self.ledger.db.instances[instance_id].get('occupants'):
+            self.ledger.db.instances[instance_id]['occupants'] = []
+        self.ledger.db.instances[instance_id]['occupants'].append(self.owner)
+
+    # Exit tagged with ('exit_instance', category='exits')
+    def exit_instance(self):
+        # This is where the instance cleanup is triggered.
+        # Must first determine that all ledger occupants have exited.
         pass
