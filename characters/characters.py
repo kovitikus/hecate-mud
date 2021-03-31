@@ -158,7 +158,6 @@ class Character(DefaultCharacter):
 
         origin = source_location
         location = self.location
-        exits = []
 
         if origin:
             self.travel.find_origin_exit(origin, location)
