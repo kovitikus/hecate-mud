@@ -1,4 +1,4 @@
-import random
+import random, time
 from datetime import datetime
 
 from evennia.utils.create import create_object
@@ -9,6 +9,8 @@ class InstanceHandler:
     def __init__(self, owner):
         self.owner = owner
         self.randomize_room_type = False
+
+        # The instance ledger is set in server.conf.settings
         self.ledger = evennia.GLOBAL_SCRIPTS.instance_ledger
 
     # The instance handler should check for currently owned instances of the same request.
@@ -40,12 +42,13 @@ class InstanceHandler:
         self.exits_list = []
 
         self._set_origin_room()
-        self._set_creation_time()
+        self._set_time()
         self._set_instance_id()
         self._get_room_qty()
         self._generate_rooms()
         self._generate_exits()
         self._save_instance()
+        self._create_log_string
 
     def _generate_rooms(self):
         for _ in range(1, self.room_qty):
@@ -64,8 +67,8 @@ class InstanceHandler:
             if num == 1:
                 # Generate a portal in origin room that leads to first room of the instance.
                 portal_to_instance = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                            location=self.origin_room, tags=[('portal', 'exits')], 
-                                            destination=room)
+                    location=self.origin_room, tags=[('portal', 'exits'), ('enter_instance', 'exits')], 
+                    destination=room)
                 self.exits_list.append(portal_to_instance)
 
                 # The first room only requires 1 exit.
@@ -102,25 +105,57 @@ class InstanceHandler:
 
                 # Create a portal that returns back to the location the instance was generated from.
                 portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                            location=room, tags=[('portal', 'exits')], destination=self.origin_room)
+                    location=room, tags=[('portal', 'exits'), ('exit_instance', 'exits')], 
+                    destination=self.origin_room)
                 self.exits_list.append(portal_to_origin)
 
         for exit in self.exits_list:
             exit.tags.add(self.instance_id, category='instance_id')
 
     def _save_instance(self):
+        # Save to ledger.
         if not self.ledger.attributes.has('instances'):
-            self.owner.attributes.add('instances', {})
+            self.ledger.attributes.add('instances', {})
         self.ledger.db.instances[self.instance_id] = {}
+        self.ledger.db.instances[self.instance_id]['creator'] = self.owner.name
+        self.ledger.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
+        self.ledger.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
         self.ledger.db.instances[self.instance_id]['rooms'] = self.rooms_list
+        self.ledger.db.instances[self.instance_id]['exits'] = self.exits_list
+
+        # Save to object that generated this instance.
+        if not self.owner.attributes.has('instances'):
+            self.owner.attributes.add('instances', {})
+        self.owner.db.instances[self.instance_id] = {}
+        self.owner.db.instances[self.instance_id]['creator'] = self.owner.name
+        self.owner.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
+        self.owner.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
+        self.owner.db.instances[self.instance_id]['rooms'] = self.rooms_list
+        self.owner.db.instances[self.instance_id]['exits'] = self.exits_list
+
+    def _create_log_string(self):
+        border = "======================================================"
+        instance_type = f"Instance Type: {'random' if self.randomize_room_type else self.room_type}"
+        creation_time = f"Creation Time: {self.creation_time}"
+        creator = f"Creator: {self.owner.name}"
+        epoch_create = f"Epoch Creation: {self.epoch_creation}"
+        epoch_expire = f"Epoch Expiration: {self.epoch_expiration}"
+        room_count = f"Room Count: {len(self.rooms_list)}"
+        log_str = f"{border}\n{instance_type}\n{creation_time}\n{creator}\n"
+        log_str = f"{log_str}\n{epoch_create}\n{epoch_expire}\n{room_count}\n"
+
+        self.ledger.db.instances[self.instance_id]['log_str'] = log_str
+        self.owner.db.instances[self.instance_id]['log_str'] = log_str
 
 #-------------
 # Helpers
     def _set_origin_room(self):
         self.origin_room = self.owner.location
 
-    def _set_creation_time(self):
+    def _set_time(self):
         self.creation_time = datetime.now()
+        self.epoch_creation = time.time()
+        self.epoch_expiration = self.epoch_creation + (3600 * 24) # 3,600s = 1h
 
     def _set_instance_id(self):
         self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
@@ -171,13 +206,42 @@ class InstanceHandler:
         if self.owner.location.tags.get(category='instance_id'):
             instance_id = self.owner.location.tags.get(category='instance_id')
 
-        # Add character to instance occupant list.
-        if not self.ledger.db.instances[instance_id].get('occupants'):
-            self.ledger.db.instances[instance_id]['occupants'] = []
-        self.ledger.db.instances[instance_id]['occupants'].append(self.owner)
+            # Add character to instance occupant list.
+            if self.ledger.db.instances[instance_id].get('occupants') is None:
+                self.ledger.db.instances[instance_id]['occupants'] = []
+            self.ledger.db.instances[instance_id]['occupants'].append(self.owner)
+        else:
+            # This instance_id acquisition should NOT fail. If it does, something went wrong.
+            # TODO: log an error here
+            self.owner.msg('|rCRITICAL ERROR! Could not find the instance_id!|n')
+            return
 
     # Exit tagged with ('exit_instance', category='exits')
-    def exit_instance(self):
+    def exit_instance(self, source_location):
         # This is where the instance cleanup is triggered.
         # Must first determine that all ledger occupants have exited.
+
+        if source_location.tags.get(category='instance_id'):
+            instance_id = source_location.tags.get(category='instance_id')
+
+            self.ledger.db.instances[instance_id]['occupants'].remove(self.owner)
+
+            if len(self.ledger.db.instances[instance_id]['occupants']) == 0:
+                self._destroy_instance(instance_id)
+        else:
+            # This instance_id acquisition should NOT fail. If it does, something went wrong.
+            # TODO: log an error here
+            self.owner.msg('|rCRITICAL ERROR! Could not find the instance_id!|n')
+            return
+
+#---------------
+# Destroy the instance.
+    def _destroy_instance(self, instance_id):
+        # Check to make sure there are no orphaned characters or objects remaining in the instance.
+        
+        # Get the exits_list from the ledger using the instance_id.
+        # Loop through the list and destroy the exits.
+
+        # Get the rooms_list from the ledger using the instance_id.
+        # Loop through the list and destroy the rooms.
         pass
