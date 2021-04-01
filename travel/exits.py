@@ -41,4 +41,4 @@ class Exit(DefaultExit):
         if self.tags.get('enter_instance', category='exits'):
             traversing_object.instance.enter_instance()
         elif self.tags.get('exit_instance', category='exits'):
-            traversing_object.instance.exit_instance()
+            traversing_object.instance.exit_instance(source_location)
