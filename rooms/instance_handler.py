@@ -167,7 +167,7 @@ class InstanceHandler:
 
     def _get_room_qty(self):
         # Each instance will, for now, contain a possibility of 3-5 rooms.
-        self.room_qty = random.randrange(3-5)
+        self.room_qty = random.randint(3, 5)
 
     def _get_room_type(self):
         room_types = ['forest', 'sewer', 'cave', 'alley']
@@ -194,14 +194,15 @@ class InstanceHandler:
         self.exit_type = random.choice(exit_types)
 
     def _get_exit_key(self):
-        room_key = self.room_key
-        if room_key == 'forest':
-            pass
-        elif room_key == 'sewer':
-            pass
-        elif room_key == 'cave':
-            pass
-        pass
+        room_type = self.room_type
+        if room_type == 'forest':
+            self.exit_key = 'a forest'
+        elif room_type == 'sewer':
+            self.exit_key = 'a sewer'
+        elif room_type == 'cave':
+            self.exit_key = 'a cave'
+        elif room_type == 'alley':
+            self.exit_key = 'an alley'
 
 #------------------------------
 # Character Enter and Exit: at_after_traverse() on the Exit typeclass.
