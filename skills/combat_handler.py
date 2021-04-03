@@ -286,7 +286,7 @@ class CombatHandler:
 
         owner.msg(f"|430[Success: {success} Roll: {die_roll}] {owner_desc}|n")
         target.msg(f"|r[Success: {success} Roll: {die_roll}] {target_desc}|n")
-        owner.location.msg_contents(f"{others_desc}", exclude=(owner, target))
+        owner.location.msg_contents(f"{others_desc}", exclude=[owner, target])
 
     def create_defense_desc(self, c_a_name, art_weap, t_name):
         article = self.article
