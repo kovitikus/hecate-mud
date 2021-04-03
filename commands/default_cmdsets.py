@@ -68,6 +68,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(command.CmdGroup())
         self.add(command.CmdUngroup())
         self.add(command.CmdAFKTimer())
+        self.add(command.CmdInstance())
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
