@@ -33,23 +33,23 @@ def at_initial_setup():
                     'Player_Character typeclasses are not allowed to enter this room in a move_to check.')
 
     # Create the superuser's home room.
-    rm3 = create_object(typeclass='rooms.rooms.OOC_Room', key='Main Office')
+    rm3 = create_object(typeclass='rooms.rooms.Room', key='Main Office')
     char1.home = rm3
     rm3.tags.add('main_office', category='ooc_room')
     char1.move_to(rm3, quiet=True, move_hooks=False)
 
     # Create the Common Room. This is where all portals will lead when entering public OOC areas.
-    rm4 = create_object(typeclass='rooms.rooms.OOC_Room', key='Common Room')
+    rm4 = create_object(typeclass='rooms.rooms.Room', key='Common Room')
     rm4.tags.add('common_room', category='ooc_room')
     rm4.tags.add(category='public_ooc')
 
     # Connect the main office and common room with exits.
-    exit_rm3_rm4 = create_object(typeclass='travel.exits.Door', key='a mahogany door', aliases = ['door', ], 
+    exit_rm3_rm4 = create_object(typeclass='travel.exits.Exit', key='a mahogany door', aliases = ['door', ], 
                                     location=rm3, destination=rm4, tags=[('door', 'exits'), ])
     exit_rm3_rm4.attributes.add('card_dir', 'n')
     exit_rm3_rm4.tags.add(category='ooc_exit')
 
-    exit_rm4_rm3 = create_object(typeclass='travel.exits.Door', key='a mahogany door', aliases=['door', ],
+    exit_rm4_rm3 = create_object(typeclass='travel.exits.Exit', key='a mahogany door', aliases=['door', ],
                                     location=rm4, destination=rm3, tags=[('door', 'exits'), ])
     exit_rm4_rm3.attributes.add('card_dir', 's')
     exit_rm4_rm3.tags.add(category='ooc_exit')
