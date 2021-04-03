@@ -11,9 +11,13 @@ from characters.inventory_handler import InventoryHandler
 from characters.currency_handler import CurrencyHandler
 from characters.status_handler import StatusHandler
 from travel.travel_handler import TravelHandler
+from rooms.instance_handler import InstanceHandler
 
 
 class Character(DefaultCharacter):
+    @lazy_property
+    def instance(self):
+        return InstanceHandler(self)
     @lazy_property
     def status(self):
         return StatusHandler(self)
@@ -240,9 +244,6 @@ class Character(DefaultCharacter):
         else:
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
-
-class OOC_Character(Character):
-    pass
 
 class Player_Character(Character):
     def at_object_creation(self):
