@@ -114,35 +114,6 @@ class Room(DefaultRoom):
         if self.db.crowd:
             looker.msg(f"You find yourself at the periphery of a terribly thick crowd. You note a moderate number of {list_to_string(people)}.")
 
-    
-class OOC_Room(Room):
-    def at_object_creation(self):
-        self.tags.add('ooc_room')
-
-class OOC_Quarters(Room):
-    def at_object_creation(self):
-        self.db.desc = "This compact room leaves much to be desired. It has a bunk large enough for one person and an adjoining basic bathroom facility."
-        portal_room = create_object(typeclass='rooms.rooms.OOC_Room',
-                                    key='Portal Room')
-        # Make exits connecting the Portal Room with the Workshop
-        quarters_to_portal = create_object(typeclass='travel.exits.Exit',
-                                            key=f'{portal_room.name}', aliases='portal', destination=portal_room,
-                                            location=self, home=self)
-        quarters_to_portal.db.card_dir = 'n'
-
-        portal_to_quarters = create_object(typeclass='travel.exits.Exit',
-                                            key=f'{self.name}', aliases=['quar', 'quart'], destination=self,
-                                            location=portal_room, home=portal_room)
-        portal_to_quarters.db.card_dir = 's'
-
-        # Connect the portal room to the Common Room
-        common_room = search_object('Common Room')[0]
-        portal_to_common = create_object(typeclass='travel.exits.Exit',
-                                            key=f'{common_room.name}', aliases='common', destination=common_room,
-                                            location=portal_room, home=portal_room)
-        portal_to_common.db.card_dir = 'n'
-
-
 class SewerRoom(Room):
     @lazy_property
     def spawn(self):
