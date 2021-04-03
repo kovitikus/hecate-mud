@@ -1,6 +1,9 @@
 import random, time
 from datetime import datetime
 
+from evennia import GLOBAL_SCRIPTS
+from evennia.utils import logger
+from evennia.utils.search import search_object
 from evennia.utils.create import create_object
 from evennia.utils.evmenu import EvMenu
 
@@ -11,7 +14,7 @@ class InstanceHandler:
         self.randomize_room_type = False
 
         # The instance ledger is set in server.conf.settings
-        self.ledger = evennia.GLOBAL_SCRIPTS.instance_ledger
+        self.ledger = GLOBAL_SCRIPTS.instance_ledger
 
     # The instance handler should check for currently owned instances of the same request.
     # If an instance conflict is found, the player is prompted to choose between the old instance and new.
@@ -48,7 +51,7 @@ class InstanceHandler:
         self._generate_rooms()
         self._generate_exits()
         self._save_instance()
-        self._create_log_string
+        self._create_log_string()
 
     def _generate_rooms(self):
         for _ in range(1, self.room_qty):
@@ -87,7 +90,7 @@ class InstanceHandler:
                 self.exits_list.append(exit_to_next_room)
 
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                            location=room, tags=[self.exit_type], destination=prev_room)
+                                        location=room, tags=[self.exit_type], destination=prev_room)
                 self.exits_list.append(exit_to_previous_room)
 
                 # Connect the previous room to this room.
@@ -100,7 +103,7 @@ class InstanceHandler:
             elif num == len(self.rooms_list):
                 # The final room requires an exit back to previous room.
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                            location=room, tags=[self.exit_type], destination=prev_room)
+                                        location=room, tags=[self.exit_type], destination=prev_room)
                 self.exits_list.append(exit_to_previous_room)
 
                 # Create a portal that returns back to the location the instance was generated from.
@@ -111,6 +114,7 @@ class InstanceHandler:
 
         for exit in self.exits_list:
             exit.tags.add(self.instance_id, category='instance_id')
+            exit.db.card_dir = 'n'
 
     def _save_instance(self):
         # Save to ledger.
@@ -146,6 +150,7 @@ class InstanceHandler:
 
         self.ledger.db.instances[self.instance_id]['log_str'] = log_str
         self.owner.db.instances[self.instance_id]['log_str'] = log_str
+        logger.log_file(log_str, filename='instances.log')
 
 #-------------
 # Helpers
@@ -212,8 +217,9 @@ class InstanceHandler:
             self.ledger.db.instances[instance_id]['occupants'].append(self.owner)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
-            # TODO: log an error here
-            self.owner.msg('|rCRITICAL ERROR! Could not find the instance_id!|n')
+            err_msg = f"enter_instance could not find instance_id!"
+            logger.log_file(err_msg, filename='instance_errors.log')
+            self.owner.msg('|rCRITICAL ERROR! enter_instance could not find the instance_id!|n')
             return
 
     # Exit tagged with ('exit_instance', category='exits')
@@ -230,18 +236,77 @@ class InstanceHandler:
                 self._destroy_instance(instance_id)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
-            # TODO: log an error here
-            self.owner.msg('|rCRITICAL ERROR! Could not find the instance_id!|n')
+            err_msg = f"exit_instance could not find instance_id!"
+            logger.log_file(err_msg, filename='instance_errors.log')
+            self.owner.msg('|rCRITICAL ERROR! exit_instance could not find the instance_id!|n')
             return
 
 #---------------
 # Destroy the instance.
     def _destroy_instance(self, instance_id):
-        # Check to make sure there are no orphaned characters or objects remaining in the instance.
-        
-        # Get the exits_list from the ledger using the instance_id.
-        # Loop through the list and destroy the exits.
+        # Make sure the instance_id exists on the ledger.
+        if not instance_id in self.ledger.db.instances:
+            err_msg = f"destroy_instance could not find instance_id: {instance_id}"
+            logger.log_file(err_msg, filename='instance_errors.log')
+            self.owner.msg('|rCRITICAL ERROR! destroy_instance could not find the instance_id!|n')
+            return
 
-        # Get the rooms_list from the ledger using the instance_id.
-        # Loop through the list and destroy the rooms.
-        pass
+        # Check to make sure there are no orphaned characters or objects remaining in the instance.
+        # Any left behind will be sent to their default home, so this is not critical.
+        
+        # Delete all exits.
+        exits_list = list(self.ledger.db.instances[instance_id]['exits_list'])
+        for exit in exits_list:
+            self.ledger.db.instances[instance_id]['exits_list'].remove(exit)
+            exit.delete()
+        if len(self.ledger.db.instances[instance_id]['exits_list']) == 0:
+            del self.ledger.db.instances[instance_id]['exits_list']
+
+        # Delete all rooms.
+        rooms_list = list(self.ledger.db.instances[instance_id]['rooms_list'])
+        for room in rooms_list:
+            self.ledger.db.instances[instance_id]['rooms_list'].remove(room)
+            room.delete()
+        if len(self.ledger.db.instances[instance_id]['rooms_list']) == 0:
+            del self.ledger.db.instances[instance_id]['rooms_list']
+
+        # Exits and Rooms are deleted, remove the instance from the ledger.
+        del self.ledger.db.instances[instance_id]
+
+#----------------------
+# Generate OOC Chambers for new accounts.
+    def generate_ooc_rooms(self):
+        owner = self.owner
+
+        name = owner.key
+        possessive = '\'' if name[-1] == 's' else '\'s'
+        homeroom = create_object(typeclass='rooms.rooms.Room', key=f"{name}{possessive} Quarters")
+        homeroom.db.desc = ("This compact room leaves much to be desired. "
+            "It has a bunk large enough for one person and an adjoining basic bathroom facility.")
+        homeroom.tags.add(category='ooc_room')
+        owner.home = homeroom
+        owner.location = homeroom
+
+        portal_room = create_object(typeclass='rooms.rooms.Room', key='Portal Room')
+        portal_room.tags.add(category='ooc_room')
+
+        # Make exits connecting the Portal Room with the Workshop
+        quarters_to_portal_rm = create_object(typeclass='travel.exits.Exit',
+                                    key=f'{portal_room.name}', aliases='portal', 
+                                    destination=portal_room, location=homeroom, home=homeroom)
+        quarters_to_portal_rm.db.card_dir = 'n'
+        quarters_to_portal_rm.tags.add(category='ooc_exit')
+
+        portal_rm_to_quarters = create_object(typeclass='travel.exits.Exit',
+                                    key=f"{homeroom.name}", aliases=['quar', 'quart'], 
+                                    destination=homeroom, location=portal_room, home=portal_room)
+        portal_rm_to_quarters.db.card_dir = 's'
+        portal_rm_to_quarters.tags.add(category='ooc_exit')
+
+        # Connect the portal room to the Common Room
+        common_room = search_object('Common Room')[0]
+        portal_rm_to_common = create_object(typeclass='travel.exits.Exit',
+                                    key=f'{common_room.name}', aliases='common', 
+                                    destination=common_room, location=portal_room, home=portal_room)
+        portal_rm_to_common.db.card_dir = 'n'
+        portal_rm_to_common.tags.add(category='ooc_exit')
