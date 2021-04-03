@@ -65,56 +65,62 @@ class InstanceHandler:
 
     def _generate_exits(self):
         for num, room in enumerate(self.rooms_list, start=1):
-            self._get_exit_type()
-            self._get_exit_key()
             if num == 1:
                 # Generate a portal in origin room that leads to first room of the instance.
-                portal_to_instance = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                    location=self.origin_room, tags=[('portal', 'exits'), ('enter_instance', 'exits')], 
-                    destination=room)
+                portal_to_instance = create_object(typeclass='travel.exits.Exit', key=room.name,
+                    location=self.origin_room, aliases=['port', 'portal'],
+                    tags=[('portal', 'exits'), ('enter_instance', 'exits')], destination=room)
                 self.exits_list.append(portal_to_instance)
 
                 # The first room only requires 1 exit.
-                exit_to_next_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                        location=room, tags=[self.exit_type])
+                exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
+                                        location=room)
+                exit_to_next_room.db.card_dir = 'n'
                 self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
                 prev_room = room
                 prev_room_exit = exit_to_next_room
 
-            elif num > 1 and num < len(self.rooms_list):
-                # All rooms between first and last.
-                exit_to_next_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                        location=room, tags=[self.exit_type])
-                self.exits_list.append(exit_to_next_room)
-
-                exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                        location=room, tags=[self.exit_type], destination=prev_room)
-                self.exits_list.append(exit_to_previous_room)
-
+            elif num > 1 and num < len(self.rooms_list): # All rooms between first and last.
                 # Connect the previous room to this room.
                 prev_room_exit.destination = room
+                prev_room_exit.key = room.name
+
+                exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
+                                        location=room, destination=prev_room)
+                exit_to_previous_room.db.card_dir = 's'
+                self.exits_list.append(exit_to_previous_room)
+
+                exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
+                                        location=room)
+                exit_to_next_room.db.card_dir = 'n'
+                self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
                 prev_room = room
                 prev_room_exit = exit_to_next_room
             
             elif num == len(self.rooms_list):
+                # Connect the previous room to this room.
+                prev_room_exit.destination = room
+                prev_room_exit.key = room.name
+
                 # The final room requires an exit back to previous room.
-                exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                                        location=room, tags=[self.exit_type], destination=prev_room)
+                exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
+                                        location=room, destination=prev_room)
+                exit_to_previous_room.db.card_dir = 's'
                 self.exits_list.append(exit_to_previous_room)
 
                 # Create a portal that returns back to the location the instance was generated from.
-                portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.exit_key,
-                    location=room, tags=[('portal', 'exits'), ('exit_instance', 'exits')], 
-                    destination=self.origin_room)
+                portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.origin_room.name,
+                                    location=room, aliases=['port', 'portal'],
+                                    tags=[('portal', 'exits'), ('exit_instance', 'exits')], 
+                                    destination=self.origin_room)
                 self.exits_list.append(portal_to_origin)
 
         for exit in self.exits_list:
             exit.tags.add(self.instance_id, category='instance_id')
-            exit.db.card_dir = 'n'
 
     def _save_instance(self):
         # Save to ledger.
@@ -189,21 +195,6 @@ class InstanceHandler:
         elif room_type == 'alley':
             self.room_key = random.choice(alley)
 
-    def _get_exit_type(self):
-        exit_types = [('stair', 'exits'), ('door', 'exits'), ('portal', 'exits')]
-        self.exit_type = random.choice(exit_types)
-
-    def _get_exit_key(self):
-        room_type = self.room_type
-        if room_type == 'forest':
-            self.exit_key = 'a forest'
-        elif room_type == 'sewer':
-            self.exit_key = 'a sewer'
-        elif room_type == 'cave':
-            self.exit_key = 'a cave'
-        elif room_type == 'alley':
-            self.exit_key = 'an alley'
-
 #------------------------------
 # Character Enter and Exit: at_after_traverse() on the Exit typeclass.
     # Exit tagged with ('enter_instance', category='exits')
@@ -256,20 +247,20 @@ class InstanceHandler:
         # Any left behind will be sent to their default home, so this is not critical.
         
         # Delete all exits.
-        exits_list = list(self.ledger.db.instances[instance_id]['exits_list'])
+        exits_list = list(self.ledger.db.instances[instance_id]['exits'])
         for exit in exits_list:
-            self.ledger.db.instances[instance_id]['exits_list'].remove(exit)
+            self.ledger.db.instances[instance_id]['exits'].remove(exit)
             exit.delete()
-        if len(self.ledger.db.instances[instance_id]['exits_list']) == 0:
-            del self.ledger.db.instances[instance_id]['exits_list']
+        if len(self.ledger.db.instances[instance_id]['exits']) == 0:
+            del self.ledger.db.instances[instance_id]['exits']
 
         # Delete all rooms.
-        rooms_list = list(self.ledger.db.instances[instance_id]['rooms_list'])
+        rooms_list = list(self.ledger.db.instances[instance_id]['rooms'])
         for room in rooms_list:
-            self.ledger.db.instances[instance_id]['rooms_list'].remove(room)
+            self.ledger.db.instances[instance_id]['rooms'].remove(room)
             room.delete()
-        if len(self.ledger.db.instances[instance_id]['rooms_list']) == 0:
-            del self.ledger.db.instances[instance_id]['rooms_list']
+        if len(self.ledger.db.instances[instance_id]['rooms']) == 0:
+            del self.ledger.db.instances[instance_id]['rooms']
 
         # Exits and Rooms are deleted, remove the instance from the ledger.
         del self.ledger.db.instances[instance_id]
