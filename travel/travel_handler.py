@@ -151,7 +151,7 @@ class TravelHandler:
     # doc str
     def travel_one_way(self):
         if not hasattr(self.exit_obj, 'destination'):
-            self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=(self.owner, ))
+            self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=self.owner)
             return True
     # doc str
     def pick_departure_string(self):
@@ -247,7 +247,7 @@ class TravelHandler:
     # Sends the final string to the specified objects.
     def send_departure_string(self):
         self.owner.msg(self.self_str)
-        self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
+        self.owner.location.msg_contents(self.others_str, exclude=self.owner)
 
 #-------------------------------------------------------
 # announce_move_to hook on Character typeclass
@@ -263,7 +263,7 @@ class TravelHandler:
     def origin_exit_missing_destination(self, origin, location):
         if not hasattr(self.origin_exit, 'destination'):
             if origin:
-                location.msg_contents(f"{self.owner.name} arrives from |530{origin.name}|n.", exclude=(self, ))
+                location.msg_contents(f"{self.owner.name} arrives from |530{origin.name}|n.", exclude=self.owner)
             return True
         else:
             return False
@@ -327,7 +327,7 @@ class TravelHandler:
     
     # doc str
     def send_arrival_string(self):
-        self.owner.location.msg_contents(self.others_str, exclude=(self.owner, ))
+        self.owner.location.msg_contents(self.others_str, exclude=self.owner)
 
 #-------------------------
 # at_after_move() hook on Character typeclass
