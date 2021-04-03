@@ -1006,7 +1006,7 @@ class CmdInstance(Command):
 
             args = self.args.strip()
             if 'menu' in args:
-                inst_menu = True
+                self.inst_menu = True
 
     def func(self):
         caller = self.caller
@@ -1014,8 +1014,7 @@ class CmdInstance(Command):
         if self.inst_summary:
             caller.instance.inst_summary()
         elif self.inst_menu:
-            EvMenu(caller, 'rooms.instance_menu', startnode='start_menu',
-                    cmdset_mergetype='Union')
+            EvMenu(caller, 'rooms.instance_menu', startnode='start_menu')
         else:
             return
 
@@ -1048,6 +1047,7 @@ class CmdAFKTimer(Command):
                 caller.attributes.add('afk_timer', args)
             else:
                 caller.db.afk_timer = args
+                caller.msg(f"You set your AFK Timer to {args} seconds.")
 
 
 def get_inventory_arg_type(args):
