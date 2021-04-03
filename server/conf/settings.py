@@ -94,7 +94,8 @@ GLOBAL_SCRIPTS = {
     'instance_ledger': {
         'typeclass': 'typeclasses.scripts.Script',
         'desc': 'Holds record of all current instances.',
-        'persistent': True
+        'persistent': True,
+        'attributes': [('instances', {})]
     }
 }
 
