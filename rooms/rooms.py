@@ -54,34 +54,7 @@ class Room(DefaultRoom):
         # if self.db.desc:
         #     location_desc = self.db.desc
         if exits:
-            num = 1
-            exits_len = len(exits)
-            exits_string = "    You see "
-            for x in exits:
-                x_alias = x.aliases.all()
-                if x.tags.get('door', category='exits'):
-                    if exits_len == 1:
-                        exits_string += (f"|530{exit_name[num - 1]}|n to the "
-                                        f"|340{looker.travel.card_dir_name(x.db.card_dir)}|n.")
-                    elif exits_len == num:
-                        exits_string += f"and |530{exit_name[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
-                    else:
-                        exits_string += f"|530{exit_name[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n, "
-                elif x.tags.get('stair', category='exits') or x.tags.get('ladder', category='exits'):
-                    if exits_len == 1:
-                        exits_string += f"|530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n."
-                    elif exits_len == num:
-                        exits_string += f"and |530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n."
-                    else:
-                        exits_string += f"|530{exit_name[num - 1]}|n leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n, "
-                else:
-                    if exits_len == 1:
-                        exits_string += f"|530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
-                    elif exits_len == num:
-                        exits_string += f"and |530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n."
-                    else:
-                        exits_string += f"|530{destinations[num - 1]}|n to the |340{looker.travel.card_dir_name(x.db.card_dir)}|n, "
-                num += 1
+            looker.travel.room_exits(exits, exit_name, destinations)
         if characters or things:
             # handle pluralization of things (never pluralize characters)
             thing_strings = []

@@ -410,3 +410,51 @@ class TravelHandler:
     # Decides if an exit requires a direction in its string.
     def exit_str_gen(self, exit_obj):
         owner = self.owner
+
+#-------------------------
+# return_appearance hook on Room typeclass
+    def room_exits(self, exits, exit_name, destinations):
+        exits_len = len(exits)
+        exits_string = "    You see "
+        for num, x in enumerate(exits, start=1):
+            x_alias = x.aliases.all()
+            if x.tags.get('door', category='exits'):
+                if exits_len == 1:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n to the "
+                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
+                elif exits_len == num:
+                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n to the "
+                                f"|340{self.card_dir_name(x.db.card_dir)}|n.")
+                else:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n to the "
+                                f"|340{self.card_dir_name(x.db.card_dir)}|n, ")
+            elif x.tags.get('stair', category='exits') or x.tags.get('ladder', category='exits'):
+                if exits_len == 1:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
+                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
+                elif exits_len == num:
+                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n "
+                                f"leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
+                else:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
+                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n, ")
+            elif x.tags.get('portal', category='exits'):
+                if exits_len == 1:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
+                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
+                elif exits_len == num:
+                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n leading "
+                                    f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
+                else:
+                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
+                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n, ")
+            else:
+                if exits_len == 1:
+                    exits_string = (f"{exits_string}|530{destinations[num - 1]}|n to the "
+                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
+                elif exits_len == num:
+                    exits_string = (f"{exits_string}and |530{destinations[num - 1]}|n to the "
+                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
+                else:
+                    exits_string = (f"{exits_string}|530{destinations[num - 1]}|n to the "
+                                    f"|340{self.card_dir_name(x.db.card_dir)}|n, ")
