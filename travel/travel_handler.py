@@ -44,6 +44,40 @@ class TravelHandler:
             card_dir == 'downwards'
         return card_dir
 
+    # Generate a string from a list of exits.
+    def exits_to_string(self, exits):
+        owner = self.owner
+        exit_str = ''
+        exit_str_list = []
+
+        if len(exits) > 0:
+            if len(exits) == 1:
+                single_exit = True
+            else:
+                single_exit = False
+        else:
+            # No exits were found.
+            self.no_exit_str = "There are no obvious exits."
+            exit_str = False
+            return exit_str
+
+        if single_exit:
+            if exits[0].db.card_dir is not None: # Exit has a cardinal direction.
+                exit_str = (f"|530{exits[0].get_display_name(owner)}|n to the "
+                            f"|340{self.card_dir_name(exits[0].db.card_dir)}|n.")
+            else: # Exit has no cardinal direction.
+                exit_str = f"|530{exits[0].get_display_name(owner)}|n."
+        else: # 2 or more exits.
+            for i in exits:
+                if i.db.card_dir is not None: # Exit has a cardinal direction.
+                    exit_str = (f"|530{i.get_display_name(owner)}|n to the "
+                                f"|340{self.card_dir_name(i.db.card_dir)}|n") # north, east, southwest, etc
+                else: # Exit has no cardinal direction.
+                    exit_str = f"|530{i.get_display_name(owner)}|n"
+                exit_str_list.append(exit_str)
+            exit_str = gen_mec.comma_separated_string_list(exit_str_list)
+        return exit_str
+
 #-------------------
 # Cardinal Exit Traversal
     def traverse_cardinal_exit(self, direction):
@@ -367,94 +401,23 @@ class TravelHandler:
             char_str = False
 
         # Parse list of exits.
-        if len(exits) > 0:
-            if len(exits) == 1:
-                self.single_exit = True
-            else:
-                self.single_exit = False
-            exit_str = self.exits_to_string(exits)
-        else:
-            # No exits were found.
-            no_exit_str = "There are no obvious exits."
-            exit_str = False
+        exit_str = self.exits_to_string(exits)
 
         # Generate final outgoing message.
         msg = f"You arrive at |530{location.get_display_name(owner)}|n. "
         msg = f"{msg}{'' if char_str == False else char_str}" # Characters string addition.
         if exit_str:
-            msg = f"{msg}You see {exit_str}."
+            msg = f"{msg}You see {exit_str}"
         else:
-            msg = f"{msg}{no_exit_str if exit_str == False else exit_str}"
+            msg = f"{msg}{self.no_exit_str}"
         return msg
-
-    # Generate a string from a list of exits.
-    def exits_to_string(self, exits):
-        owner = self.owner
-        exit_str = ''
-        exit_str_list = []
-
-        if self.single_exit:
-            exit_str = f"|530{exits[0].get_display_name(owner)}|n to the |340{self.card_dir_name(exits[0].db.card_dir)}|n"
-        else: # 2 or more exits.
-            for i in exits:
-                if i.db.card_dir is not None: # Exit has a cardinal direction.
-                    exit_str = (f"|530{i.get_display_name(owner)}|n to the "
-                                f"|340{self.card_dir_name(i.db.card_dir)}|n") # north, east, southwest, etc
-                else: # Exit has no cardinal direction.
-                    exit_str = f"|530{i.get_display_name(owner)}|n"
-                exit_str_list.append(exit_str)
-            exit_str = gen_mec.comma_separated_string_list(exit_str_list)
-        return exit_str
-
-    # TODO: (I don't even recall writing this or what it was for. Requires investigation.)
-    # Decides if an exit requires a direction in its string.
-    def exit_str_gen(self, exit_obj):
-        owner = self.owner
 
 #-------------------------
 # return_appearance hook on Room typeclass
-    def room_exits(self, exits, exit_name, destinations):
-        exits_len = len(exits)
-        exits_string = "    You see "
-        for num, x in enumerate(exits, start=1):
-            x_alias = x.aliases.all()
-            if x.tags.get('door', category='exits'):
-                if exits_len == 1:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n to the "
-                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
-                elif exits_len == num:
-                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n to the "
-                                f"|340{self.card_dir_name(x.db.card_dir)}|n.")
-                else:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n to the "
-                                f"|340{self.card_dir_name(x.db.card_dir)}|n, ")
-            elif x.tags.get('stair', category='exits') or x.tags.get('ladder', category='exits'):
-                if exits_len == 1:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
-                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
-                elif exits_len == num:
-                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n "
-                                f"leading |340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
-                else:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
-                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n, ")
-            elif x.tags.get('portal', category='exits'):
-                if exits_len == 1:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
-                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
-                elif exits_len == num:
-                    exits_string = (f"{exits_string}and |530{exit_name[num - 1]}|n leading "
-                                    f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n.")
-                else:
-                    exits_string = (f"{exits_string}|530{exit_name[num - 1]}|n leading "
-                                f"|340{'upwards' if 'u' in x_alias else 'downwards'}|n, ")
-            else:
-                if exits_len == 1:
-                    exits_string = (f"{exits_string}|530{destinations[num - 1]}|n to the "
-                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
-                elif exits_len == num:
-                    exits_string = (f"{exits_string}and |530{destinations[num - 1]}|n to the "
-                                    f"|340{self.card_dir_name(x.db.card_dir)}|n.")
-                else:
-                    exits_string = (f"{exits_string}|530{destinations[num - 1]}|n to the "
-                                    f"|340{self.card_dir_name(x.db.card_dir)}|n, ")
+    def room_exits(self, exits):
+        exit_str = self.exits_to_string(exits)
+        if exit_str == False:
+                exit_str = "    There are no obvious exits."
+        else:
+            exit_str = f"    You see {exit_str}"
+        return exit_str

@@ -37,13 +37,11 @@ class Room(DefaultRoom):
         # get and identify all objects
         visible = (con for con in self.contents if con != looker and
                    con.access(looker, "view"))
-        exits, exit_name, characters, destinations, things = [], [], [], [], defaultdict(list)
+        exits, characters, things = [], [], defaultdict(list)
         for con in visible:
             key = con.get_display_name(looker)
             if con.destination:
                 exits.append(con)
-                exit_name.append(key)
-                destinations.append(con.destination.name)
             elif inherits_from(con, "characters.characters.Character"):
                 characters.append(f"|c{key}|n")
             else:
@@ -54,7 +52,7 @@ class Room(DefaultRoom):
         # if self.db.desc:
         #     location_desc = self.db.desc
         if exits:
-            looker.travel.room_exits(exits, exit_name, destinations)
+            exit_str = looker.travel.room_exits(exits)
         if characters or things:
             # handle pluralization of things (never pluralize characters)
             thing_strings = []
@@ -70,7 +68,7 @@ class Room(DefaultRoom):
         if self.db.desc:
             string = f"{string} {self.db.desc}"
         if exits:
-            string = f"{string}\n{exits_string}"
+            string = f"{string}\n{exit_str}"
         if things:
             string = f"{string}\n    {list_to_string(thing_strings)} |nlie upon the ground."
         if characters:
