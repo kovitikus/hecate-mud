@@ -113,8 +113,7 @@ class Character(DefaultCharacter):
         # It currently gives an error:
         #
         # Couldn't perform move ('at_announce_move()'). 
-        # Contact an admin. ('TravelHandler' object has no 
-    #                                           attribute 'exit_obj')
+        # Contact an admin. ('TravelHandler' object has no attribute 'exit_obj')
         if not self.location:
             return
         location = self.location
@@ -127,7 +126,6 @@ class Character(DefaultCharacter):
             return
         self.travel.pick_departure_string()
         self.travel.send_departure_string()
-        
 
     def announce_move_to(self, source_location, msg=None, mapping=None, 
                         **kwargs):
