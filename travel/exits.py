@@ -42,3 +42,13 @@ class Exit(DefaultExit):
             traversing_object.instance.enter_instance()
         elif self.tags.get('exit_instance', category='exits'):
             traversing_object.instance.exit_instance(source_location)
+    
+    def return_appearance(self, looker, **kwargs):
+        msg = ''
+        if self.attributes.has('desc'):
+            msg = self.desc
+        if self.destination is not None:
+            # Returns the appearance of the destination room.
+            dest = self.destination
+            msg = f"{msg}Through {self.name}...\n{dest.return_appearance(looker)}"
+        return msg

@@ -677,6 +677,20 @@ class CmdLook(Command):
             if args == 'crowd':
                 self.caller.location.crowd(self.caller)
                 return
+            elif args in ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']:
+                # Looking at an exit returns the appearance of its destination.
+                # https://i.imgur.com/6KFXUMd.png
+                target = None
+                for exit in self.caller.location.exits:
+                    if exit.attributes.has('card_dir'):
+                        if exit.db.card_dir == args:
+                            target = exit
+                if target:
+                    msg = target.return_appearance(self.caller)
+                else:
+                    msg = "There is no exit to look at in that direction!"
+                self.caller.msg(msg)
+                return
             else:
                 target = caller.search(args, location=[caller, caller.location])
                 if not target:
