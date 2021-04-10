@@ -88,6 +88,9 @@ class Character(DefaultCharacter):
         self.attributes.add('lying', False)
         self.attributes.add('afk_timer', 600) # 10 minute timeout
 
+        # Skills
+        self.skill.generate_fresh_skillset(self, 'martial arts')
+
     def announce_move_from(self, destination, msg=None, mapping=None, 
                             **kwargs):
         """
@@ -243,15 +246,7 @@ class Character(DefaultCharacter):
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
 
-class Player_Character(Character):
-    def at_object_creation(self):
-        super().at_object_creation()
-        self.skill.generate_fresh_skillset(self, 'martial arts')
-
-class NPC(Character):
-    pass
-
-class Merchant(NPC):
+class Merchant(Character):
     @lazy_property
     def merch(self):
         return MerchantHandler(self)
