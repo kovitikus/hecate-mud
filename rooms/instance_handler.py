@@ -76,8 +76,6 @@ class InstanceHandler:
                 # Room 1 Coordinates
                 current_room_coords = {'x': 0, 'y': 0}
                 room.attributes.add('coords', current_room_coords)
-                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
-                                category=self.instance_id)
                 self.used_coords.append(current_room_coords)
 
                 # Decide next room's coordinates.
@@ -106,8 +104,6 @@ class InstanceHandler:
                 # Room Coordinates
                 current_room_coords = self.next_room_coords
                 room.attributes.add('coords', current_room_coords)
-                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
-                                category=self.instance_id)
                 self.used_coords.append(current_room_coords)
 
                 # Decide next room's coordinates.
@@ -136,8 +132,6 @@ class InstanceHandler:
                 # Room Coordinates
                 current_room_coords = self.next_room_coords
                 room.attributes.add('coords', current_room_coords)
-                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
-                                category=self.instance_id)
                 self.used_coords.append(current_room_coords)
 
                 # Create a portal that returns back to the location the instance was generated from.
@@ -151,14 +145,17 @@ class InstanceHandler:
             exit.tags.add(self.instance_id, category='instance_id')
 
     def _generate_new_room_coords(self, current_room_coords):
-        # n = x, y - 1
-        # ne = x + 1, y - 1
-        # e = x + 1, y
-        # se = x + 1, y + 1
-        # s = x, y + 1
-        # sw = x - 1, y + 1
-        # w = x - 1, y
-        # nw = x - 1, y - 1
+        # https://gist.github.com/kovitikus/f231899a6111f508675596fd8599182f
+        """
+        n = x, y - 1
+        ne = x + 1, y - 1
+        e = x + 1, y
+        se = x + 1, y + 1
+        s = x, y + 1
+        sw = x - 1, y + 1
+        w = x - 1, y
+        nw = x - 1, y - 1
+        """
         free_space = False
         card_dirs = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 
@@ -196,7 +193,7 @@ class InstanceHandler:
                 self.dir_choice = dir_choice
                 free_space = True
             else:
-                card_dirs.pop(dir_choice)
+                card_dirs.remove(dir_choice)
 
     def _save_instance(self):
         # Save to ledger.
@@ -248,8 +245,8 @@ class InstanceHandler:
         self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
 
     def _get_room_qty(self):
-        # Each instance will, for now, contain a possibility of 3-5 rooms.
-        self.room_qty = random.randint(3, 5)
+        # Each instance will, for now, contain a possibility of 5-10 rooms.
+        self.room_qty = random.randrange(21, 31)
 
     def _get_room_type(self):
         room_types = ['forest', 'sewer', 'cave', 'alley']
