@@ -9,6 +9,14 @@ class TravelHandler:
 
 #---------------------
 # General Methods
+    def open_environment_exit(self, exit):
+        if exit.tags.get('door', category='exits') or \
+            exit.tags.get('stair', category='exits') or \
+            exit.tags.get('ladder', category='exits'):
+            return False
+        else:
+            return True
+
     def find_exit_by_card_dir(self):
         for x in self.owner.location.contents:
             if x.db.card_dir == self.direction:
@@ -63,17 +71,31 @@ class TravelHandler:
 
         if single_exit:
             if exits[0].db.card_dir is not None: # Exit has a cardinal direction.
-                exit_str = (f"|530{exits[0].get_display_name(owner)}|n to the "
+                if self.open_environment_exit(exits[0]):
+                    exit_str = (f"|530{exits[0].destination.get_display_name(owner)}|n to the "
+                            f"|340{self.card_dir_name(exits[0].db.card_dir)}|n.")
+                else:
+                    exit_str = (f"|530{exits[0].get_display_name(owner)}|n to the "
                             f"|340{self.card_dir_name(exits[0].db.card_dir)}|n.")
             else: # Exit has no cardinal direction.
-                exit_str = f"|530{exits[0].get_display_name(owner)}|n."
+                if self.open_environment_exit(exits[0]):
+                    exit_str = f"|530{exits[0].destination.get_display_name(owner)}|n."
+                else:
+                    exit_str = f"|530{exits[0].get_display_name(owner)}|n."
         else: # 2 or more exits.
             for i in exits:
                 if i.db.card_dir is not None: # Exit has a cardinal direction.
-                    exit_str = (f"|530{i.get_display_name(owner)}|n to the "
-                                f"|340{self.card_dir_name(i.db.card_dir)}|n") # north, east, southwest, etc
+                    if self.open_environment_exit(i):
+                        exit_str = (f"|530{i.destination.get_display_name(owner)}|n to the "
+                                    f"|340{self.card_dir_name(i.db.card_dir)}|n")
+                    else:
+                        exit_str = (f"|530{i.get_display_name(owner)}|n to the "
+                                    f"|340{self.card_dir_name(i.db.card_dir)}|n")
                 else: # Exit has no cardinal direction.
-                    exit_str = f"|530{i.get_display_name(owner)}|n"
+                    if self.open_environment_exit(i):
+                        exit_str = f"|530{i.destination.get_display_name(owner)}|n"
+                    else:
+                        exit_str = f"|530{i.get_display_name(owner)}|n"
                 exit_str_list.append(exit_str)
             exit_str = gen_mec.comma_separated_string_list(exit_str_list)
         return exit_str
