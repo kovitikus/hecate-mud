@@ -41,6 +41,7 @@ class InstanceHandler:
 # Instance Creation
     def _generate_instance(self):
         # Save the data to the handler.
+        self.used_coords = []
         self.rooms_list = []
         self.exits_list = []
 
@@ -72,10 +73,20 @@ class InstanceHandler:
                     tags=[('portal', 'exits'), ('enter_instance', 'exits')], destination=room)
                 self.exits_list.append(portal_to_instance)
 
+                # Room 1 Coordinates
+                current_room_coords = {'x': 0, 'y': 0}
+                room.attributes.add('coords', current_room_coords)
+                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
+                                category=self.instance_id)
+                self.used_coords.append(current_room_coords)
+
+                # Decide next room's coordinates.
+                self._generate_new_room_coords(current_room_coords)
+
                 # The first room only requires 1 exit.
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.db.card_dir = 'n'
+                exit_to_next_room.db.card_dir = self.dir_choice
                 self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
@@ -89,12 +100,22 @@ class InstanceHandler:
 
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.db.card_dir = 's'
+                exit_to_previous_room.db.card_dir = self._opposite_card_dir(self.dir_choice)
                 self.exits_list.append(exit_to_previous_room)
+                
+                # Room Coordinates
+                current_room_coords = self.next_room_coords
+                room.attributes.add('coords', current_room_coords)
+                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
+                                category=self.instance_id)
+                self.used_coords.append(current_room_coords)
+
+                # Decide next room's coordinates.
+                self._generate_new_room_coords(current_room_coords)
 
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.db.card_dir = 'n'
+                exit_to_next_room.db.card_dir = self.dir_choice
                 self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
@@ -109,8 +130,15 @@ class InstanceHandler:
                 # The final room requires an exit back to previous room.
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.db.card_dir = 's'
+                exit_to_previous_room.db.card_dir = self._opposite_card_dir(self.dir_choice)
                 self.exits_list.append(exit_to_previous_room)
+
+                # Room Coordinates
+                current_room_coords = self.next_room_coords
+                room.attributes.add('coords', current_room_coords)
+                room.tags.add(f"{str(current_room_coords['x'])},{str(current_room_coords['y'])}", 
+                                category=self.instance_id)
+                self.used_coords.append(current_room_coords)
 
                 # Create a portal that returns back to the location the instance was generated from.
                 portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.origin_room.name,
@@ -121,6 +149,54 @@ class InstanceHandler:
 
         for exit in self.exits_list:
             exit.tags.add(self.instance_id, category='instance_id')
+
+    def _generate_new_room_coords(self, current_room_coords):
+        # n = x, y - 1
+        # ne = x + 1, y - 1
+        # e = x + 1, y
+        # se = x + 1, y + 1
+        # s = x, y + 1
+        # sw = x - 1, y + 1
+        # w = x - 1, y
+        # nw = x - 1, y - 1
+        free_space = False
+        card_dirs = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+
+        while free_space == False:
+            dir_choice = random.choice(card_dirs)
+
+            if dir_choice == 'n':
+                test_coords_x = current_room_coords['x']
+                test_coords_y = current_room_coords['y'] - 1
+            elif dir_choice == 'ne':
+                test_coords_x = current_room_coords['x'] + 1
+                test_coords_y = current_room_coords['y'] - 1
+            elif dir_choice == 'e':
+                test_coords_x = current_room_coords['x'] + 1
+                test_coords_y = current_room_coords['y']
+            elif dir_choice == 'se':
+                test_coords_x = current_room_coords['x'] + 1
+                test_coords_y = current_room_coords['y'] + 1
+            elif dir_choice == 's':
+                test_coords_x = current_room_coords['x']
+                test_coords_y = current_room_coords['y'] + 1
+            elif dir_choice == 'sw':
+                test_coords_x = current_room_coords['x'] - 1
+                test_coords_y = current_room_coords['y'] + 1
+            elif dir_choice == 'w':
+                test_coords_x = current_room_coords['x'] - 1
+                test_coords_y = current_room_coords['y']
+            elif dir_choice == 'nw':
+                test_coords_x = current_room_coords['x'] - 1
+                test_coords_y = current_room_coords['y'] - 1
+            test_coords = {'x': test_coords_x, 'y': test_coords_y}
+
+            if test_coords not in self.used_coords:
+                self.next_room_coords = test_coords
+                self.dir_choice = dir_choice
+                free_space = True
+            else:
+                card_dirs.pop(dir_choice)
 
     def _save_instance(self):
         # Save to ledger.
@@ -194,6 +270,25 @@ class InstanceHandler:
             self.room_key = random.choice(cave)
         elif room_type == 'alley':
             self.room_key = random.choice(alley)
+
+    def _opposite_card_dir(self, card_dir):
+        if card_dir == 'n':
+            opp_dir = 's'
+        elif card_dir == 'ne':
+            opp_dir = 'sw'
+        elif card_dir == 'e':
+            opp_dir = 'w'
+        elif card_dir == 'se':
+            opp_dir = 'nw'
+        elif card_dir == 's':
+            opp_dir = 'n'
+        elif card_dir == 'sw':
+            opp_dir = 'ne'
+        elif card_dir == 'w':
+            opp_dir = 'e'
+        elif card_dir == 'nw':
+            opp_dir = 'se'
+        return opp_dir
 
 #------------------------------
 # Character Enter and Exit: at_after_traverse() on the Exit typeclass.
