@@ -95,7 +95,11 @@ GLOBAL_SCRIPTS = {
         'typeclass': 'typeclasses.scripts.Script',
         'desc': 'Holds record of all current instances.',
         'persistent': True,
-        'attributes': [('instances', {})]
+    },
+    'zone_ledger': {
+        'typeclass': 'typeclasses.scripts.Script',
+        'desc': "Holds record of game-wide zone data, including occupancy.",
+        'persistent': True
     }
 }
 
