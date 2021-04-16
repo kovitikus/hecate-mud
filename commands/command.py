@@ -43,13 +43,6 @@ class Command(BaseCommand):
         """
         self.caller.status.afk_check()
 
-class CmdDesc(Command):
-    key = "desc"
-    def func(self):
-        caller = self.caller
-        desc = caller.desc()
-        self.msg(desc)
-
 class CmdCharGen(Command):
     key = "chargen"
 

@@ -37,7 +37,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-        self.add(command.CmdDesc())
         self.add(command.CmdCharGen())
         self.add(command.CmdLearnSkillset())
         self.add(command.CmdGrantSP())
