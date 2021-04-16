@@ -7,6 +7,7 @@ from evennia.utils.create import create_object
 from evennia.utils.utils import list_to_string, lazy_property
 
 from mobs.mob_spawner import MobSpawner
+from rooms.room_handler import RoomHandler
 
 
 class Room(DefaultRoom):
@@ -19,9 +20,22 @@ class Room(DefaultRoom):
     See examples/object.py for a list of
     properties and methods available on all Objects.
     """
+    @lazy_property
+    def room(self):
+        return RoomHandler(self)
+    @lazy_property
+    def spawn(self):
+        return MobSpawner(self)
+
     def at_object_creation(self):
         self.attributes.add('crowd', False)
 
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
+        if moved_obj.has_account():
+            self.room.set_room_occupied()
+    def at_object_leave(self, moved_obj, target_location, **kwargs):
+        if moved_obj.has_account():
+            self.room.set_room_vacant()
 
     def return_appearance(self, looker, **kwargs):
         """
@@ -86,9 +100,6 @@ class Room(DefaultRoom):
             looker.msg(f"You find yourself at the periphery of a terribly thick crowd. You note a moderate number of {list_to_string(people)}.")
 
 class SewerRoom(Room):
-    @lazy_property
-    def spawn(self):
-        return MobSpawner(self)
     def at_object_receive(self, new_arrival, source_location):
         if new_arrival.has_account and not new_arrival.is_superuser:
             self.spawn.spawn_timer()
