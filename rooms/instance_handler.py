@@ -200,7 +200,7 @@ class InstanceHandler:
         if not self.ledger.attributes.has('instances'):
             self.ledger.attributes.add('instances', {})
         self.ledger.db.instances[self.instance_id] = {}
-        self.ledger.db.instances[self.instance_id]['creator'] = self.owner.name
+        self.ledger.db.instances[self.instance_id]['creator'] = self.owner
         self.ledger.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
         self.ledger.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
         self.ledger.db.instances[self.instance_id]['rooms'] = self.rooms_list
@@ -210,7 +210,6 @@ class InstanceHandler:
         if not self.owner.attributes.has('instances'):
             self.owner.attributes.add('instances', {})
         self.owner.db.instances[self.instance_id] = {}
-        self.owner.db.instances[self.instance_id]['creator'] = self.owner.name
         self.owner.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
         self.owner.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
         self.owner.db.instances[self.instance_id]['rooms'] = self.rooms_list
@@ -354,8 +353,12 @@ class InstanceHandler:
         if len(self.ledger.db.instances[instance_id]['rooms']) == 0:
             del self.ledger.db.instances[instance_id]['rooms']
 
+        # Remove the instance from the creator object.
+        creator = self.ledger.db.instances[instance_id]['creator']
+        del creator.db.instances[instance_id]
         # Exits and Rooms are deleted, remove the instance from the ledger.
         del self.ledger.db.instances[instance_id]
+         
 
 #----------------------
 # Generate OOC Chambers for new accounts.
