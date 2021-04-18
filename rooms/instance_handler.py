@@ -55,13 +55,20 @@ class InstanceHandler:
         self._create_log_string()
 
     def _generate_rooms(self):
-        for _ in range(1, self.room_qty):
+        for num, _ in enumerate(range(1, self.room_qty + 1), start=1):
             if self.randomize_room_type:
                 self._get_room_type()
             self._get_room_key()
 
             self.room = create_object(typeclass='rooms.rooms.Room', key=self.room_key)
             self.room.tags.add(self.instance_id, category='instance_id')
+
+            # Mark the first and last rooms of the instance.
+            # Used in the room object receive/leave hooks.
+            if num == 1:
+                self.room.tags.add('enter_instance', category='rooms')
+            elif num == len(self.room_qty):
+                self.room.tags.add('exit_instance', category='rooms')
             self.rooms_list.append(self.room)
 
     def _generate_exits(self):
@@ -287,8 +294,8 @@ class InstanceHandler:
         return opp_dir
 
 #------------------------------
-# Character Enter and Exit: at_after_traverse() on the Exit typeclass.
-    # Exit tagged with ('enter_instance', category='exits')
+# at_object_receive / at_object_leave Room typeclass hooks.
+    # Room tagged with ('enter_instance', category='exits')
     def enter_instance(self):
         # Determine the currently occupied room's instance_id.
         if self.owner.location.tags.get(category='instance_id'):
@@ -305,7 +312,7 @@ class InstanceHandler:
             self.owner.msg('|rCRITICAL ERROR! enter_instance could not find the instance_id!|n')
             return
 
-    # Exit tagged with ('exit_instance', category='exits')
+    # Room tagged with ('exit_instance', category='exits')
     def exit_instance(self, source_location):
         # This is where the instance cleanup is triggered.
         # Must first determine that all ledger occupants have exited.
@@ -358,7 +365,6 @@ class InstanceHandler:
         del creator.db.instances[instance_id]
         # Exits and Rooms are deleted, remove the instance from the ledger.
         del self.ledger.db.instances[instance_id]
-         
 
 #----------------------
 # Generate OOC Chambers for new accounts.

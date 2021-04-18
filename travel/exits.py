@@ -36,12 +36,6 @@ class Exit(DefaultExit):
     """
     def at_object_creation(self):
         self.attributes.add('card_dir', None)
-
-    def at_after_traverse(self, traversing_object, source_location, **kwargs):
-        if self.tags.get('enter_instance', category='exits'):
-            traversing_object.instance.enter_instance()
-        elif self.tags.get('exit_instance', category='exits'):
-            traversing_object.instance.exit_instance(source_location)
     
     def return_appearance(self, looker, **kwargs):
         msg = ''
