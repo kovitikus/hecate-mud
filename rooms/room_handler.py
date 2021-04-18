@@ -19,21 +19,24 @@ class RoomHandler:
             uid = owner.tags.get(category='instance_id')
         elif owner.tags.get(category='zone_id'):
             uid = owner.tags.get(category='zone_id')
+        else:
+            uid = None
 
-        # If this zone isn't already on the ledger, add as the uid.
-        if not zone_ledger.attributes.has(uid):
-            zone_ledger.attributes.add(uid, {'mobs': [], 'occupants': []})
+        if uid is not None:
+            # If this zone isn't already on the ledger, add as the uid.
+            if not zone_ledger.attributes.has(uid):
+                zone_ledger.attributes.add(uid, {'mobs': [], 'occupants': []})
 
-            # The first time this zone is added to the ledger, generate a script to track mob spawn.
-            mob_spawn_script = create_script(typeclass='typeclasses.scripts.Script', 
-                            key=uid, persistent=True, autostart=True)
-            mob_spawn_script.spawn.spawn_timer() # Initiate the MobSpawnHandler
+                # The first time this zone is added to the ledger, generate a script to track mob spawn.
+                mob_spawn_script = create_script(typeclass='typeclasses.scripts.Script', 
+                                key=uid, persistent=True, autostart=True)
+                mob_spawn_script.spawn.start_spawner() # Initiate the MobSpawnHandler
 
-        # Zone is being tracked, add the new occupant
-        zone_ledger_uid = zone_ledger.attributes.get(uid)
-        zone_occupants = list(zone_ledger_uid['occupants'])
-        if occupant not in zone_occupants:
-            zone_ledger_uid['occupants'].append(occupant)
+            # Zone is being tracked, add the new occupant
+            zone_ledger_uid = zone_ledger.attributes.get(uid)
+            zone_occupants = list(zone_ledger_uid['occupants'])
+            if occupant not in zone_occupants:
+                zone_ledger_uid['occupants'].append(occupant)
 
     def set_room_vacant(self, occupant):
         owner = self.owner
@@ -46,7 +49,7 @@ class RoomHandler:
                 empty_room = False
             else:
                 empty_room = True
-        if empty_room:
+        if empty_room and owner.tags.get('occupied', category='rooms'):
             owner.tags.remove('occupied', category='rooms')
 
         # Generate the unique identifier for this room, which represents the entire zone.
@@ -54,18 +57,23 @@ class RoomHandler:
             uid = owner.tags.get(category='instance_id')
         elif owner.tags.get(category='zone_id'):
             uid = owner.tags.get(category='zone_id')
+        else:
+            uid = None
 
-        # Remove the occupant from the zone ledger.
-        zone_ledger_uid = zone_ledger.attributes.get(uid)
-        zone_ledger_uid['occupants'].remove(occupant)
-        zone_occupant_count = len(zone_ledger_uid['occupants'])
+        if uid is not None:
+            # Remove the occupant from the zone ledger.
+            zone_ledger_uid = zone_ledger.attributes.get(uid)
+            zone_occupant_list = list(zone_ledger_uid['occupants'])
+            if occupant in zone_occupant_list:
+                zone_ledger_uid['occupants'].remove(occupant)
+            zone_occupant_count = len(zone_ledger_uid['occupants'])
 
-        # Check if the zone is empty.
-        if zone_occupant_count == 0:
-            empty_zone = True
-        if empty_zone:
-            self.zone_ledger.attributes.remove(uid)
+            # Check if the zone is empty.
+            if zone_occupant_count == 0:
+                empty_zone = True
+            if empty_zone:
+                self.zone_ledger.attributes.remove(uid)
 
-            # Clean up the MobSpawner script.
-            spawn_script = search_script(uid)[0]
-            spawn_script.delete()
+                # Clean up the MobSpawner script.
+                spawn_script = search_script(uid)[0]
+                spawn_script.delete()
