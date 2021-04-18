@@ -67,7 +67,7 @@ class InstanceHandler:
             # Used in the room object receive/leave hooks.
             if num == 1:
                 self.room.tags.add('enter_instance', category='rooms')
-            elif num == len(self.room_qty):
+            elif num == self.room_qty:
                 self.room.tags.add('exit_instance', category='rooms')
             self.rooms_list.append(self.room)
 
