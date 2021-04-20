@@ -2,6 +2,7 @@ from evennia import GLOBAL_SCRIPTS
 from evennia.settings_default import TIME_ZONE
 from evennia.utils.create import create_script
 from evennia import search_script
+from evennia.utils.search import search_object_by_tag
 
 class RoomHandler:
     def __init__(self, owner):
@@ -17,15 +18,17 @@ class RoomHandler:
         # Decide the unique identifier which represents the entire zone.
         if owner.tags.get(category='instance_id'):
             uid = owner.tags.get(category='instance_id')
+            uid_category = 'instance_id'
         elif owner.tags.get(category='zone_id'):
             uid = owner.tags.get(category='zone_id')
+            uid_category = 'zone_id'
         else:
             uid = None
 
         if uid is not None:
             # If this zone isn't already on the ledger, add as the uid.
             if not zone_ledger.attributes.has(uid):
-                zone_ledger.attributes.add(uid, {'mobs': [], 'occupants': []})
+                zone_ledger.attributes.add(uid, {'mobs': [], 'occupants': [], 'rooms': []})
 
                 # The first time this zone is added to the ledger, generate a script to track mob spawn.
                 mob_spawn_script = create_script(typeclass='typeclasses.scripts.Script', 
@@ -37,6 +40,18 @@ class RoomHandler:
             zone_occupants = list(zone_ledger_uid['occupants'])
             if occupant not in zone_occupants:
                 zone_ledger_uid['occupants'].append(occupant)
+            
+            # Find and add all rooms for this zone.
+            zone_objects_list = search_object_by_tag(key=uid, category=uid_category)
+
+            # Filter for rooms only.
+            zone_rooms = []
+            for i in zone_objects_list:
+                if i.is_typeclass('rooms.rooms.Room'):
+                    zone_rooms.append(i)
+            
+            # Add rooms to the zone ledger.
+            zone_ledger_uid['rooms'] = zone_rooms
 
     def set_room_vacant(self, occupant):
         owner = self.owner
