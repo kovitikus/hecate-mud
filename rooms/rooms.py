@@ -30,19 +30,11 @@ class Room(DefaultRoom):
         # Set the room & zone occupancy.
         if moved_obj.has_account:
             self.room.set_room_occupied(moved_obj)
-
-        # Manage occupancy of an instance.
-        if self.tags.get('enter_instance', category='exits'):
-            moved_obj.instance.enter_instance()
         
     def at_object_leave(self, moved_obj, target_location, **kwargs):
         # Set the room & zone occupancy.
         if moved_obj.has_account:
             self.room.set_room_vacant(moved_obj)
-
-        # Manage occupancy of an instance.
-        if self.tags.get('exit_instance', category='exits'):
-            moved_obj.instance.exit_instance(self)
 
     def return_appearance(self, looker, **kwargs):
         """
