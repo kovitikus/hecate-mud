@@ -7,59 +7,65 @@ from evennia.utils.search import search_object_by_tag
 class RoomHandler:
     def __init__(self, owner):
         self.owner = owner
-        self.zone_ledger = GLOBAL_SCRIPTS.zone_ledger
-    
+
+        # All zones are stored in a single dictionary attribute on the zone_ledger script.
+        # This makes it possible to add other attributes, such as total number of occupied zones,
+        # while also maintaining a curated dictionary of zones.
+        self.zones = GLOBAL_SCRIPTS.zone_ledger.attributes.get(key='zones', default={})[0]
+
     def set_room_occupied(self, occupant):
         owner = self.owner
-        zone_ledger = self.zone_ledger
+        zones = self.zones
+        uid = None
+
         if not owner.tags.get('occupied', category='rooms'):
             owner.tags.add('occupied', category='rooms')
 
-        # Decide the unique identifier which represents the entire zone.
-        if owner.tags.get(category='instance_id'):
-            uid = owner.tags.get(category='instance_id')
-            uid_category = 'instance_id'
-        elif owner.tags.get(category='zone_id'):
+        if owner.tags.get(category='zone_id'):
             uid = owner.tags.get(category='zone_id')
-            uid_category = 'zone_id'
-        else:
-            uid = None
 
         if uid is not None:
-            # If this zone isn't already on the ledger, add as the uid.
-            if not zone_ledger.attributes.has(uid):
-                zone_ledger.attributes.add(uid, {'mobs': [], 'occupants': [], 'rooms': []})
+            # Zone script doesn't exist. Generate a new one.
+            if not zones.has_key(uid):
+                zone_script = create_script(typeclass='typeclasses.scripts.Script', 
+                                key=uid, persistent=True, autostart=True,
+                                attributes=[('occupants', []), ('rooms', []), ('mobs', [])])
 
-                # The first time this zone is added to the ledger, generate a script to track mob spawn.
-                mob_spawn_script = create_script(typeclass='typeclasses.scripts.Script', 
-                                key=uid, persistent=True, autostart=True)
-                mob_spawn_script.spawn.start_spawner() # Initiate the MobSpawnHandler
+                # Pass the room's zone_type to the zone_script.
+                if owner.tags.get(category='zone_type'):
+                    zone_type = owner.tags.get(category='zone_type')
+                    zone_script.tags.add(zone_type, category='zone_type')
 
-            # Zone is being tracked, add the new occupant
-            zone_ledger_uid = zone_ledger.attributes.get(uid)
-            zone_occupants = list(zone_ledger_uid['occupants'])
+                # Spawn NPCs or mobs.
+                if owner.tags.get('has_spawn'):
+                    zone_script.spawn.start_spawner()
+
+                # Find and add all rooms for this zone.
+                zone_objects_list = search_object_by_tag(key=uid, category='zone_id')
+                zone_rooms = []
+                for i in zone_objects_list:
+                    if i.is_typeclass('rooms.rooms.Room'):
+                        zone_rooms.append(i)
+                zone_script.db.rooms = zone_rooms
+
+                # Add a reference to the zone script to the ledger for later retrieval.
+                zones[uid] = zone_script
+
+            # Zone script exists. Update it.
+            zone_script = zones.get(uid)
+            zone_occupants = list(zone_script.db.occupants)
             if occupant not in zone_occupants:
-                zone_ledger_uid['occupants'].append(occupant)
-            
-            # Find and add all rooms for this zone.
-            zone_objects_list = search_object_by_tag(key=uid, category=uid_category)
-
-            # Filter for rooms only.
-            zone_rooms = []
-            for i in zone_objects_list:
-                if i.is_typeclass('rooms.rooms.Room'):
-                    zone_rooms.append(i)
-            
-            # Add rooms to the zone ledger.
-            zone_ledger_uid['rooms'] = zone_rooms
+                zone_script.db.occupants.append(occupant)
 
     def set_room_vacant(self, occupant):
         owner = self.owner
-        zone_ledger = self.zone_ledger
+        zones = self.zones
         empty_room = False
         empty_zone = False
+        static_zone = False
 
-        for obj in self.owner.contents_get():
+        # Check if this room is void of players.
+        for obj in owner.contents_get():
             if obj.has_account:
                 empty_room = False
             else:
@@ -67,28 +73,25 @@ class RoomHandler:
         if empty_room and owner.tags.get('occupied', category='rooms'):
             owner.tags.remove('occupied', category='rooms')
 
-        # Generate the unique identifier for this room, which represents the entire zone.
-        if owner.tags.get(category='instance_id'):
-            uid = owner.tags.get(category='instance_id')
-        elif owner.tags.get(category='zone_id'):
+        # Acquire this room's zone identifier.
+        if owner.tags.get(category='zone_id'):
             uid = owner.tags.get(category='zone_id')
         else:
             uid = None
 
         if uid is not None:
-            # Remove the occupant from the zone ledger.
-            zone_ledger_uid = zone_ledger.attributes.get(uid)
-            zone_occupant_list = list(zone_ledger_uid['occupants'])
+            # Remove the occupant from the zone.
+            zone_script = zones.get(uid)
+            zone_occupant_list = list(zone_script.db.occupants)
             if occupant in zone_occupant_list:
-                zone_ledger_uid['occupants'].remove(occupant)
-            zone_occupant_count = len(zone_ledger_uid['occupants'])
+                zone_script.db.occupants.remove(occupant)
+
+            if zone_script.tags.get('static_zone'):
+                static_zone = True
 
             # Check if the zone is empty.
+            zone_occupant_count = len(zone_script.db.occupants)
             if zone_occupant_count == 0:
                 empty_zone = True
-            if empty_zone:
-                self.zone_ledger.attributes.remove(uid)
-
-                # Clean up the MobSpawner script.
-                spawn_script = search_script(uid)[0]
-                spawn_script.delete()
+            if empty_zone and not static_zone:
+                del zones[uid]
