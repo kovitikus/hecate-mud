@@ -28,10 +28,10 @@ class Room(DefaultRoom):
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         # Destroy anything that enters
-        if self.tags.get('black_hole', category='rooms'):
+        if self.tags.get('black_hole', category='rooms') and not moved_obj.has_account:
             self.room.black_hole(moved_obj)
             return
-        elif self.tags.get('trash_bin', category='rooms'):
+        elif self.tags.get('trash_bin', category='rooms') and not moved_obj.has_account:
             self.room.obj_enter_trash(moved_obj)
             return
 

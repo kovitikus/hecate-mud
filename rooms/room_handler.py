@@ -119,7 +119,7 @@ class RoomHandler:
     
     def empty_trash(self):
         now = time.time()
-        for obj in self.contents:
+        for obj in self.owner.contents:
             if obj.attributes.has('deletion_time'):
                 deletion_time = obj.attributes.get('deletion_time')
                 obj_name = obj.name
