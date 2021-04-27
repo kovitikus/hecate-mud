@@ -11,7 +11,7 @@ class RoomHandler:
         # All zones are stored in a single dictionary attribute on the zone_ledger script.
         # This makes it possible to add other attributes, such as total number of occupied zones,
         # while also maintaining a curated dictionary of zones.
-        self.zones = GLOBAL_SCRIPTS.zone_ledger.attributes.get(key='zones', default={})[0]
+        self.zones = GLOBAL_SCRIPTS.zone_ledger.attributes.get(key='zones', default={})
 
     def set_room_occupied(self, occupant):
         owner = self.owner
