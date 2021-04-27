@@ -61,7 +61,7 @@ class Room(DefaultRoom):
                 # things can be pluralized
                 things[key].append(con)
         # get description, build string
-        location_name = f"    You see |530{self.get_display_name(looker)}|n."
+        location_name = f"    You see |310{self.get_display_name(looker)}|n."
         # if self.db.desc:
         #     location_desc = self.db.desc
         if exits:
