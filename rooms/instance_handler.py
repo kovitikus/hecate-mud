@@ -5,7 +5,6 @@ from evennia import GLOBAL_SCRIPTS
 from evennia.utils import logger
 from evennia.utils.search import search_object
 from evennia.utils.create import create_object
-from evennia.utils.evmenu import EvMenu
 
 
 class InstanceHandler:
