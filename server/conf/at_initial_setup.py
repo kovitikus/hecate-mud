@@ -26,11 +26,32 @@ def at_initial_setup():
     char1.equip.generate_equipment()
 
     room = search_object('#2', use_dbref=True)[0]
-    room.key = 'Default Home'
-    room.db.desc = ('This is the room where objects travel to when their home location isn\'t ' 
-                    'explicity set in the source code or by a builder, '
-                    'and the object\'s current room is destroyed. '
-                    'Character typeclasses are not allowed to enter this room in a move_to check.')
+    room.key = 'default_home'
+    room.db.desc = ("This is the room where objects travel to when their home location isn\'t " 
+                    "explicity set in the source code or by a builder, "
+                    "and the object\'s current location is destroyed. "
+                    "Character typeclasses are not allowed to enter this room in a move_to check.")
+
+    # Black Hole
+    black_hole = create_object(typeclass='rooms.rooms.Room', key='black_hole')
+    black_hole.db.desc = ("The room where all objects go to die. It is the default home for "
+                        "objects that are considered worthless. Any object entering this room is "
+                        "automatically deleted via the at_object_receive method.")
+    black_hole.tags.add('black_hole', category='rooms')
+
+    # Statis Chamber
+    statis_chamber = create_object(typeclass='rooms.rooms.Room', key='statis_chamber')
+    statis_chamber.db.desc = ("This room holds objects indefinitely. It is the default home for "
+                            "objects that are of significant value, unique, or otherwise should "
+                            "not be destroyed for any reason.")
+    statis_chamber.tags.add('statis_chamber', category='rooms')
+
+    # Trash Bin
+    trash_bin = create_object(typeclass='rooms.rooms.Room', key='trash_bin')
+    trash_bin.db.desc = ("This room holds objects for 90 days, before being sent to black_hole. "
+                            "It is the default home for objects of some value and the destination "
+                            "of said objects when discarded by players.")
+    trash_bin.tags.add('trash_bin', category='rooms')
 
     # Create the superuser's home room.
     rm3 = create_object(typeclass='rooms.rooms.Room', key='Main Office')

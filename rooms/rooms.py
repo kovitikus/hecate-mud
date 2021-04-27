@@ -27,6 +27,14 @@ class Room(DefaultRoom):
         self.attributes.add('crowd', False)
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
+        # Destroy anything that enters
+        if self.tags.get('black_hole', category='rooms'):
+            self.room.black_hole(moved_obj)
+            return
+        elif self.tags.get('trash_bin', category='rooms'):
+            self.room.obj_enter_trash(moved_obj)
+            return
+
         # Set the room & zone occupancy.
         if moved_obj.has_account:
             self.room.set_room_occupied(moved_obj)

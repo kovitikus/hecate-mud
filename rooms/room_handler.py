@@ -1,7 +1,8 @@
+import time
+
 from evennia import GLOBAL_SCRIPTS
-from evennia.settings_default import TIME_ZONE
+from evennia.utils import logger
 from evennia.utils.create import create_script
-from evennia import search_script
 from evennia.utils.search import search_object_by_tag
 
 class RoomHandler:
@@ -95,3 +96,35 @@ class RoomHandler:
                 empty_zone = True
             if empty_zone and not static_zone:
                 del zones[uid]
+
+#----------------
+# Black Hole Room Logic
+    def black_hole(self, object):
+        obj_name = object.name
+        deleted = object.delete()
+        if deleted:
+            log_str = f"{obj_name} has been destroyed!"
+            logger.log_file(log_str, filename='black_hole.log')
+
+#-----------------
+# Trash Bin Room Logic
+    def obj_enter_trash(self, object):
+        grace_period = 2_592_000 # seconds = 30 days
+        now = time.time() # Current epoch time
+        deletion_time = now + grace_period
+        object.attributes.add('deletion_time', deletion_time)
+
+        log_str = f"{object.name} pending deletion at {deletion_time} epoch time."
+        logger.log_file(log_str, filename='trash_bin.log')
+    
+    def empty_trash(self):
+        now = time.time()
+        for obj in self.contents:
+            if obj.attributes.has('deletion_time'):
+                deletion_time = obj.attributes.get('deletion_time')
+                obj_name = obj.name
+                if now >= deletion_time:
+                    deleted = obj.delete()
+                    if deleted:
+                        log_str = f"{obj_name} has been destroyed!"
+                        logger.log_file(log_str, filename='trash_bin.log')

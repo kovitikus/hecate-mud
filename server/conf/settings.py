@@ -100,6 +100,11 @@ GLOBAL_SCRIPTS = {
         'typeclass': 'typeclasses.scripts.Script',
         'desc': "Holds record of game-wide zone data, including occupancy.",
         'persistent': True
+    },
+    'trash_collector': {
+        'typeclass': 'typeclasses.scripts.TrashCollector',
+        'desc': "Checks for trash_bin objects to destroy once every 24 hours.",
+        'persistent': True
     }
 }
 
