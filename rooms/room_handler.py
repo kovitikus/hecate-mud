@@ -12,11 +12,14 @@ class RoomHandler:
         # All zones are stored in a single dictionary attribute on the zone_ledger script.
         # This makes it possible to add other attributes, such as total number of occupied zones,
         # while also maintaining a curated dictionary of zones.
-        self.zones = GLOBAL_SCRIPTS.zone_ledger.attributes.get(key='zones', default={})
+        if not GLOBAL_SCRIPTS.zone_ledger.attributes.has('zones'):
+            GLOBAL_SCRIPTS.zone_ledger.attributes.add('zones', {})
 
+#-------------
+# Called by at_object_receive on the rooms.rooms.Room typeclass
     def set_room_occupied(self, occupant):
         owner = self.owner
-        zones = self.zones
+        zones = GLOBAL_SCRIPTS.zone_ledger.db.zones
         uid = None
 
         if not owner.tags.get('occupied', category='rooms'):
@@ -27,7 +30,7 @@ class RoomHandler:
 
         if uid is not None:
             # Zone script doesn't exist. Generate a new one.
-            if not zones.has_key(uid):
+            if uid not in zones:
                 zone_script = create_script(typeclass='typeclasses.scripts.Script', 
                                 key=uid, persistent=True, autostart=True,
                                 attributes=[('occupants', []), ('rooms', []), ('mobs', [])])
@@ -54,13 +57,16 @@ class RoomHandler:
 
             # Zone script exists. Update it.
             zone_script = zones.get(uid)
-            zone_occupants = list(zone_script.db.occupants)
-            if occupant not in zone_occupants:
-                zone_script.db.occupants.append(occupant)
+            if zone_script is not None:
+                zone_occupants = list(zone_script.db.occupants)
+                if occupant not in zone_occupants:
+                    zone_script.db.occupants.append(occupant)
 
-    def set_room_vacant(self, occupant):
+#-------------
+# Called by at_object_leave on the rooms.rooms.Room typeclass
+    def set_room_vacant(self, occupant, target_location):
         owner = self.owner
-        zones = self.zones
+        zones = GLOBAL_SCRIPTS.zone_ledger.db.zones
         empty_room = False
         empty_zone = False
         static_zone = False
@@ -80,22 +86,32 @@ class RoomHandler:
         else:
             uid = None
 
-        if uid is not None:
-            # Remove the occupant from the zone.
-            zone_script = zones.get(uid)
-            zone_occupant_list = list(zone_script.db.occupants)
-            if occupant in zone_occupant_list:
-                zone_script.db.occupants.remove(occupant)
+        # Acquire target location's zone identifier.
+        if target_location.tags.get(category='zone_id'):
+            target_location_uid = target_location.tags.get(category='zone_id')
+        else:
+            target_location_uid = None
 
-            if zone_script.tags.get('static_zone'):
-                static_zone = True
+        if uid is not None and uid != target_location_uid:
+            if uid in zones:
+                # Remove the occupant from the zone.
+                zone_script = zones[uid]
+                if zone_script is not None:
+                    if zone_script.attributes.has('occupants'):
+                        zone_occupant_list = list(zone_script.db.occupants)
+                        if occupant in zone_occupant_list:
+                            zone_script.db.occupants.remove(occupant)
 
-            # Check if the zone is empty.
-            zone_occupant_count = len(zone_script.db.occupants)
-            if zone_occupant_count == 0:
-                empty_zone = True
-            if empty_zone and not static_zone:
-                del zones[uid]
+                        if zone_script.tags.get('static_zone'):
+                            static_zone = True
+
+                        # Check if the zone is empty.
+                        zone_occupant_count = len(zone_script.db.occupants)
+                        if zone_occupant_count == 0:
+                            empty_zone = True
+                        if empty_zone and not static_zone:
+                            del zones[uid]
+                            zone_script.delete()
 
 #----------------
 # Black Hole Room Logic

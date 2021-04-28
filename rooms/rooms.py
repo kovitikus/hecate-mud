@@ -42,7 +42,7 @@ class Room(DefaultRoom):
     def at_object_leave(self, moved_obj, target_location, **kwargs):
         # Set the room & zone occupancy.
         if moved_obj.has_account:
-            self.room.set_room_vacant(moved_obj)
+            self.room.set_room_vacant(moved_obj, target_location)
 
     def return_appearance(self, looker, **kwargs):
         """

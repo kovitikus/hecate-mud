@@ -61,6 +61,9 @@ class InstanceHandler:
 
             self.room = create_object(typeclass='rooms.rooms.Room', key=self.room_key)
             self.room.tags.add(self.instance_id, category='instance_id')
+            self.room.tags.add(self.room_type, category='zone_type')
+            self.room.tags.add('instance_spawn_testing', category='zone_id')
+            self.room.tags.add('has_spawn')
             self.rooms_list.append(self.room)
 
     def _generate_exits(self):
