@@ -28,12 +28,16 @@ class TravelHandler:
             if x.db.card_dir == self.direction:
                 self.exit_obj = x
                 break
+            else:
+                self.exit_obj = None
 
     def find_exit_by_destination(self, destination):
         for x in self.owner.location.contents:
             if x.destination == destination:
                 self.exit_obj = x
                 break
+            else:
+                self.exit_obj = None
 
     def card_dir_name(self, card_dir):
         if card_dir == 'n':
@@ -203,9 +207,12 @@ class TravelHandler:
 #---------------------------------------------------------------------
 # announce_move_from hook on Character typeclass
     # doc str
-    def travel_one_way(self):
-        if not hasattr(self.exit_obj, 'destination'):
-            self.owner.location.msg_contents(f"{self.owner.name} departs to {self.exit_obj}.", exclude=self.owner)
+    def travel_one_way(self, destination):
+        if self.exit_obj is None:
+            self.owner.location.msg_contents(f"{self.owner.name} teleports to {destination}", exclude=self.owner)
+            return True
+        elif not hasattr(self.exit_obj, 'destination'):
+            self.owner.location.msg_contents(f"{self.owner.name} departs via {self.exit_obj}.", exclude=self.owner)
             return True
     # doc str
     def pick_departure_string(self):
@@ -398,6 +405,9 @@ class TravelHandler:
         char_str = ''
         exit_str = ''
         msg = ''
+
+        if location is None:
+            return "You have arrive nowhere."
 
         # Generate lists of characters and exits in the room.
         for i in location.contents:
