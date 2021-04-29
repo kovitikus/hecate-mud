@@ -18,19 +18,17 @@ class SpawnHandler:
         zone_type = self.owner.tags.get(category='zone_type')
         self.mob_pool = utils.variable_from_module("mobs.mobs", variable=zone_type)
         self.black_hole = search_object_by_tag(key='black_hole', category='rooms')[0]
-        print(f"spawnhandler black_hole variable assignment: {self.black_hole}")
     
     def start_spawner(self):
         owner = self.owner
-        start_spawning = False
-        occupant_count = len(owner.attributes.get('occupants'))
-        print(f"spawner occupant_count: {occupant_count}")
-        mob_count = len(owner.attributes.get('mobs'))
-        print(f"spawner mob_count: {mob_count}")
+        if owner is None:
+            return
+        start_spawning = True
+        occupant_count = len(owner.attributes.get('occupants', []))
+        mob_count = len(owner.attributes.get('mobs', []))
 
-        if occupant_count > 0 and mob_count < (occupant_count * 2): # 2 mobs spawned per character.
-            start_spawning = True
-            print(f"occupant_count > 0 and mob_count < occupant_count * 2: {start_spawning}")
+        if mob_count >= (occupant_count * 2): # 2 mobs spawned per character.
+            start_spawning = False
 
         if start_spawning == True:
             self._find_target()
@@ -76,7 +74,7 @@ class SpawnHandler:
             if random.random() < 0.5:
                 adjs.append(random.choice(self.mob[f"adj{num}"]))
             num += 1
-        self.mob_key = _INFLECT.an(f"{' '.join(adjs)}{noun}").strip()
+        self.mob_key = _INFLECT.an(f"{' '.join(adjs)} {noun}").strip()
 
     def _spawn_mob(self):
         mob = create_object(typeclass='characters.characters.Character', key=self.mob_key,
