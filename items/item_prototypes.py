@@ -1,4 +1,5 @@
 from evennia.utils.utils import random
+from evennia.utils.search import search_object_by_tag
 
 FOOD = {
     'prototype_key': 'food',
@@ -102,7 +103,8 @@ INVENTORY_CONTAINER = {
 
 INVENTORY_BAG = {
     'prototype_parent': 'inventory_container',
-    'key': lambda: generate_random_bag_key()
+    'key': lambda: generate_random_bag_key(),
+    'home': lambda: trash_bin_dbref()
 }
 
 BAIT = {
@@ -128,6 +130,10 @@ def generate_random_bag_key():
     # a pristine yellow bag
     bag_key = f"a {random.choice(adjective)} {random.choice(color)} bag"
     return bag_key
+
+def trash_bin_dbref():
+    trash_bin = search_object_by_tag(key='trash_bin', category='rooms')[0]
+    return trash_bin.dbref
 
 # Bags
 # Satchels
