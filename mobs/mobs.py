@@ -44,7 +44,7 @@ class Dummy(DefaultMob):
         if cur_hp <= 0:
             cur_hp = max_hp
 
-SEWER = {
+sewer = {
     'rat': {
         'adj1': ['vicious', 'slick-coated', 'large', 'red-maned', 'filthy', 'feral'],
         'adj2': ['black', 'yellow', 'pale-white', 'black'],

@@ -32,8 +32,10 @@ class RoomHandler:
             # Zone script doesn't exist. Generate a new one.
             if uid not in zones:
                 zone_script = create_script(typeclass='typeclasses.scripts.Script', 
-                                key=uid, persistent=True, autostart=True,
-                                attributes=[('occupants', []), ('rooms', []), ('mobs', [])])
+                                key=uid, persistent=True, autostart=True)
+                zone_script.attributes.add('occupants', [])
+                zone_script.attributes.add('rooms', [])
+                zone_script.attributes.add('mobs', [])
 
                 # Pass the room's zone_type to the zone_script.
                 if owner.tags.get(category='zone_type'):
