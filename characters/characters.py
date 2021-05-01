@@ -10,6 +10,8 @@ from characters.currency_handler import CurrencyHandler
 from characters.status_handler import StatusHandler
 from travel.travel_handler import TravelHandler
 from rooms.instance_handler import InstanceHandler
+from sentients.sentient_handler import SentientHandler
+from sentients.merchant_handler import MerchantHandler
 
 
 class Character(DefaultCharacter):
@@ -40,6 +42,12 @@ class Character(DefaultCharacter):
     @lazy_property
     def currency(self):
         return CurrencyHandler(self)
+    @lazy_property
+    def merch(self):
+        return MerchantHandler(self)
+    @lazy_property
+    def sentient(self):
+        return SentientHandler(self)
 
     def at_object_creation(self):
         # Command Sets

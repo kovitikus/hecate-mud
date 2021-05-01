@@ -39,7 +39,7 @@ class SentientHandler:
     def choose_attack(self, target):
         owner = self.owner
 
-        if utils.inherits_from(owner, 'sentients.sentients.Sentient'):
+        if owner.tags.get('rat', category='sentients'):
             skillset = 'rat'
             skill_list = ['claw', 'bite']
             skill = random.choice(skill_list)
