@@ -395,7 +395,7 @@ class TravelHandler:
     # Generate a summary description of a location, its occupants, and exits.
     def location_summary(self):
         """
-        You arrive at <location name>. <Person/NPC> <is/are> here. You see <exit name> to the 
+        You arrive at <location name>. <Person/Sentient> <is/are> here. You see <exit name> to the 
         <exit direction>, and <exit name> to the <exit direction>.
         """
         owner = self.owner

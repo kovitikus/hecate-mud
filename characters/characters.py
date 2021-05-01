@@ -1,10 +1,8 @@
 from evennia import DefaultCharacter
-from evennia.utils.create import create_object
-from evennia.utils.utils import (list_to_string, inherits_from, lazy_property)
+from evennia.utils.utils import (lazy_property)
 
 from skills.combat_handler import CombatHandler
 from skills.skill_handler import SkillHandler
-from npcs.merchant_handler import MerchantHandler
 from items.item_handler import ItemHandler
 from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
@@ -63,7 +61,7 @@ class Character(DefaultCharacter):
         # Prototype spawner attempts to set objects' home specifically
         # to DEFAULT_HOME, which is Limbo.
         # In the initial_setup module, Limbo isn't created until after
-        # the superuser. https://pastebin.com/Qs4gwwZe
+        # the superuser. https://gist.github.com/kovitikus/9b358ea0ebc09ec1e3840f332e93c00d
         if not self.dbref == '#1':
             self.equip.generate_equipment()
 
@@ -185,7 +183,7 @@ class Character(DefaultCharacter):
         the room and the most critical information.
 
         Example:
-            You arrive at <destination name>. <Person/NPC> <is/are> here.
+            You arrive at <destination name>. <Person/Sentient> <is/are> here.
             You see <exit name> to the <exit direction>, an <exit name>
             to the <exit direction>, and <exit name> to the <exit direction>.
         """
@@ -240,11 +238,3 @@ class Character(DefaultCharacter):
         else:
             desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
         return desc
-
-class Merchant(Character):
-    @lazy_property
-    def merch(self):
-        return MerchantHandler(self)
-    
-    def at_object_creation(self):
-        self.attributes.add('stock', [])

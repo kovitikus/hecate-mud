@@ -41,8 +41,8 @@ def set_roundtime(owner):
 def unbusy(owner):
     owner.msg('|yYou are no longer busy.|n')
     owner.db.busy = False
-    if inherits_from(owner, 'mobs.mobs.DefaultMob'):
-        owner.mob.check_for_target()
+    if owner.tags.get('hostile', category='sentient'):
+        owner.sentient.check_for_target()
 
 def roll_die(sides=100):
     roll = random.randint(1, sides)

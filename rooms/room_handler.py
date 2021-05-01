@@ -35,14 +35,14 @@ class RoomHandler:
                                 key=uid, persistent=True, autostart=True)
                 zone_script.attributes.add('occupants', [])
                 zone_script.attributes.add('rooms', [])
-                zone_script.attributes.add('mobs', [])
+                zone_script.attributes.add('sentients', [])
 
                 # Pass the room's zone_type to the zone_script.
                 if owner.tags.get(category='zone_type'):
                     zone_type = owner.tags.get(category='zone_type')
                     zone_script.tags.add(zone_type, category='zone_type')
 
-                # Spawn NPCs or mobs.
+                # Spawn sentients.
                 if owner.tags.get('has_spawn'):
                     zone_script.spawn.start_spawner()
 

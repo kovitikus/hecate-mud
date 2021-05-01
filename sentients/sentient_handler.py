@@ -2,7 +2,7 @@ import random
             
 from evennia import utils
 
-class MobHandler:
+class SentientHandler:
     def __init__(self, owner):
         self.owner = owner
 
@@ -39,7 +39,7 @@ class MobHandler:
     def choose_attack(self, target):
         owner = self.owner
 
-        if utils.inherits_from(owner, 'mobs.mobs.Rat'):
+        if utils.inherits_from(owner, 'sentients.sentients.Sentient'):
             skillset = 'rat'
             skill_list = ['claw', 'bite']
             skill = random.choice(skill_list)

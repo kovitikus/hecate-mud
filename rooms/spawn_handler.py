@@ -16,7 +16,7 @@ class SpawnHandler:
         self.owner = owner
         self.zone_rooms = list(self.owner.attributes.get('rooms'))
         zone_type = self.owner.tags.get(category='zone_type')
-        self.mob_pool = utils.variable_from_module("mobs.mobs", variable=zone_type)
+        self.sentient_pool = utils.variable_from_module("sentients.sentients", variable=zone_type)
         self.black_hole = search_object_by_tag(key='black_hole', category='rooms')[0]
     
     def start_spawner(self):
@@ -25,18 +25,18 @@ class SpawnHandler:
             return
         start_spawning = True
         occupant_count = len(owner.attributes.get('occupants', []))
-        mob_count = len(owner.attributes.get('mobs', []))
+        sentient_count = len(owner.attributes.get('sentients', []))
 
-        if mob_count >= (occupant_count * 2): # 2 mobs spawned per character.
+        if sentient_count >= (occupant_count * 2): # 2 hostile sentients spawned per character.
             start_spawning = False
 
         if start_spawning == True:
             self._find_target()
             self._target_rep()
             self._pick_spawn_room()
-            self._pick_mob()
-            self._generate_mob_key()
-            self._spawn_mob()
+            self._pick_sentient()
+            self._generate_sentient_key()
+            self._spawn_sentient()
             self._idle_spawner()
         elif start_spawning == False:
             self._idle_spawner()
@@ -49,7 +49,7 @@ class SpawnHandler:
     
     def _target_rep(self):
         # Here we'd normally check what reputation the target character has for this zone.
-        # The rep determines the difficulty and types of mobs that can spawn.
+        # The rep determines the difficulty and types of sentients that can spawn.
         # Tier 1 rep is anything from 1-100, tier 2 101-200, etc
         self.target_rep = 20
 
@@ -58,26 +58,26 @@ class SpawnHandler:
         # from the target's current location, but for now it's the target's current location.
         self.spawn_room = self.target.location
 
-    def _pick_mob(self):
-        mob_pool = self.mob_pool
-        mobs = []
-        for k in mob_pool.keys():
-            if mob_pool[k].get('base_difficulty') < self.target_rep:
-                mobs.append(mob_pool[k])
-        self.mob = random.choice(mobs)
+    def _pick_sentient(self):
+        sentient_pool = self.sentient_pool
+        sentients = []
+        for k in sentient_pool.keys():
+            if sentient_pool[k].get('base_difficulty') < self.target_rep:
+                sentients.append(sentient_pool[k])
+        self.sentient = random.choice(sentients)
 
-    def _generate_mob_key(self):
-        noun = self.mob.get('noun')
+    def _generate_sentient_key(self):
+        noun = self.sentient.get('noun')
         adjs = []
         num = 1
-        while (f"adj{num}") in self.mob:
+        while (f"adj{num}") in self.sentient:
             if random.random() < 0.5:
-                adjs.append(random.choice(self.mob[f"adj{num}"]))
+                adjs.append(random.choice(self.sentient[f"adj{num}"]))
             num += 1
-        self.mob_key = _INFLECT.an(f"{' '.join(adjs)} {noun}").strip()
+        self.sentient_key = _INFLECT.an(f"{' '.join(adjs)} {noun}").strip()
 
-    def _spawn_mob(self):
-        mob = create_object(typeclass='characters.characters.Character', key=self.mob_key,
+    def _spawn_sentient(self):
+        sentient = create_object(typeclass='sentients.sentients.Sentient', key=self.sentient_key,
                             location=self.spawn_room, home=self.black_hole)
-        self.spawn_room.msg_contents(f"{self.mob_key} has appeared from the shadows.")
-        self.owner.db.mobs.append(mob)
+        self.spawn_room.msg_contents(f"{self.sentient_key} has appeared from the shadows.")
+        self.owner.db.sentients.append(sentient)
