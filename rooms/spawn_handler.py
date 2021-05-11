@@ -100,9 +100,9 @@ class SpawnHandler:
         """
         sentient_pool = self.sentient_pool
         sentients = []
-        for k in sentient_pool.keys():
-            if sentient_pool[k].get('base_difficulty') < self.target_rep:
-                sentients.append(sentient_pool[k])
+        for v in sentient_pool.values():
+            if v.get('base_difficulty') < self.target_rep:
+                sentients.append(v)
         self.sentient = random.choice(sentients)
 
     def _generate_sentient_key(self):
@@ -131,3 +131,4 @@ class SpawnHandler:
                             tags=[(self.sentient.get('noun'), 'sentients')])
         self.spawn_room.msg_contents(f"{self.sentient_key} has appeared from the shadows.")
         self.owner.db.sentients.append(sentient)
+        sentient.sentient.check_for_target()

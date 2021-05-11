@@ -141,8 +141,8 @@ except ImportError:
 
 # Modules that contain prototypes for use with the spawner mechanism.
 PROTOTYPE_MODULES = [
-    "items.item_prototypes",
-    "sentients.sentients"]
+    "items.item_prototypes"
+    ]
 
 
 # Typeclass and base for all objects (fallback)
