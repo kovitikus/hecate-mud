@@ -95,7 +95,7 @@ class Character(DefaultCharacter):
         self.attributes.add('afk_timer', 600) # 10 minute timeout
 
         # Skills
-        self.skill.generate_fresh_skillset(self, 'martial arts')
+        self.skill.generate_fresh_skillset('martial arts')
 
     def announce_move_from(self, destination, msg=None, mapping=None, 
                             **kwargs):
