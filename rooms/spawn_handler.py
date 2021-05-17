@@ -126,9 +126,19 @@ class SpawnHandler:
         """
         Creates the sentient object and spawns it in the predetermined location.
         """
+        noun = self.sentient.get('noun')
         sentient = create_object(typeclass='characters.characters.Character', key=self.sentient_key,
                             location=self.spawn_room, home=self.black_hole, 
-                            tags=[(self.sentient.get('noun'), 'sentients')])
+                            tags=[(noun, 'sentients')])
+        
+        # Add the sentient's skillset.
+        sentient.skill.learn_skillset(noun)
+
+        # Add the sentient's commandset.
+        cmdset = f"sentients.sentient_cmdsets.{noun.upper()}CmdSet"
+        sentient.cmdset.add(cmdset, permanent=True)
+
+
         self.spawn_room.msg_contents(f"{self.sentient_key} has appeared from the shadows.")
         self.owner.db.sentients.append(sentient)
         sentient.sentient.check_for_target()

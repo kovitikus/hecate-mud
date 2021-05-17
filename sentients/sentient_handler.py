@@ -40,14 +40,14 @@ class SentientHandler:
         owner = self.owner
 
         if owner.tags.get('rat', category='sentients'):
-            skillset = 'rat'
-            skill_list = ['claw', 'bite']
+            skill_list = ['ratclaw', 'ratbite']
             skill = random.choice(skill_list)
-            self.attack(target, skillset, skill)
+            self.attack(target, skill)
 
-    def attack(self, target, skillset, skill):
+    def attack(self, target, skill):
         owner = self.owner
-        owner.combat.attack(target, skillset, skill)
+        cmd = f"{skill} {target}"
+        owner.execute_cmd(cmd)
     
     def idle(self):
         utils.delay(5, self.check_for_target)
