@@ -23,7 +23,6 @@ does what you expect it to.
 def at_initial_setup():
     # Search by dbref to find the #1 superuser
     char1 = search_object('#1', use_dbref=True)[0]
-    char1.equip.generate_equipment()
 
     room = search_object('#2', use_dbref=True)[0]
     room.key = 'default_home'
@@ -52,6 +51,10 @@ def at_initial_setup():
                             "It is the default home for objects of some value and the destination "
                             "of said objects when discarded by players.")
     trash_bin.tags.add('trash_bin', category='rooms')
+
+    # Superuser's equipment generation must take place after the item rooms are generated.
+    # The inventory container requires trash_bin to exist.
+    char1.equip.generate_equipment()
 
     # Create the superuser's home room.
     rm3 = create_object(typeclass='rooms.rooms.Room', key='Main Office')
