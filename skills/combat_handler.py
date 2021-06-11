@@ -91,7 +91,7 @@ class CombatHandler:
         attack_rs = owner.skill.return_rank_score(attack_rank, attack_difficulty)
 
         defend_high, defend_mid, defend_low = self.target.skill.defense_layer_calc(rs_only=True)
-
+        defend_rs = None
 
         if attack_aim == 'high':
             defend_rs = defend_high
@@ -274,6 +274,18 @@ class CombatHandler:
                             'target': f"{c_a_name} claws at you with {a_poss} front paws! {target_outcome}",
                             'others': f"{c_a_name} claws at {t_name} with {a_poss} front paws! {others_outcome}"},
                         'bite': 
+                            {'owner': f"You bite at {t_name} with your teeth! {owner_outcome}",
+                            'target': f"{c_a_name} bites at you with {a_poss} teeth! {target_outcome}",
+                            'others': f"{c_a_name} bites at {t_name} with {a_poss} teeth! {others_outcome}"}
+                        },
+                    'spider':
+                        {'bite': 
+                            {'owner': f"You bite at {t_name} with your teeth! {owner_outcome}",
+                            'target': f"{c_a_name} bites at you with {a_poss} teeth! {target_outcome}",
+                            'others': f"{c_a_name} bites at {t_name} with {a_poss} teeth! {others_outcome}"}
+                        },
+                    'snake':
+                        {'bite': 
                             {'owner': f"You bite at {t_name} with your teeth! {owner_outcome}",
                             'target': f"{c_a_name} bites at you with {a_poss} teeth! {target_outcome}",
                             'others': f"{c_a_name} bites at {t_name} with {a_poss} teeth! {others_outcome}"}

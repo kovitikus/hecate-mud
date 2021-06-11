@@ -143,6 +143,18 @@ skillsets = {'martial arts':
                     {'uid': 'rat bite', 'skill_type': 'offense', 'damage_type': 'pierce', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'high', 'weapon': 'bite'},
                 'claw':
                     {'uid': 'rat claw', 'skill_type': 'offense', 'damage_type': 'slash', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'mid', 'weapon': 'claw'}
+                },
+            'spider':
+                {'bite':
+                    {'uid': 'spider bite', 'skill_type': 'offense', 'damage_type': 'pierce',
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee',
+                    'default_aim': 'mid', 'weapon': 'bite'}
+                },
+            'snake':
+                {'bite':
+                    {'uid': 'snake bite', 'skill_type': 'offense', 'damage_type': 'pierce',
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee',
+                    'default_aim': 'high', 'weapon': 'bite'}
                 }
             }
 
