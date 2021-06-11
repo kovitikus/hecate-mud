@@ -238,30 +238,12 @@ class SkillHandler():
 
     def generate_fresh_skillset(self, skillset, starting_rank=1):
         owner = self.owner
-
-        # Store dictionaries of baseline skills for each skillset.
+        starting_skillsets = skillsets.STARTING_SKILLSETS
         base_dic = {'base ranks': starting_rank, 'bonus ranks': 0, 'current ap': 0}
-        staves = {'end jab': 0, 'parting jab': 0, 'parting swat': 0, 'simple strike': 0, 'swat': 0, 
-                    'parting smash': 0, 'pivot smash': 0, 'side strike': 0, 'snapstrike': 0, 'stepping spin': 0, 
-                    'longarm strike': 0, 'pivoting longarm': 0, 'spinstrike': 0, 'sweep strike': 0, 'triple bash': 0, 
-                    'mid block': 0, 'low block': 0, 'overhead block': 0, 'defensive sweep': 0, 'feint': 0, 'leg sweep': 0}
-        holy = {'heal': 0}
-        marts = {'dodge': 0, 'duck': 0, 'jump': 0}
-        rat = {'claw': 0, 'bite': 0}
 
-        # setup all the fresh new skills and set them to 0 in a new skillset
-        if skillset == 'staves':
-            owner.attributes.add(skillset, {**base_dic, **staves})
-            self.skillset_dics[skillset] = {**base_dic, **staves}
-        elif skillset == 'holy':
-            owner.attributes.add(skillset, {**base_dic, **holy})
-            self.skillset_dics[skillset] = {**base_dic, **holy}
-        elif skillset == 'martial arts':
-            owner.attributes.add(skillset, {**base_dic, **marts})
-            self.skillset_dics[skillset] = {**base_dic, **marts}
-        elif skillset == 'rat':
-            owner.attributes.add(skillset, {**base_dic, **rat})
-            self.skillset_dics[skillset] = {**base_dic, **rat}
+        owner.attributes.add(skillset, {**base_dic, **starting_skillsets[skillset]})
+        self.skillset_dics[skillset] = {**base_dic, **starting_skillsets[skillset]}
+ 
 
     def grant_action_points(self, skillset):
         owner = self.owner

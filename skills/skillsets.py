@@ -156,3 +156,9 @@ for k, v in skillsets.items():
 for i in temp_skill_list:
     for k, v in i.items():
         VIABLE_SKILLS.append(k)
+
+STARTING_SKILLSETS = {}
+for skillset in skillsets.keys():
+    STARTING_SKILLSETS[skillset] = {}
+    for skill in skillsets[skillset].keys():
+        STARTING_SKILLSETS[skillset][skill] = 0
