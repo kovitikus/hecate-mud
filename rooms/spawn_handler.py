@@ -135,7 +135,7 @@ class SpawnHandler:
         sentient.skill.learn_skillset(noun)
 
         # Add the sentient's commandset.
-        cmdset = f"sentients.sentient_cmdsets.{noun.upper()}CmdSet"
+        cmdset = f"sentients.sentient_cmdsets.{noun.capitalize()}CmdSet"
         sentient.cmdset.add(cmdset, permanent=True)
 
 
