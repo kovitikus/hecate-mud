@@ -129,7 +129,7 @@ class SpawnHandler:
         noun = self.sentient.get('noun')
         sentient = create_object(typeclass='characters.characters.Character', key=self.sentient_key,
                             location=self.spawn_room, home=self.black_hole, 
-                            tags=[(noun, 'sentients')])
+                            tags=[(noun, 'sentient_class')])
         
         # Add the sentient's skillset.
         sentient.skill.learn_skillset(noun)

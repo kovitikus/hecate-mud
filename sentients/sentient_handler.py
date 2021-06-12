@@ -5,6 +5,7 @@ from evennia import utils
 class SentientHandler:
     def __init__(self, owner):
         self.owner = owner
+        self.skillsets = utils.utils.variable_from_module('skills.skillsets', 'skillsets')
 
     def check_for_target(self):
         owner = self.owner
@@ -14,7 +15,6 @@ class SentientHandler:
         if app_len >= 1:
             target = approached[0]
             self.choose_attack(target)
-            return
         else:
             self.get_target()
 
@@ -33,20 +33,25 @@ class SentientHandler:
         # Pick random target from visible targets.
         rand_targ = random.randrange(t_len)
         target = visible[rand_targ - 1]
-        owner.combat.approach(owner, target)
+        owner.combat.approach(target)
         self.check_for_target()
 
     def choose_attack(self, target):
         owner = self.owner
+        skillset = owner.tags.get(category='sentient_class')
 
-        if owner.tags.get('rat', category='sentients'):
-            skill_list = ['ratclaw', 'ratbite']
-            skill = random.choice(skill_list)
-            self.attack(target, skill)
+        choices = []
+        for k in self.skillsets[skillset].keys():
+            choices.append(k)
+        skill = random.choice(choices)
 
-    def attack(self, target, skill):
+        skill_command = self.skillsets[skillset][skill].get('uid')
+
+        self.attack(skill_command, target)
+
+    def attack(self, skill_command, target):
         owner = self.owner
-        cmd = f"{skill} {target}"
+        cmd = f"{skill_command} {target}"
         owner.execute_cmd(cmd)
     
     def idle(self):

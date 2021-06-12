@@ -41,7 +41,7 @@ def set_roundtime(owner):
 def unbusy(owner):
     owner.msg('|yYou are no longer busy.|n')
     owner.db.busy = False
-    if owner.tags.get(category='sentient'):
+    if owner.tags.get(category='sentient_class'):
         owner.sentient.check_for_target()
 
 def roll_die(sides=100):

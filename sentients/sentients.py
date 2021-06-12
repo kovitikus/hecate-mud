@@ -2,7 +2,7 @@ MERCHANT = {
     'prototype_key': 'merchant',
     'key': 'merchant',
     'typeclass': 'characters.characters.Character',
-    'tags': ('merchant', 'sentients'),
+    'tags': ('merchant', 'sentient_class'),
     'stock': {}
 }
 

@@ -752,7 +752,7 @@ class CmdStock(Command):
     def func(self):
         room_contents = self.caller.location.contents
         for i in room_contents:
-            if i.tags.get('merchant', category='sentients'):
+            if i.tags.get('merchant', category='sentient_class'):
                 self.caller.msg(i.merch.return_stock())
 
 class CmdBuy(Command):
@@ -792,7 +792,7 @@ class CmdBuy(Command):
         caller = self.caller
         room_contents = caller.location.contents
         for i in room_contents:
-            if i.tags.get('merchant', category='sentients'):
+            if i.tags.get('merchant', category='sentient_class'):
                 caller.msg(i.merch.sell_item(caller, self.item, quantity=self.quantity))
 
 class CmdConvertCoin(Command):
