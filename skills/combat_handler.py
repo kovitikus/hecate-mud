@@ -387,7 +387,6 @@ class CombatHandler:
         owner = self.owner
         name = owner.key
         location = owner.location
-        owner_app = owner.attributes.get('approached')
         
         hp = owner.attributes.get('hp')
         current_hp = hp['current_hp']
@@ -401,21 +400,31 @@ class CombatHandler:
             owner.db.ko = True
             location.msg_contents(f'{name} falls unconscious!')
         if current_hp <= -100:
-            # Check for
-            for a in owner_app:
-                if a is not None:
-                    ap_list = a.attributes.get('approached')
-                    if ap_list:
-                        ap_list.remove(owner)
-            if owner_app:
-                owner_app.remove(attacker)
-            if not owner.has_account:
-                owner.on_death()
-            else:
-                owner.db.hp['current_hp'] = owner.db.hp['max_hp']
-                location.msg_contents(f"{name} dies and is resurrected to max HP.", exclude=owner)
-                owner.msg("You die and are resurrected to full HP.")
-                owner.db.ko = False
+            self.death()
+
+    def death(self):
+        """
+        Handle the owner's death.
+
+        Removes the owner from any currently approached objects' approached list.
+        Clears the owner's approached list.
+
+        If the owner is not puppeted by a player, call its on_death() method.
+        Resurrects the character if puppeted by a player. (temporary)
+        """
+        owner = self.owner
+        for char in self.approached_list:
+            if char is not None:
+                # Request that each approached object remove this owner from its list.
+                char.combat.remove_approached(owner)
+        self.clear_approached()
+        if not owner.has_account:
+            owner.on_death()
+        else:
+            owner.db.hp['current_hp'] = owner.db.hp['max_hp']
+            owner.location.msg_contents(f"{owner.name} dies and is resurrected to full health.", exclude=owner)
+            owner.msg("You die and are resurrected to full health.")
+            owner.db.ko = False
 
 #-------------------------------------------------------------------------------------#
 
