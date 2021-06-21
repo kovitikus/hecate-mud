@@ -84,65 +84,141 @@ for i in range(1, 1_001):
 # Skill Order: Offensive, Defensive, Utility > Difficulty > Alphabetically
 skillsets = {'martial arts':
                 {'dodge':
-                    {'uid': 'marts dodge','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': None},
+                    {'uid': 'marts dodge','skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None},
                 'duck':
-                    {'uid': 'marts duck','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'high', 'weapon': None},
+                    {'uid': 'marts duck','skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': None},
                 'jump':
-                    {'uid': 'marts jump','skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 0, 'attack_range': 'either', 'default_aim': 'low', 'weapon': None}
+                    {'uid': 'marts jump','skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'low', 'weapon': None}
+                },
+            'magic warding':
+                {'fire ward':
+                    {'uid': 'fire ward', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None},
+                'frost ward':
+                    {'uid': 'frost ward', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None},
+                'arcane ward':
+                    {'uid': 'arcane ward', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None},
+                'holy ward':
+                    {'uid': 'holy ward', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None},
+                'unholy ward':
+                    {'uid': 'unholy ward', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None}
                 },
             'staves': 
                 {'end jab': 
-                    {'uid': 'stave end jab', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave end jab', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'parting jab': 
-                    {'uid': 'stave parting jab', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave parting jab', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'parting swat': 
-                    {'uid': 'stave parting swat', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave parting swat', 'skill_type': 'offense','damage_type': 'bruise',
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'simple strike': 
-                    {'uid': 'stave simple strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave simple strike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'swat': 
-                    {'uid': 'stave swat', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave swat', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'parting smash':
-                     {'uid': 'stave parting smash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                     {'uid': 'stave parting smash', 'skill_type': 'offense', 'damage_type': 'bruise',
+                     'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                     'default_aim': 'high', 'weapon': 'stave'},
                 'pivot smash': 
-                    {'uid': 'stave pivot smash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave pivot smash', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'side strike': 
-                    {'uid': 'stave side strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave side strike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'snapstrike': 
-                    {'uid': 'stave snapstrike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                    {'uid': 'stave snapstrike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': 'stave'},
                 'stepping spin': 
-                    {'uid': 'stave stepping spin', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave stepping spin', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'longarm strike': 
-                    {'uid': 'stave longarm strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                    {'uid': 'stave longarm strike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': 'stave'},
                 'pivoting longarm': 
-                    {'uid': 'stave pivoting longarm', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave pivoting longarm', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'spinstrike': 
-                    {'uid': 'stave spinstrike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                    {'uid': 'stave spinstrike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': 'stave'},
                 'sweep strike': 
-                    {'uid': 'stave sweep strike', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': ['low', 'high'], 'weapon': 'stave'},
+                    {'uid': 'stave sweep strike', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': ['low', 'high'], 'weapon': 'stave'},
                 'triple bash': 
-                    {'uid': 'stave triple bash', 'skill_type': 'offense', 'damage_type': 'bruise', 'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                    {'uid': 'stave triple bash', 'skill_type': 'offense', 'damage_type': 'bruise',
+                    'difficulty': 'difficult', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': 'stave'},
                 'mid block': 
-                    {'uid': 'stave mid block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'easy', 'hands': 2, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': 'stave'},
+                    {'uid': 'stave mid block', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'easy', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': 'stave'},
                 'low block': 
-                    {'uid': 'stave low block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
+                    {'uid': 'stave low block', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'low', 'weapon': 'stave'},
                 'overhead block': 
-                    {'uid': 'stave overhead block', 'skill_type': 'defense', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'high', 'weapon': 'stave'},
+                    {'uid': 'stave overhead block', 'skill_type': 'defense', 'damage_type': None,
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'high', 'weapon': 'stave'},
                 'defensive sweep': 
-                    {'uid': 'stave defensive sweep', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
+                    {'uid': 'stave defensive sweep', 'skill_type': 'utility', 'damage_type': None,
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'low', 'weapon': 'stave'},
                 'feint': 
-                    {'uid': 'stave feint', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'},
+                    {'uid': 'stave feint', 'skill_type': 'utility', 'damage_type': None,
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'low', 'weapon': 'stave'},
                 'leg sweep': 
-                    {'uid': 'stave leg sweep', 'skill_type': 'utility', 'damage_type': None, 'difficulty': 'average', 'hands': 2, 'attack_range': 'either', 'default_aim': 'low', 'weapon': 'stave'}
+                    {'uid': 'stave leg sweep', 'skill_type': 'utility', 'damage_type': None,
+                    'difficulty': 'average', 'hands': 2, 'attack_range': 'either',
+                    'default_aim': 'low', 'weapon': 'stave'}
                 },
             'holy':
                 {'heal':
-                    {'uid': 'stave swat', 'skill_type': 'utility', 'damage_type': 'heal', 'difficulty': 'average', 'hands': 0, 'attack_range': 'either', 'default_aim': 'mid', 'weapon': None}
+                    {'uid': 'holy heal', 'skill_type': 'utility', 'damage_type': 'heal',
+                    'difficulty': 'average', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None}
                 },
             'rat':
                 {'bite':
-                    {'uid': 'ratbite', 'skill_type': 'offense', 'damage_type': 'pierce', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'high', 'weapon': 'bite'},
+                    {'uid': 'ratbite', 'skill_type': 'offense', 'damage_type': 'pierce',
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee',
+                    'default_aim': 'high', 'weapon': 'bite'},
                 'claw':
-                    {'uid': 'ratclaw', 'skill_type': 'offense', 'damage_type': 'slash', 'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee', 'default_aim': 'mid', 'weapon': 'claw'}
+                    {'uid': 'ratclaw', 'skill_type': 'offense', 'damage_type': 'slash',
+                    'difficulty': 'easy', 'hands': 0, 'attack_range': 'melee',
+                    'default_aim': 'mid', 'weapon': 'claw'}
                 },
             'spider':
                 {'bite':
