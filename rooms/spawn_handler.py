@@ -25,7 +25,7 @@ class SpawnHandler:
         self.owner = owner
         self.zone_rooms = list(self.owner.attributes.get('rooms'))
         zone_type = self.owner.tags.get(category='zone_type')
-        self.sentient_pool = utils.variable_from_module("sentients.sentients", variable=zone_type)
+        self.sentient_pool = utils.variable_from_module("sentients.sentient_classes", variable=zone_type)
         self.black_hole = search_object_by_tag(key='black_hole', category='rooms')[0]
     
     def start_spawner(self):
