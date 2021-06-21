@@ -210,6 +210,12 @@ skillsets = {'martial arts':
                     'difficulty': 'average', 'hands': 0, 'attack_range': 'either',
                     'default_aim': 'mid', 'weapon': None}
                 },
+            'fire':
+                {'fireball':
+                    {'uid': 'fireball', 'skill_type': 'offense', 'damage_type': 'magic',
+                    'difficulty': 'average', 'hands': 0, 'attack_range': 'either',
+                    'default_aim': 'mid', 'weapon': None}
+                },
             'rat':
                 {'bite':
                     {'uid': 'ratbite', 'skill_type': 'offense', 'damage_type': 'pierce',
