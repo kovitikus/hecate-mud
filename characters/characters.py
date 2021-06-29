@@ -1,9 +1,11 @@
+from django.utils.functional import lazy
 from evennia import DefaultCharacter
 from evennia.utils.utils import (lazy_property)
 
 from skills.combat_handler import CombatHandler
 from skills.skill_handler import SkillHandler
 from items.item_handler import ItemHandler
+from characters.character_handler import CharacterHandler
 from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
 from characters.currency_handler import CurrencyHandler
@@ -36,6 +38,9 @@ class Character(DefaultCharacter):
     @lazy_property
     def equip(self):
         return EquipmentHandler(self)
+    @lazy_property
+    def char(self):
+        return CharacterHandler(self)
     @lazy_property
     def item(self):
         return ItemHandler(self)
