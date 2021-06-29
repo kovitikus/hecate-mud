@@ -48,10 +48,13 @@ class CmdCharGen(Command):
 
     def func(self):
         caller = self.caller
-        EvMenu(caller, "characters.chargen", startnode="main", 
-                cmd_on_exit="look", cmdset_mergetype="Replace", 
-                cmdset_priority=1, auto_quit=True, auto_look=True, 
-                auto_help=True)
+
+        char_appearance = {'gender': None, 'height': None, 'build': None, 'face': None, 'eye_color': None,
+        'nose': None, 'lips': None, 'chin': None, 'skin_color': None, 'hair_length': None, 'hair_color': None,
+        'hair_texture': None, 'hair_style': None}
+        
+        EvMenu(caller, "characters.chargen", startnode="main",
+                char_appearance=char_appearance, skills={})
 
 class CmdLearnSkillset(Command):
     key = 'learn'
