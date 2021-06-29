@@ -19,11 +19,12 @@ class CharacterHandler():
             owner.msg("You've already got a character class!")
             return
         
+        # Pull the proper dictionary from the char_classes dictionary.
         char_class_dic = self.main_class_dic[char_class_choice]
-        armor_type = char_class_dic.get('armor_type')
+        char_armor_type = char_class_dic.get('char_armor_type')
 
         owner.tags.add(char_class_choice, category='char_class')
-        owner.tags.add(armor_type, category='armor_type')
+        owner.tags.add(char_armor_type, category='char_armor_type')
 
         for skillset in char_class_dic['skillsets']:
             owner.skill.learn_skillset(skillset)

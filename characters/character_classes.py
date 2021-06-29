@@ -1,14 +1,14 @@
 # Main Classes
 main_classes = {
     'mage': {
-        'skillsets': ['fire', 'staves'], 'armor_type': 'cloth'
+        'skillsets': ['fire', 'staves'], 'char_armor_type': 'cloth'
         },
 
     'paladin': {
-        'skillsets': ['holy'], 'armor_type': 'plate'
+        'skillsets': ['holy'], 'char_armor_type': 'plate'
         },
 
     'priest': {
-        'skillsets': ['holy'], 'armor_type': 'cloth'
+        'skillsets': ['holy'], 'char_armor_type': 'cloth'
         }
 }
