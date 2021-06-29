@@ -6,6 +6,7 @@ class CharacterHandler():
     """
     def __init__(self, owner):
         self.owner = owner
+        self.main_class_dic = variable_from_module("characters.character_classes", variable='main_classes')
 
     def add_char_class(self, char_class_choice):
         """
@@ -18,7 +19,7 @@ class CharacterHandler():
             owner.msg("You've already got a character class!")
             return
         
-        char_class_dic = variable_from_module("characters.character_classes", variable=char_class_choice)
+        char_class_dic = self.main_class_dic[char_class_choice]
         armor_type = char_class_dic.get('armor_type')
 
         owner.tags.add(char_class_choice, category='char_class')
