@@ -1,4 +1,5 @@
 from evennia import create_object
+from evennia.utils.utils import variable_from_module
 
 from characters import character_adjectives
 
@@ -9,10 +10,16 @@ def main(caller, raw_string, **kwargs):
         {"key": ("1", "name"),
         "desc": "Name your character.",
         "goto": "enter_name"},
+
         {"key": ("2", "appearance", "appear"),
         "desc": "Create your character's appearance.",
         "goto": "appearance"},
-        {"key": ("3", "finish", "create"),
+
+        {"key": ("3", "class"),
+        "desc": "Choose your character's class.",
+        "goto": "char_class"},
+
+        {"key": ("4", "finish", "create"),
         "desc": "Finish and create.",
         "goto": _create_char}
     )
@@ -198,8 +205,21 @@ def _set_hair_style(caller, raw_string, **kwargs):
     caller.ndb._menutree.char_appearance['hair_style'] = kwargs.get('hair_style')
     return 'appearance'
 
+def char_class(caller, raw_string, **kwargs):
+    text = "Choose your character\'s class."
+    char_classes = variable_from_module("characters.character_classes", 'main_classes')
+    options = []
+    for c in char_classes.keys():
+        options.append({'desc': f'{c}',
+                        'goto': (_set_char_class, {'char_class': f'{c}'})})
+    return text, options
+def _set_char_class(caller, raw_string, **kwargs):
+    caller.ndb._menutree.char_class = kwargs.get('char_class')
+    return 'main'
+
 def _create_char(caller, raw_string, **kwargs):
     char_name = caller.ndb._menutree.char_name
+    char_class = caller.ndb._menutree.char_class
     get = caller.ndb._menutree.char_appearance.get
 
     #Figure Attributes
@@ -229,10 +249,12 @@ def _create_char(caller, raw_string, **kwargs):
     caller.msg(f"You currently have a total of {chars_len} characters.")
 
     #Add the new character object to the chars attribute as next number in the character list.
-    caller.db.chars[str(chars_len)] = create_object(typeclass="characters.characters.Character", key=char_name, home=None,
+    new_char = create_object(typeclass="characters.characters.Character", key=char_name, home=None,
     attributes=[('figure', {'gender': gender, 'height': height, 'build': build}),
                 ('facial', {'face': face, 'eye_color': eye_color, 'nose': nose, 'lips': lips, 'chin': chin, 'skin_color': skin_color}),
                 ('hair', {'hair_color': hair_color, 'texture': hair_texture, 'length': hair_length, 'style': hair_style})])
+    caller.db.chars[str(chars_len)] = new_char
+    new_char.char.add_char_class(char_class)
     caller.msg("|gChargen completed!|n")
     return "exit"
 
