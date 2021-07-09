@@ -49,12 +49,21 @@ class CmdCharGen(Command):
     def func(self):
         caller = self.caller
 
-        char_appearance = {'gender': None, 'height': None, 'build': None, 'face': None, 'eye_color': None,
-        'nose': None, 'lips': None, 'chin': None, 'skin_color': None, 'hair_length': None, 'hair_color': None,
-        'hair_texture': None, 'hair_style': None}
+        choices_dic = {'char_name': None, 'char_class': None, 'gender': None, 'height': None,
+        'build': None, 'face': None, 'eye_color': None, 'nose': None, 'lips': None, 'chin': None,
+        'skin_color': None, 'hair_length': None, 'hair_color': None, 'hair_texture': None, 
+        'hair_style': None}
         
-        EvMenu(caller, "characters.chargen", startnode="main",
-                char_appearance=char_appearance, skills={})
+        EvMenu(caller, "characters.chargen", startnode="node_main",
+                choices_dic=choices_dic)
+
+class CmdPlay(Command):
+    key = 'play'
+
+    def func(self):
+        caller = self.caller
+
+        EvMenu(caller, 'characters.play_menu', startnode='main')
 
 class CmdLearnSkillset(Command):
     key = 'learn'
