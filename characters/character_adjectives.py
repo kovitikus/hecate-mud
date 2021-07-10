@@ -49,15 +49,3 @@ character_adjectives = {
             ['braided', 'ponytail', 'in a bun', 'none']
     }
 }
-
-categories_list = []
-for key in character_adjectives.keys():
-    categories_list.append(key)
-
-# Generates a dictionary category keys containing a list of properties as their values
-# Assigns the list to the category key, resetting the list per category.
-properties_dic = {}
-for category in categories_list:
-    properties_dic[category] = []
-    for key in character_adjectives[category].keys():
-        properties_dic[category].append(key)
