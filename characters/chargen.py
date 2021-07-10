@@ -2,9 +2,17 @@ from evennia import create_object
 from evennia.utils import evtable
 from evennia.utils.utils import variable_from_module
 
-
+# Imports the full adjectives dictionary, which consists of:
+# Category dictionary -> property key -> adjective list value
 adjectives_dic = variable_from_module("characters.character_adjectives", 'character_adjectives')
-properties_list = list(adjectives_dic.keys())
+
+# Generates a dictionary category keys containing a list of properties as their values
+# Assigns the list to the category key, resetting the list per category.
+properties_dic = {}
+for category in adjectives_dic.keys():
+    properties_dic[category] = []
+    for key in adjectives_dic[category].keys():
+        properties_dic[category].append(key)
 
 def node_main(caller, raw_string, **kwargs):
     text = 'Please create your character.'
@@ -43,88 +51,97 @@ def _set_name(caller, raw_string, **kwargs):
     return 'node_main'
 
 def node_appearance(caller, raw_string, **kwargs):
-    pass
+    choices_dic = caller.ndb._menutree.choices_dic
+    table1 = evtable.EvTable(table=[["Name:"], [f"|y{choices_dic.get('char_name')}|n"],
+                            ["Class:"], [f"|y{choices_dic.get('char_class')}|n"]],
+                            border=None)
+    text = (f"{table1}\n{_char_desc(choices_dic)}\n\n"
+            "Choose an appearance to modify.")
+    options = []
+    for category in properties_dic.keys():
+        options.append({'desc': category.capitalize(),
+                        'goto': ('node_properties',
+                                    {'category': category})})
+    options.append({'desc': "Return to the Main Menu",
+                    'goto': 'node_main'})
+    return text, options
+
+def node_properties(caller, raw_string, **kwargs):
+    category = kwargs['category']
+    property = kwargs.get('next_property', properties_dic[category][0])
+
+    text = (f"Choose your character's |g{property}|n:")
+    options = []
+
+    adjectives = adjectives_dic[category][property]
+    for adjective in adjectives:
+        options.append({'desc': adjective,
+                        'goto': (_set_choices,
+                                    {'category': category,
+                                    'property': property,
+                                    'adjective': adjective})})
+    return text, options
 
 def _set_choices(caller, raw_string, **kwargs):
-    key = kwargs['key']
-    value = kwargs['value']
+    category = kwargs['category']
+    property = kwargs['property']
+    adjective = kwargs['adjective']
 
-    caller.ndb._menutree.choices_dic[key] = value
-    caller.msg(f"You have chosen: |y{value}|n")
+    caller.ndb._menutree.choices_dic[property] = adjective
+    caller.msg(f"You have chosen: |y{adjective}|n")
 
-    pind = properties_list.index(key)
-    next_property = properties_list[pind + 1] if pind < len(properties_list) - 1 else None
+    property_index = properties_dic[category].index(property)
+    if property_index < len(properties_dic[category]) - 1:
+        next_property = properties_dic[category][property_index + 1]
+    else:
+        next_property = None
 
     if next_property:
-        return None, {'next_property': next_property}
-
-    return 'node_main'
+        return None, {'next_property': next_property,
+                    'category': category}
+    else:
+        return 'node_appearance'
 
 # This appearance node is made possible by Griatch. Thanks a ton for all the help.
 # https://gist.github.com/Griatch/b51d7f086d7cee45e8061752b6de113b
 
-def node_appearance(caller, raw_string, **kwargs):
-    choices_dic = caller.ndb._menutree.choices_dic
-    property = kwargs.get('next_property', properties_list[0])
 
-    table1 = evtable.EvTable(table=[["Name:"], [f"|y{choices_dic.get('char_name')}|n"],
-                            ["Class:"], [f"|y{choices_dic.get('char_class')}|n"]],
-                            border=None)
-
-    text = (
-        f"{table1}\n{_char_desc(choices_dic)}\n"
-        f"Choose your character's |g{property}|n:"
-    )
-    options = []
-
-    adjectives = adjectives_dic[property]
-    for adj in adjectives:
-        options.append({'desc': adj,
-                        'goto': (_set_choices,
-                                    {'key': property,
-                                    'value': adj}
-                                )
-        })
-
-    return text, options
 
 def _char_desc(choices_dic):
     get = choices_dic.get
-    print(choices_dic)
     final_desc = "You see a featureless entity."
-    if get('gender') == None or get('height') == None or get('build') == None:
+    if get('Gender') == None or get('Height') == None or get('Build') == None:
         figure = False
     else:
         figure = True
-        gender = 'man' if get('gender') == 'male' else 'woman'
-        figure_desc = f"You see a {get('height')} {get('build')} {gender}."
+        gender = 'man' if get('Gender') == 'male' else 'woman'
+        figure_desc = f"You see a {get('Height')} {get('Build')} {gender}."
 
-    if get('eye_color') == None or get('nose') == None or get('lips') == None \
-        or get('chin') == None or get('face') == None or get('skin_color') == None:
+    if get('Eye Color') == None or get('Nose') == None or get('Lips') == None \
+        or get('Chin') == None or get('Face') == None or get('Skin Color') == None:
         facial = False
     else:
         facial = True
-        gender = 'He' if get('gender') == 'male' else 'She'
-        facial_desc = (f"{gender} has {get('eye_color')} eyes set above a {get('nose')} nose, "
-            f"{get('lips')} lips and a {get('chin')} chin in a {get('face')} "
-            f"{get('skin_color')} face.")
+        gender = 'He' if get('Gender') == 'male' else 'She'
+        facial_desc = (f"{gender} has {get('Eye Color')} eyes set above a {get('Nose')} nose, "
+            f"{get('Lips')} lips and a {get('Chin')} chin in a {get('Face')} "
+            f"{get('Skin Color')} Face.")
             
-    if get('hair_length') == None:
+    if get('Hair Length') == None:
         hair = False
     else:
-        gender = 'He' if get('gender') == 'male' else 'She'
-        if get('hair_length') == 'bald':
+        gender = 'He' if get('Gender') == 'male' else 'She'
+        if get('Hair Length') == 'bald':
             hair = True
-            hair_desc = f"{gender} is {get('hair_length')}."
+            hair_desc = f"{gender} is {get('Hair Length')}."
         else:
-            if get('hair_length') == None or get('hair_texture') == None or \
-                get('hair_color') == None or get('hair_style') == None:
+            if get('Hair Length') == None or get('Hair Texture') == None or \
+                get('Hair Color') == None or get('Hair Style') == None:
                 hair = False
             else:
                 hair = True
-                print('Hair else statement was entered properly.')
-                hair_desc = (f"{gender} has {get('hair_length')} {get('hair_texture')} "
-                            f"{get('hair_color')} hair {get('hair_style')}.")
+                hair_desc = (f"{gender} has {get('Hair Length')} {get('Hair Texture')} "
+                            f"{get('Hair Color')} hair {get('Hair Style')}.")
 
     if figure:
         final_desc = f"{figure_desc}"
@@ -152,23 +169,23 @@ def _create_char(caller, raw_string, **kwargs):
     char_name = get('char_name')
     char_class = get('char_class')
     #Figure Attributes
-    gender = get('gender')
-    height = get('height')
-    build = get('build')
+    gender = get('Gender')
+    height = get('Height')
+    build = get('Build')
 
     #Facial Attributes
-    face = get('face')
-    eye_color = get('eye_color')
-    nose = get('nose')
-    lips = get('lips')
-    chin = get('chin')
-    skin_color = get('skin_color')
+    face = get('Face')
+    eye_color = get('Eye Color')
+    nose = get('Nose')
+    lips = get('Lips')
+    chin = get('Chin')
+    skin_color = get('Skin Color')
 
     #Hair Attributes
-    hair_color = get('hair_color')
-    hair_texture = get('hair_texture')
-    hair_length = get('hair_length')
-    hair_style = get('hair_style')
+    hair_color = get('Hair Color')
+    hair_texture = get('Hair Texture')
+    hair_length = get('Hair Length')
+    hair_style = get('Hair Style')
 
 
     # Check for chars attribute and initilize if none.
@@ -179,9 +196,9 @@ def _create_char(caller, raw_string, **kwargs):
 
     #Add the new character object to the chars attribute as next number in the character list.
     new_char = create_object(typeclass="characters.characters.Character", key=char_name, home=None,
-    attributes=[('figure', {'gender': gender, 'height': height, 'build': build}),
-                ('facial', {'face': face, 'eye_color': eye_color, 'nose': nose, 'lips': lips, 'chin': chin, 'skin_color': skin_color}),
-                ('hair', {'hair_color': hair_color, 'texture': hair_texture, 'length': hair_length, 'style': hair_style})])
+    attributes=[('figure', {'Gender': gender, 'Height': height, 'Build': build}),
+                ('facial', {'Face': face, 'Eye Color': eye_color, 'Nose': nose, 'Lips': lips, 'Chin': chin, 'Skin Color': skin_color}),
+                ('hair', {'Hair Color': hair_color, 'texture': hair_texture, 'length': hair_length, 'style': hair_style})])
     caller.db.chars[str(chars_len)] = new_char
     new_char.char.add_char_class(char_class)
     caller.msg("|gChargen completed!|n")
