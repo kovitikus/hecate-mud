@@ -206,24 +206,3 @@ def _create_char(caller, raw_string, **kwargs):
 
 def exit(caller, raw_string, **kwargs):
     options = None
-
-'''
-Character Creation
-
-Choose your character's:
-1. Name
-2. Appearance
-3. Class
-4. Create
-'''
-
-'''
-Character Appearance Menu
-
-You see a very tall ample man. He has grey eyes set above a large nose, full lips and a clefted chin
-in a disfigured pale face. He has close-cropped bouncy ginger hair in a bun.
-
-1. Figure
-2. Facial
-3. Hair
-'''
