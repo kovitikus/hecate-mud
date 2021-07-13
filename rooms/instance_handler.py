@@ -436,6 +436,17 @@ class InstanceHandler:
 #-------------
 # Static Zone Generation
     def generate_static_zone(self, zone):
+        """
+        Takes a list of dictionaries, each dictionary with instructions for a single room and its exits
+        and generates them into the world. Coordinates and cardinal directions are required.
+
+        Arguments:
+            zone (string): The name of the zone requested. It is passed into here by instance_menu.py
+                but the instructions are held in the zones.py module.
+
+        Example:
+            https://gist.github.com/kovitikus/b561663ec5c75f1598d50f2cd7b741b7
+        """
         instructions = self.static_zones[zone]
         #----------
         # Room Generation
