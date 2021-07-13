@@ -5,12 +5,14 @@ from evennia import GLOBAL_SCRIPTS
 from evennia.utils import logger
 from evennia.utils.search import search_object
 from evennia.utils.create import create_object
+from evennia.utils.utils import variable_from_module
 
 
 class InstanceHandler:
     def __init__(self, owner):
         self.owner = owner
         self.randomize_room_type = False
+        self.static_zones = variable_from_module("rooms.zones", variable='static_zones')
 
         # The instance ledger is set in server.conf.settings
         self.ledger = GLOBAL_SCRIPTS.instance_ledger
@@ -147,16 +149,23 @@ class InstanceHandler:
             exit.tags.add(self.instance_id, category='instance_id')
 
     def _generate_new_room_coords(self, current_room_coords):
-        # https://gist.github.com/kovitikus/f231899a6111f508675596fd8599182f
         """
-        n = x, y - 1
-        ne = x + 1, y - 1
-        e = x + 1, y
-        se = x + 1, y + 1
-        s = x, y + 1
-        sw = x - 1, y + 1
-        w = x - 1, y
-        nw = x - 1, y - 1
+        Picks a random cardinal direction and uses it to generate a new set of 
+        random x, y coordinates. Tests the new coordinates to ensure that they aren't already in use.
+        When results aren't already in the self.used_coords list, they are set to the handler.
+
+        Arguments:
+            current_room_coords (dictionary): A dictionary consisting of an x key and y key
+                both containing an integar.
+        
+        Sets:
+            self.next_room_coords (dictionary): A dictionary consisting of an x key and y key
+                both containing an integar.
+            self.dir_choice (string): A cardinal direction used to determine the exit direction
+                of the current room to the new room.
+
+        Example:
+            https://gist.github.com/kovitikus/f231899a6111f508675596fd8599182f
         """
         free_space = False
         card_dirs = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
@@ -164,31 +173,7 @@ class InstanceHandler:
         while free_space == False:
             dir_choice = random.choice(card_dirs)
 
-            if dir_choice == 'n':
-                test_coords_x = current_room_coords['x']
-                test_coords_y = current_room_coords['y'] - 1
-            elif dir_choice == 'ne':
-                test_coords_x = current_room_coords['x'] + 1
-                test_coords_y = current_room_coords['y'] - 1
-            elif dir_choice == 'e':
-                test_coords_x = current_room_coords['x'] + 1
-                test_coords_y = current_room_coords['y']
-            elif dir_choice == 'se':
-                test_coords_x = current_room_coords['x'] + 1
-                test_coords_y = current_room_coords['y'] + 1
-            elif dir_choice == 's':
-                test_coords_x = current_room_coords['x']
-                test_coords_y = current_room_coords['y'] + 1
-            elif dir_choice == 'sw':
-                test_coords_x = current_room_coords['x'] - 1
-                test_coords_y = current_room_coords['y'] + 1
-            elif dir_choice == 'w':
-                test_coords_x = current_room_coords['x'] - 1
-                test_coords_y = current_room_coords['y']
-            elif dir_choice == 'nw':
-                test_coords_x = current_room_coords['x'] - 1
-                test_coords_y = current_room_coords['y'] - 1
-            test_coords = {'x': test_coords_x, 'y': test_coords_y}
+            test_coords = self._card_dir_to_coords(current_room_coords, dir_choice)
 
             if test_coords not in self.used_coords:
                 self.next_room_coords = test_coords
@@ -287,6 +272,55 @@ class InstanceHandler:
         elif card_dir == 'nw':
             opp_dir = 'se'
         return opp_dir
+
+    def _card_dir_to_coords(self, current_coords, card_dir):
+        """
+        Takes a current room's coordinates and decides what the next room's coordinates would be
+        based on the cardinal direction provided from the current room.
+
+        Arguments:
+            current_cords (dictionary): A dictionary consisting of an x key and y key
+                both containing an integar.
+            card_dir (string): A string with the cardinal direction. i.e. 'ne'
+        
+        Returns (dictionary):
+            The new x, y coordinates in the same form as the current_cords.
+
+        Cheat Sheet:
+            n = x, y - 1
+            ne = x + 1, y - 1
+            e = x + 1, y
+            se = x + 1, y + 1
+            s = x, y + 1
+            sw = x - 1, y + 1
+            w = x - 1, y
+            nw = x - 1, y - 1
+        """
+        if card_dir == 'n':
+            new_coords_x = current_coords['x']
+            new_coords_y = current_coords['y'] - 1
+        elif card_dir == 'ne':
+            new_coords_x = current_coords['x'] + 1
+            new_coords_y = current_coords['y'] - 1
+        elif card_dir == 'e':
+            new_coords_x = current_coords['x'] + 1
+            new_coords_y = current_coords['y']
+        elif card_dir == 'se':
+            new_coords_x = current_coords['x'] + 1
+            new_coords_y = current_coords['y'] + 1
+        elif card_dir == 's':
+            new_coords_x = current_coords['x']
+            new_coords_y = current_coords['y'] + 1
+        elif card_dir == 'sw':
+            new_coords_x = current_coords['x'] - 1
+            new_coords_y = current_coords['y'] + 1
+        elif card_dir == 'w':
+            new_coords_x = current_coords['x'] - 1
+            new_coords_y = current_coords['y']
+        elif card_dir == 'nw':
+            new_coords_x = current_coords['x'] - 1
+            new_coords_y = current_coords['y'] - 1
+        return {'x': new_coords_x, 'y': new_coords_y}
 
 #------------------------------
 # Character Enter and Exit: at_after_traverse() on the Exit typeclass.
@@ -398,3 +432,36 @@ class InstanceHandler:
                                     destination=common_room, location=portal_room, home=portal_room)
         portal_rm_to_common.db.card_dir = 'n'
         portal_rm_to_common.tags.add(category='ooc_exit')
+
+#-------------
+# Static Zone Generation
+    def generate_static_zone(self, zone):
+        instructions = self.static_zones[zone]
+        #----------
+        # Room Generation
+        # Doing this first ensures that each exit's destination room object already exists.
+        rooms_list = []
+        for dict in instructions:
+            room = create_object("rooms.rooms.Room", key=dict['key'], tags=[(zone, 'zone_id')],
+            attributes=[('coords', dict['coords'])])
+            rooms_list.append(room)
+
+        #----------
+        # Exit Generation
+        for num, dict in enumerate(instructions, start=0):
+            # There exists the same number of created rooms as dictionaries in the instructions list.
+            # This can be used to match the dictionary entry to the room object.
+            current_room = rooms_list[num]
+            for card_dir in dict['exits']:
+                # First the exit destination's coordinates are calculated and then checked against
+                # the list of rooms already generated to find the appropriate destination.
+                card_dir_room_coords = self._card_dir_to_coords(dict['coords'], card_dir)
+                for room in rooms_list:
+                    if room.db.coords == card_dir_room_coords:
+                        destination_found = True
+                        exit_destination = room
+                # Successfully found the exit's destination, create the exit.
+                if destination_found:
+                    exit_obj = create_object(typeclass='travel.exits.Exit', key=exit_destination.key,
+                                            location=current_room, destination=exit_destination)
+                    exit_obj.db.card_dir = card_dir
