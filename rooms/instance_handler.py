@@ -88,7 +88,7 @@ class InstanceHandler:
                 # The first room only requires 1 exit.
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.db.card_dir = self.dir_choice
+                exit_to_next_room.tags.add(self.dir_choice, category='card_dir')
                 self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
@@ -102,7 +102,7 @@ class InstanceHandler:
 
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.db.card_dir = self._opposite_card_dir(self.dir_choice)
+                exit_to_previous_room.tags.add(self._opposite_card_dir(self.dir_choice), category='card_dir')
                 self.exits_list.append(exit_to_previous_room)
                 
                 # Room Coordinates
@@ -115,7 +115,7 @@ class InstanceHandler:
 
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.db.card_dir = self.dir_choice
+                exit_to_next_room.tags.add(self.dir_choice, category='card_dir')
                 self.exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
@@ -130,7 +130,7 @@ class InstanceHandler:
                 # The final room requires an exit back to previous room.
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.db.card_dir = self._opposite_card_dir(self.dir_choice)
+                exit_to_previous_room.tags.add(self._opposite_card_dir(self.dir_choice), category='card_dir')
                 self.exits_list.append(exit_to_previous_room)
 
                 # Room Coordinates
@@ -416,13 +416,13 @@ class InstanceHandler:
         quarters_to_portal_rm = create_object(typeclass='travel.exits.Exit',
                                     key=f'{portal_room.name}', aliases='portal', 
                                     destination=portal_room, location=homeroom, home=homeroom)
-        quarters_to_portal_rm.db.card_dir = 'n'
+        quarters_to_portal_rm.tags.add('n', category='card_dir')
         quarters_to_portal_rm.tags.add(category='ooc_exit')
 
         portal_rm_to_quarters = create_object(typeclass='travel.exits.Exit',
                                     key=f"{homeroom.name}", aliases=['quar', 'quart'], 
                                     destination=homeroom, location=portal_room, home=portal_room)
-        portal_rm_to_quarters.db.card_dir = 's'
+        portal_rm_to_quarters.tags.add('s', category='card_dir')
         portal_rm_to_quarters.tags.add(category='ooc_exit')
 
         # Connect the portal room to the Common Room
@@ -430,7 +430,7 @@ class InstanceHandler:
         portal_rm_to_common = create_object(typeclass='travel.exits.Exit',
                                     key=f'{common_room.name}', aliases='common', 
                                     destination=common_room, location=portal_room, home=portal_room)
-        portal_rm_to_common.db.card_dir = 'n'
+        portal_rm_to_common.tags.add('n', category='card_dir')
         portal_rm_to_common.tags.add(category='ooc_exit')
 
 #-------------
@@ -475,4 +475,4 @@ class InstanceHandler:
                 if destination_found:
                     exit_obj = create_object(typeclass='travel.exits.Exit', key=exit_destination.key,
                                             location=current_room, destination=exit_destination)
-                    exit_obj.db.card_dir = card_dir
+                    exit_obj.tags.add(card_dir, category='card_dir')

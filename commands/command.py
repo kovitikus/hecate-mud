@@ -687,9 +687,11 @@ class CmdLook(Command):
                 # https://i.imgur.com/6KFXUMd.png
                 target = None
                 for exit in self.caller.location.exits:
-                    if exit.attributes.has('card_dir'):
-                        if exit.db.card_dir == args:
+                    if exit.tags.get(category='card_dir'):
+                        card_dir = exit.tags.get(category='card_dir')
+                        if card_dir == args:
                             target = exit
+                            break
                 if target:
                     msg = target.return_appearance(self.caller)
                 else:

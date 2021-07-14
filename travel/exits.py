@@ -34,9 +34,6 @@ class Exit(DefaultExit):
                                         not be called if the attribute `err_traverse` is
                                         defined, in which case that will simply be echoed.
     """
-    def at_object_creation(self):
-        self.attributes.add('card_dir', None)
-
     def at_after_traverse(self, traversing_object, source_location, **kwargs):
         if self.tags.get('enter_instance', category='exits'):
             traversing_object.instance.enter_instance()

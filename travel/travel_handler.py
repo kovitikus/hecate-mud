@@ -25,7 +25,7 @@ class TravelHandler:
 
     def find_exit_by_card_dir(self):
         for x in self.owner.location.contents:
-            if x.db.card_dir == self.direction:
+            if x.tags.get(category='card_dir') == self.direction:
                 self.exit_obj = x
                 break
             else:
@@ -80,13 +80,14 @@ class TravelHandler:
             return exit_str
 
         def _exit_str_gen(exit):
-            if exit.db.card_dir is not None: # Exit has a cardinal direction.
+            exit_card_dir = exit.tags.get(category='card_dir')
+            if exit_card_dir is not None: # Exit has a cardinal direction.
                 if self.open_environment_exit(exit):
                     return (f"|310{exit.destination.get_display_name(owner)}|n to the "
-                            f"|340{self.card_dir_name(exit.db.card_dir)}|n")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n")
                 else:
                     return (f"|310{exit.get_display_name(owner)}|n to the "
-                            f"|340{self.card_dir_name(exit.db.card_dir)}|n")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n")
             else: # Exit has no cardinal direction.
                 if self.open_environment_exit(exit):
                     return f"|310{exit.destination.get_display_name(owner)}|n"
@@ -217,16 +218,12 @@ class TravelHandler:
     # doc str
     def pick_departure_string(self):
         exit_obj = self.exit_obj
-        owner_name = self.owner.name
-        exit_name = exit_obj.name
-        card_dir = exit_obj.db.card_dir
 
         # Generate a string from the exits list based on the exit type and if a direction exists.
         owner = self.owner
-        exit_str = None
 
         # Check for special exit typeclasses.
-        if exit_obj.db.card_dir is not None:
+        if exit_obj.tags.get(category='card_dir') is not None:
             if exit_obj.tags.get('door', category='exits'):
                 self.depart_door_str()
             elif exit_obj.tags.get('stair', category='exits'):
@@ -244,65 +241,69 @@ class TravelHandler:
     def depart_door_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
+        exit_card_dir = exit_obj.tags.get(category='card_dir')
 
-        if exit_obj.db.card_dir is not None:
-            if exit_obj.db.card_dir in ['up', 'down']:
-                self.self_str = (f"You climb |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+        if exit_card_dir is not None:
+            if exit_card_dir in ['up', 'down']:
+                self.self_str = (f"You climb |340{self.card_dir_name(exit_card_dir)}|n "
                                     f"through |310{exit_obj.get_display_name(owner)}|n.")
-                self.others_str = (f"{owner.name} climbs |340{self.card_dir_name(exit_obj.db.card_dir)}|n " # upwards, downwards
+                self.others_str = (f"{owner.name} climbs |340{self.card_dir_name(exit_card_dir)}|n " # upwards, downwards
                                     f"through |310{exit_obj.name}|n.")
             else:
-                self.self_str = (f"You depart |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.self_str = (f"You depart |340{self.card_dir_name(exit_card_dir)}|n "
                                     f"through |310{exit_obj.get_display_name(owner)}|n.")
-                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_card_dir)}|n "
                                     f"through |310{exit_obj.name}|n.")
     # Stair Strings
     def depart_stair_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
+        exit_card_dir = exit_obj.tags.get(category='card_dir')
 
-        if exit_obj.db.card_dir is not None:
-            if exit_obj.db.card_dir in ['up', 'down']:
+        if exit_card_dir is not None:
+            if exit_card_dir in ['up', 'down']:
                 self.self_str = (f"You climb |310{exit_obj.get_display_name(owner)}|n "
-                            f"|340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n.")
                 self.others_str = (f"{owner.name} climbs |310{exit_obj.name}|n "
-                            f"|340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n.")
             else:
                 self.self_str = (f"You climb |310{exit_obj.get_display_name(owner)}|n "
-                            f"to the |340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"to the |340{self.card_dir_name(exit_card_dir)}|n.")
                 self.others_str = (f"{owner.name} climbs |310{exit_obj.name}|n "
-                            f"to the |340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"to the |340{self.card_dir_name(exit_card_dir)}|n.")
     # Ladder Strings
     def depart_ladder_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
+        exit_card_dir = exit_obj.tags.get(category='card_dir')
 
-        if exit_obj.db.card_dir is not None:
-            if exit_obj.db.card_dir in ['up', 'down']:
+        if exit_card_dir is not None:
+            if exit_card_dir in ['up', 'down']:
                 self.self_str = (f"You climb |310{exit_obj.get_display_name(owner)}|n "
-                            f"|340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n.")
                 self.others_str = (f"{owner.name} climbs |310{exit_obj.name}|n "
-                            f"|340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(exit_card_dir)}|n.")
             else:
                 self.self_str = (f"You climb |310{exit_obj.get_display_name(owner)}|n "
-                            f"to the |340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"to the |340{self.card_dir_name(exit_card_dir)}|n.")
                 self.others_str = (f"{owner.name} climbs |310{exit_obj.name}|n "
-                            f"to the |340{self.card_dir_name(exit_obj.db.card_dir)}|n.")
+                            f"to the |340{self.card_dir_name(exit_card_dir)}|n.")
                     
     def depart_default_str(self):
         owner = self.owner
         exit_obj = self.exit_obj
+        exit_card_dir = exit_obj.tags.get(category='card_dir')
 
-        if exit_obj.db.card_dir is not None:
-            if exit_obj.db.card_dir in ['up', 'down']:
-                self.self_str = (f"You depart |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+        if exit_card_dir is not None:
+            if exit_card_dir in ['up', 'down']:
+                self.self_str = (f"You depart |340{self.card_dir_name(exit_card_dir)}|n "
                             f"towards |310{exit_obj.get_display_name(owner)}|n.")
-                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_card_dir)}|n "
                             f"towards |310{exit_obj.name}|n.")
             else:
-                self.self_str = (f"You depart |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.self_str = (f"You depart |340{self.card_dir_name(exit_card_dir)}|n "
                             f"towards |310{exit_obj.get_display_name(owner)}|n.")
-                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_obj.db.card_dir)}|n "
+                self.others_str = (f"{owner.name} departs |340{self.card_dir_name(exit_card_dir)}|n "
                             f"towards |310{exit_obj.name}|n.")
 
     # Sends the final string to the specified objects.
@@ -337,7 +338,7 @@ class TravelHandler:
         origin_exit = self.origin_exit
         self.others_str = ''
 
-        if origin_exit.attributes.has('card_dir'):
+        if origin_exit.tags.get(category='card_dir'):
             if origin_exit.tags.get('door', category='exits'):
                 self.arrive_door_str()
             elif origin_exit.tags.get('stair', category='exits'):
@@ -352,40 +353,44 @@ class TravelHandler:
     # Door Strings
     def arrive_door_str(self):
         origin_exit = self.origin_exit
-        if origin_exit.db.card_dir in ['up', 'down']:
-            self.others_str = (f"{self.owner.name} arrives, climbing |340{self.card_dir_name(origin_exit.db.card_dir)}|n "
+        origin_exit_card_dir = origin_exit.tags.get(category='card_dir')
+        if origin_exit_card_dir in ['up', 'down']:
+            self.others_str = (f"{self.owner.name} arrives, climbing |340{self.card_dir_name(origin_exit_card_dir)}|n "
                             f"through |310{origin_exit.name}|n.")
         else:
             self.others_str = (f"{self.owner.name} arrives from |310{origin_exit.name}|n to the "
-                            f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
     # Stair Strings
     def arrive_stair_str(self):
         origin_exit = self.origin_exit
-        if origin_exit.db.card_dir in ['up', 'down']:
+        origin_exit_card_dir = origin_exit.tags.get(category='card_dir')
+        if origin_exit_card_dir in ['up', 'down']:
             self.others_str = (f"{self.owner.name} arrives, climbing |310{origin_exit.name}|n "
-                                f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                                f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
         else:
             self.others_str = (f"{self.owner.name} arrives from |310{origin_exit.name}|n to the "
-                            f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
     # Ladder Strings
     def arrive_ladder_str(self):
         origin_exit = self.origin_exit
-        if origin_exit.db.card_dir in ['up', 'down']:
+        origin_exit_card_dir = origin_exit.tags.get(category='card_dir')
+        if origin_exit_card_dir in ['up', 'down']:
             self.others_str = (f"{self.owner.name} arrives, climbing |310{origin_exit.name}|n "
-                                f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                                f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
         else:
             self.others_str = (f"{self.owner.name} arrives from |310{origin_exit.name}|n to the "
-                            f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
     def arrive_default_str(self):
         origin_exit = self.origin_exit
-        if origin_exit.db.card_dir in ['up', 'down']:
-                self.others_str = (f"{self.owner.name} arrives, climbing |340{self.card_dir_name(origin_exit.db.card_dir)}|n "
+        origin_exit_card_dir = origin_exit.tags.get(category='card_dir')
+        if origin_exit_card_dir in ['up', 'down']:
+                self.others_str = (f"{self.owner.name} arrives, climbing "
+                                    f"|340{self.card_dir_name(origin_exit_card_dir)}|n "
                                     f"from |310{origin_exit.name}|n.")
         else:
             self.others_str = (f"{self.owner.name} arrives from |310{origin_exit.name}|n to the "
-                            f"|340{self.card_dir_name(origin_exit.db.card_dir)}|n.")
+                            f"|340{self.card_dir_name(origin_exit_card_dir)}|n.")
 
-    
     # doc str
     def send_arrival_string(self):
         self.owner.location.msg_contents(self.others_str, exclude=self.owner)
