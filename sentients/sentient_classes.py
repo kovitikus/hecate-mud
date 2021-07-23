@@ -12,6 +12,14 @@ BASIC_SUPPLIES = {
     'stock': {'crudely_made_torch': 10, 'foul_smelling_bait': 100}
 }
 
+static_sentients = {
+    'hoff': {
+        'key': "Hoff",
+        'typeclass': "characters.characters.Character",
+        'tags': ('merchant', 'sentient_class'),
+        'attributes': [('stock', {})]
+    }
+}
 
 # Critters
 rat = {

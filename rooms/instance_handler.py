@@ -453,8 +453,18 @@ class InstanceHandler:
         # Doing this first ensures that each exit's destination room object already exists.
         rooms_list = []
         for dict in instructions:
-            room = create_object("rooms.rooms.Room", key=dict['key'], tags=[(zone, 'zone_id')],
-            attributes=[('coords', dict['coords'])])
+            room_key = dict['key']
+            room_desc = dict.get('desc', f"You see nothing special about {room_key}.")
+
+            room = create_object("rooms.rooms.Room", key=room_key, tags=[(zone, 'zone_id')],
+            attributes=[('coords', dict['coords']), ('desc', room_desc)])
+
+            # Checks to see if the room has any static sentients and if so, calls the spawner.
+            static_sentients = dict.get('static_sentients', None) # A list of strings.
+            if static_sentients:
+                for sentient in static_sentients:
+                    room.spawn.static_sentient(sentient, room)
+
             rooms_list.append(room)
 
         #----------

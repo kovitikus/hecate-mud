@@ -9,6 +9,14 @@ _INFLECT = inflect.engine()
 class SpawnHandler:
     def __init__(self, owner):
         """
+        This module may spawn objects that are throw-aways. These objects have their default home
+        designated as the black_hole room, which automatically deletes any entity that enters it.
+        """
+        self.owner = owner
+        self.black_hole = search_object_by_tag(key='black_hole', category='rooms')[0]
+        
+    def _initialize_zone(self):
+        """
         This handler's owner is the zone_script, created by the RoomHandler 
         and stored on the zone_ledger. The zone_script's key is a unique identifier, used to 
         reference it on the zone_ledger. The zone_script represents the zone as a whole and 
@@ -18,16 +26,11 @@ class SpawnHandler:
         The room list and the zone_type are both set on the zone_script, within the RoomHandler.
 
         The pool of sentients that spawn in this zone is set in the sentients.py module.
-
-        This module spawns objects that are throw-aways. These objects have their default home
-        designated as the black_hole room, which automatically deletes any entity that enters it.
         """
-        self.owner = owner
         self.zone_rooms = list(self.owner.attributes.get('rooms'))
         zone_type = self.owner.tags.get(category='zone_type')
         self.sentient_pool = utils.variable_from_module("sentients.sentient_classes", variable=zone_type)
-        self.black_hole = search_object_by_tag(key='black_hole', category='rooms')[0]
-    
+
     def start_spawner(self):
         """
         This method is called upon from outside of the handler, within the RoomHandler, during the
@@ -39,6 +42,9 @@ class SpawnHandler:
         owner = self.owner
         if owner is None:
             return
+
+        self._initialize_zone()
+
         start_spawning = True
         occupant_count = len(owner.attributes.get('occupants', []))
         sentient_count = len(owner.attributes.get('sentients', []))
@@ -142,3 +148,36 @@ class SpawnHandler:
         self.spawn_room.msg_contents(f"{self.sentient_key} has appeared from the shadows.")
         self.owner.db.sentients.append(sentient)
         sentient.sentient.check_for_target()
+
+#----------------
+# Static Sentient Spawning
+    def static_sentient(self, sentient, location=None):
+        """
+        This method is called by a room, requesting to generate a pre-determined static sentient.
+
+        Arguments:
+            sentient (string): The name of the sentient dictionary to use for object generation.
+            location (object): The room object that requested this sentient be generated.
+                Defaults to None if not specified, generating the object in the void instead.
+
+        Returns:
+            sentient_object (object): The object generated from this method is returned to the caller.
+        """
+        # Import the dictionary of static sentients and set the dictionary to the requested sentient.
+        dict = utils.variable_from_module("sentients.sentient_classes",
+            variable="static_sentients")
+        dict = dict[sentient]
+
+        # Collect information regarding the sentient.
+        typeclass = dict.get('typeclass', "characters.characters.Character")
+        key = dict['key']
+        tags = dict.get('tags', None)
+        attributes = dict.get('attributes', None)
+        desc = dict.get('desc', f"You see nothing special about {key}.")
+
+        # Create the sentient object and set its description.
+        sentient_obj = create_object(typeclass=typeclass, key=key, location=location, home=location,
+            tags=tags, attributes=attributes)
+        sentient_obj.db.desc = desc
+
+        return sentient_obj
