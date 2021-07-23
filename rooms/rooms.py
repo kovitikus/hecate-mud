@@ -7,6 +7,7 @@ from evennia.utils.create import create_object
 from evennia.utils.utils import list_to_string, lazy_property
 
 from rooms.room_handler import RoomHandler
+from rooms.spawn_handler import SpawnHandler
 
 
 class Room(DefaultRoom):
@@ -22,6 +23,9 @@ class Room(DefaultRoom):
     @lazy_property
     def room(self):
         return RoomHandler(self)
+    @lazy_property
+    def spawn(self):
+        return SpawnHandler(self)
 
     def at_object_creation(self):
         self.attributes.add('crowd', False)
