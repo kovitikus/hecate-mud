@@ -36,11 +36,11 @@ class InstanceHandler:
             self.randomize_room_type = False
             self.room_type = room_type
             
-        self._generate_instance()
+        self._generate_temporary_instance()
 
 #-------------
 # Instance Creation
-    def _generate_instance(self):
+    def _generate_temporary_instance(self):
         # Save the data to the handler.
         self.used_coords = []
         self.rooms_list = []
@@ -52,7 +52,7 @@ class InstanceHandler:
         self._get_room_qty()
         self._generate_rooms()
         self._generate_exits()
-        self._save_instance()
+        self._save_temporary_instance()
         self._create_log_string()
 
     def _generate_rooms(self):
@@ -182,25 +182,25 @@ class InstanceHandler:
             else:
                 card_dirs.remove(dir_choice)
 
-    def _save_instance(self):
+    def _save_temporary_instance(self):
         # Save to ledger.
-        if not self.ledger.attributes.has('instances'):
-            self.ledger.attributes.add('instances', {})
-        self.ledger.db.instances[self.instance_id] = {}
-        self.ledger.db.instances[self.instance_id]['creator'] = self.owner
-        self.ledger.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
-        self.ledger.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
-        self.ledger.db.instances[self.instance_id]['rooms'] = self.rooms_list
-        self.ledger.db.instances[self.instance_id]['exits'] = self.exits_list
+        if not self.ledger.attributes.has('temporary_instances'):
+            self.ledger.attributes.add('temporary_instances', {})
+        self.ledger.db.temporary_instances[self.instance_id] = {}
+        self.ledger.db.temporary_instances[self.instance_id]['creator'] = self.owner
+        self.ledger.db.temporary_instances[self.instance_id]['epoch_creation'] = self.epoch_creation
+        self.ledger.db.temporary_instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
+        self.ledger.db.temporary_instances[self.instance_id]['rooms'] = self.rooms_list
+        self.ledger.db.temporary_instances[self.instance_id]['exits'] = self.exits_list
 
         # Save to object that generated this instance.
-        if not self.owner.attributes.has('instances'):
-            self.owner.attributes.add('instances', {})
-        self.owner.db.instances[self.instance_id] = {}
-        self.owner.db.instances[self.instance_id]['epoch_creation'] = self.epoch_creation
-        self.owner.db.instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
-        self.owner.db.instances[self.instance_id]['rooms'] = self.rooms_list
-        self.owner.db.instances[self.instance_id]['exits'] = self.exits_list
+        if not self.owner.attributes.has('temporary_instances'):
+            self.owner.attributes.add('temporary_instances', {})
+        self.owner.db.temporary_instances[self.instance_id] = {}
+        self.owner.db.temporary_instances[self.instance_id]['epoch_creation'] = self.epoch_creation
+        self.owner.db.temporary_instances[self.instance_id]['epoch_expiration'] = self.epoch_expiration
+        self.owner.db.temporary_instances[self.instance_id]['rooms'] = self.rooms_list
+        self.owner.db.temporary_instances[self.instance_id]['exits'] = self.exits_list
 
     def _create_log_string(self):
         border = "======================================================"
@@ -213,9 +213,9 @@ class InstanceHandler:
         log_str = f"{border}\n{instance_type}\n{creation_time}\n{creator}\n"
         log_str = f"{log_str}\n{epoch_create}\n{epoch_expire}\n{room_count}\n"
 
-        self.ledger.db.instances[self.instance_id]['log_str'] = log_str
-        self.owner.db.instances[self.instance_id]['log_str'] = log_str
-        logger.log_file(log_str, filename='instances.log')
+        self.ledger.db.temporary_instances[self.instance_id]['log_str'] = log_str
+        self.owner.db.temporary_instances[self.instance_id]['log_str'] = log_str
+        logger.log_file(log_str, filename='temporary_instances.log')
 
 #-------------
 # Helpers
@@ -331,13 +331,13 @@ class InstanceHandler:
             instance_id = self.owner.location.tags.get(category='instance_id')
 
             # Add character to instance occupant list.
-            if self.ledger.db.instances[instance_id].get('occupants') is None:
-                self.ledger.db.instances[instance_id]['occupants'] = []
-            self.ledger.db.instances[instance_id]['occupants'].append(self.owner)
+            if self.ledger.db.temporary_instances[instance_id].get('occupants') is None:
+                self.ledger.db.temporary_instances[instance_id]['occupants'] = []
+            self.ledger.db.temporary_instances[instance_id]['occupants'].append(self.owner)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
             err_msg = f"enter_instance could not find instance_id!"
-            logger.log_file(err_msg, filename='instance_errors.log')
+            logger.log_file(err_msg, filename='temporary_instances_errors.log')
             self.owner.msg('|rCRITICAL ERROR! enter_instance could not find the instance_id!|n')
             return
 
@@ -349,10 +349,10 @@ class InstanceHandler:
         if source_location.tags.get(category='instance_id'):
             instance_id = source_location.tags.get(category='instance_id')
 
-            self.ledger.db.instances[instance_id]['occupants'].remove(self.owner)
+            self.ledger.db.temporary_instances[instance_id]['occupants'].remove(self.owner)
 
-            if len(self.ledger.db.instances[instance_id]['occupants']) == 0:
-                self._destroy_instance(instance_id)
+            if len(self.ledger.db.temporary_instances[instance_id]['occupants']) == 0:
+                self.destroy_instance('temporary_instances', instance_id)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
             err_msg = f"exit_instance could not find instance_id!"
@@ -362,9 +362,11 @@ class InstanceHandler:
 
 #---------------
 # Destroy the instance.
-    def _destroy_instance(self, instance_id):
+    def destroy_instance(self, instance_type, instance_id):
+        # Get the proper instance dictionary type.
+        ledger_dict = self.ledger.attributes.get(instance_type)
         # Make sure the instance_id exists on the ledger.
-        if not instance_id in self.ledger.db.instances:
+        if not instance_id in ledger_dict:
             err_msg = f"destroy_instance could not find instance_id: {instance_id}"
             logger.log_file(err_msg, filename='instance_errors.log')
             self.owner.msg('|rCRITICAL ERROR! destroy_instance could not find the instance_id!|n')
@@ -374,26 +376,28 @@ class InstanceHandler:
         # Any left behind will be sent to their default home, so this is not critical.
         
         # Delete all exits.
-        exits_list = list(self.ledger.db.instances[instance_id]['exits'])
+        exits_list = list(ledger_dict[instance_id]['exits'])
         for exit in exits_list:
-            self.ledger.db.instances[instance_id]['exits'].remove(exit)
+            ledger_dict[instance_id]['exits'].remove(exit)
             exit.delete()
-        if len(self.ledger.db.instances[instance_id]['exits']) == 0:
-            del self.ledger.db.instances[instance_id]['exits']
+        if len(ledger_dict[instance_id]['exits']) == 0:
+            del ledger_dict[instance_id]['exits']
 
         # Delete all rooms.
-        rooms_list = list(self.ledger.db.instances[instance_id]['rooms'])
+        rooms_list = list(ledger_dict[instance_id]['rooms'])
         for room in rooms_list:
-            self.ledger.db.instances[instance_id]['rooms'].remove(room)
+            ledger_dict[instance_id]['rooms'].remove(room)
             room.delete()
-        if len(self.ledger.db.instances[instance_id]['rooms']) == 0:
-            del self.ledger.db.instances[instance_id]['rooms']
+        if len(ledger_dict[instance_id]['rooms']) == 0:
+            del ledger_dict[instance_id]['rooms']
 
         # Remove the instance from the creator object.
-        creator = self.ledger.db.instances[instance_id]['creator']
-        del creator.db.instances[instance_id]
+        if instance_type == 'temporary_instances':
+            creator = ledger_dict[instance_id]['creator']
+            creator_dict = creator.attributes.get(instance_type)
+            del creator_dict[instance_id]
         # Exits and Rooms are deleted, remove the instance from the ledger.
-        del self.ledger.db.instances[instance_id]
+        del ledger_dict[instance_id]
 
 #----------------------
 # Generate OOC Chambers for new accounts.
@@ -447,11 +451,15 @@ class InstanceHandler:
         Example:
             https://gist.github.com/kovitikus/b561663ec5c75f1598d50f2cd7b741b7
         """
+        self.rooms_list = []
+        self.exits_list = []
         instructions = self.static_zones[zone]
+        self.instance_id = zone
+        self.epoch_creation = time.time()
+
         #----------
         # Room Generation
         # Doing this first ensures that each exit's destination room object already exists.
-        rooms_list = []
         for dict in instructions:
             room_key = dict['key']
             room_desc = dict.get('desc', f"You see nothing special about {room_key}.")
@@ -465,19 +473,19 @@ class InstanceHandler:
                 for sentient in static_sentients:
                     room.spawn.static_sentient(sentient, room)
 
-            rooms_list.append(room)
+            self.rooms_list.append(room)
 
         #----------
         # Exit Generation
         for num, dict in enumerate(instructions, start=0):
             # There exists the same number of created rooms as dictionaries in the instructions list.
             # This can be used to match the dictionary entry to the room object.
-            current_room = rooms_list[num]
+            current_room = self.rooms_list[num]
             for card_dir in dict['exits']:
                 # First the exit destination's coordinates are calculated and then checked against
                 # the list of rooms already generated to find the appropriate destination.
                 card_dir_room_coords = self._card_dir_to_coords(dict['coords'], card_dir)
-                for room in rooms_list:
+                for room in self.rooms_list:
                     if room.db.coords == card_dir_room_coords:
                         destination_found = True
                         exit_destination = room
@@ -486,3 +494,15 @@ class InstanceHandler:
                     exit_obj = create_object(typeclass='travel.exits.Exit', key=exit_destination.key,
                                             location=current_room, destination=exit_destination)
                     exit_obj.tags.add(card_dir, category='card_dir')
+                    self.exits_list.append(exit_obj)
+        self._save_static_zone()
+
+    def _save_static_zone(self):
+        # Save to ledger.
+        if not self.ledger.attributes.has('static_instances'):
+            self.ledger.attributes.add('static_instances', {})
+        self.ledger.db.static_instances[self.instance_id] = {}
+        self.ledger.db.static_instances[self.instance_id]['creator'] = self.owner
+        self.ledger.db.static_instances[self.instance_id]['epoch_creation'] = self.epoch_creation
+        self.ledger.db.static_instances[self.instance_id]['rooms'] = self.rooms_list
+        self.ledger.db.static_instances[self.instance_id]['exits'] = self.exits_list

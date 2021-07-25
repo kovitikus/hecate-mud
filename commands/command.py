@@ -1035,7 +1035,7 @@ class CmdInstance(Command):
         if self.inst_summary:
             caller.instance.inst_summary()
         elif self.inst_menu:
-            EvMenu(caller, 'rooms.instance_menu', startnode='start_menu')
+            EvMenu(caller, 'rooms.instance_menu', startnode='node_main_menu')
         else:
             return
 
