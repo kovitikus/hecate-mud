@@ -13,20 +13,29 @@
 from evennia import GLOBAL_SCRIPTS
 from evennia.utils.utils import variable_from_module
 
+zone_list = variable_from_module("rooms.zones", variable='static_zones')
+ledger_dict = {}
+ledger_dict['temporary_instance'] = GLOBAL_SCRIPTS.instance_ledger.attributes.get('temporary_instance', {})
+ledger_dict['static_instance'] = GLOBAL_SCRIPTS.instance_ledger.attributes.get('static_instance', {})
+
 
 def node_main_menu(caller, raw_string, **kwargs):
-    text = f"Main Menu"
-    # TODO: List the total number of each type of instance.
-    # There are 839 total temporary instances and 43 total static instances in existence.
+    text = (
+        f"Main Menu\n\n"
+        f"Current Instance Total\n"
+        "----------------------\n"
+        f"Temporary Instances: {len(ledger_dict['temporary_instance'])}\n"
+        f"Static Instances: {len(ledger_dict['temporary_instance'])}"
+    )
     options = (
         {'desc': "Create Temporary Instance",
         'goto': 'node_create_temporary_instance'},
         {'desc': "Create Static Instance",
         'goto': 'node_create_static_instance'},
         {'desc': "Manage Temporary Instances",
-        'goto': ('node_manage_instances', {'instance_type': 'temporary_instances'})},
+        'goto': ('node_manage_instances', {'instance_type': 'temporary_instance'})},
         {'desc': "Manage Static Instances",
-        'goto': ('node_manage_instances', {'instance_type': 'static_instances'})})
+        'goto': ('node_manage_instances', {'instance_type': 'static_instance'})})
     return text, options
 
 def node_create_temporary_instance(caller, raw_string, **kwargs):
@@ -47,7 +56,6 @@ def node_create_temporary_instance(caller, raw_string, **kwargs):
     return text, options
 
 def node_create_static_instance(caller, raw_string, **kwargs):
-    zone_list = variable_from_module("rooms.zones", variable='static_zones')
     text = f"Choose the static instance to generate:"
     options = []
 
@@ -61,10 +69,8 @@ def node_create_static_instance(caller, raw_string, **kwargs):
 def node_manage_instances(caller, raw_string, **kwargs):
     instance_type = kwargs['instance_type']
     text = "Instance Management Menu"
-    ledger_dict = dict(GLOBAL_SCRIPTS.instance_ledger.attributes.get(instance_type))
-    print(f"ledger_dict in node_manage_instances is: {ledger_dict}")
     options = []
-    for key, value in ledger_dict.items():
+    for key, value in ledger_dict[instance_type].items():
         options.append({'desc': f"Instance ID: {key}, Creator: {value['creator']}",
                         'goto': ('node_manage_single_instance', 
                         {'instance_type': instance_type, 'instance_id': key})})
@@ -75,8 +81,7 @@ def node_manage_instances(caller, raw_string, **kwargs):
 def node_manage_single_instance(caller, raw_string, **kwargs):
     instance_type = kwargs['instance_type']
     instance_id = kwargs['instance_id']
-    ledger_dict = dict(GLOBAL_SCRIPTS.instance_ledger.attributes.get(instance_type))
-    instance_dict = ledger_dict[instance_id]
+    instance_dict = ledger_dict[instance_type][instance_id]
 
     text = (
         f"Managing {instance_id}\n\n"
@@ -124,7 +129,7 @@ def _delete_instance(caller, raw_string, **kwargs):
 def _call_instance(caller, raw_string, **kwargs):
     zone_type = kwargs.get('zone_type')
     if kwargs.get('static_instance', True):
-        caller.instance.generate_static_zone(zone_type)
+        caller.instance.generate_static_instance(zone_type)
     else:
         caller.instance.set_room_type(zone_type)
     return 'end_menu'
