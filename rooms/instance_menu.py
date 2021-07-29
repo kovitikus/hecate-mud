@@ -38,19 +38,13 @@ def node_main_menu(caller, raw_string, **kwargs):
 
 def node_create_temporary_instance(caller, raw_string, **kwargs):
     text = "Choose the type of instance to generate temporarily:"
-    options = (
-        {'desc': "Random",
-        'goto': (_call_instance, {'zone_type': 'random'})},
-        {'desc': "Forest",
-        'goto': (_call_instance, {'zone_type': 'forest'})},
-        {'desc': "Sewer",
-        'goto': (_call_instance, {'zone_type': 'sewer'})},
-        {'desc': "Cave",
-        'goto': (_call_instance, {'zone_type': 'cave'})},
-        {'desc': "Alleyway",
-        'goto': (_call_instance, {'zone_type': 'alley'})},
-        {'desc': "Return to main menu.",
-        'goto': 'node_main_menu'})
+    options = []
+    temporary_zones_dict = variable_from_module('rooms.zones', 'temporary_zones')
+    for zone in temporary_zones_dict.keys():
+        options.append(
+            {'desc': zone.capitalize(),
+            'goto': (_call_instance, 
+                {'instance_type': 'temporary_instance', 'zone_type': zone})})
     return text, options
 
 def node_create_static_instance(caller, raw_string, **kwargs):
@@ -67,7 +61,7 @@ def node_create_static_instance(caller, raw_string, **kwargs):
             zone_exists = False
         options.append({'desc': desc,
         'goto': (_call_instance,
-            {'static_instance': True, 'zone_exists': zone_exists, 'zone_type': zone})})
+            {'instance_type': 'static_instance', 'zone_exists': zone_exists, 'zone_type': zone})})
     options.append({'desc': "Return to Main Menu",
                     'goto': 'node_main_menu'})
     return text, options
@@ -135,7 +129,8 @@ def _delete_instance(caller, raw_string, **kwargs):
 
 def _call_instance(caller, raw_string, **kwargs):
     zone_type = kwargs.get('zone_type')
-    if kwargs.get('static_instance', True):
+    instance_type = kwargs.get('instance_type')
+    if instance_type == 'static_instance':
         if kwargs['zone_exists'] == True:
             caller.msg(f"|r{zone_type} already exists and cannot be created!|n")
             return 'node_main_menu'
