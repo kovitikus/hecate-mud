@@ -54,7 +54,7 @@ def at_initial_setup():
 
     # Superuser's equipment generation must take place after the item rooms are generated.
     # The inventory container requires trash_bin to exist.
-    char1.equip.generate_equipment()
+    char1.equip.generate_starting_equipment()
 
     # Create the superuser's home room.
     rm3 = create_object(typeclass='rooms.rooms.Room', key='Main Office')

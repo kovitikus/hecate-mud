@@ -60,15 +60,9 @@ class Character(DefaultCharacter):
 
         # Stats
         self.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
-        self.attributes.add('inventory_slots', 
-            {'max_slots': 0, 'occupied_slots': 0})
-        self.attributes.add('coin', 
-            {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
-        equip_dic = {'head': None, 'neck': None, 'shoulders': None, 
-            'chest': None, 'arms': None, 'hands': None, 'fingers': None, 
-            'waist': None, 'thighs': None, 'calves': None, 'feet': None, 
-        'inventory_container': None}
-        self.attributes.add('equipment', equip_dic)
+        self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
+        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        self.equip.initialize_equipment_attribute()
 
         # Avoids execution of this code on initial setup of superuser.
         # Prototype spawner attempts to set objects' home specifically
@@ -76,7 +70,7 @@ class Character(DefaultCharacter):
         # In the initial_setup module, Limbo isn't created until after
         # the superuser. https://gist.github.com/kovitikus/9b358ea0ebc09ec1e3840f332e93c00d
         if not self.dbref == '#1':
-            self.equip.generate_equipment()
+            self.equip.generate_starting_equipment()
 
         # Follow and lead behaviors for traversing an exit as a group.
         self.cmdset.add('travel.travel_cmdset.TravelCmdSet')
