@@ -11,109 +11,117 @@ from evennia.utils.utils import variable_from_module
 class InstanceHandler:
     def __init__(self, owner):
         self.owner = owner
-        self.randomize_room_type = False
         self.static_zones = variable_from_module("rooms.zones", variable='static_zones')
 
         # The instance ledger is set in server.conf.settings
-        self.ledger = GLOBAL_SCRIPTS.instance_ledger
+        ledger = GLOBAL_SCRIPTS.instance_ledger
+        instance_types = ['temporary_instance', 'static_instance']
+        for type in instance_types:
+            if not ledger.attributes.has(key=type):
+                ledger.attributes.add(type, {})
+        self.ledger = ledger
 
 #----------------------
 # Temporary Instance Generation
-    def set_room_type(self, room_type):
+    def generate_temporary_instance(self, zone_type):
         """
-        Called by rooms.instance_menu
+        Calls upon the methods required to assemble the randomly generated instance.
+        This type of instance is temporary and has an expiration set as an epoch timestamp.
+
+        Arguments:
+            zone_type (string): A type of zone, which determines the room's description and 
+                which sentients occupy the zone. Such as forest, sewer, caves, etc.
         """
-        if room_type == 'random':
-            self.randomize_room_type = True
-        else:
-            self.randomize_room_type = False
-            self.room_type = room_type
-            
-        self._generate_temporary_instance()
+        owner = self.owner
+        instance_type = 'temporary_instance'
 
-    def _generate_temporary_instance(self):
-        # Save the data to the handler.
-        self.used_coords = []
-        self.rooms_list = []
-        self.exits_list = []
+        creation_time, epoch_creation, epoch_expiration = self._set_time(instance_type)
+        instance_id = f"{owner.dbid}_{creation_time}"
 
-        self._set_origin_room()
-        self._set_time()
-        self._set_instance_id()
-        self._get_room_qty()
-        self._generate_rooms()
-        self._generate_exits()
-        self._save_instance('temporary_instance')
-        self._create_log_string('temporary_instance')
+        rooms_list = self._generate_rooms(zone_type, instance_id)
+        exits_list = self._generate_exits(rooms_list)
 
-    def _generate_rooms(self):
-        for _ in range(1, self.room_qty + 1):
-            if self.randomize_room_type:
-                self._get_room_type()
-            self._get_room_key()
+        for exit in exits_list:
+            exit.tags.add(instance_id, category='instance_id')
 
-            self.room = create_object(typeclass='rooms.rooms.Room', key=self.room_key)
-            self.room.tags.add(self.instance_id, category='instance_id')
-            self.room.tags.add(self.room_type, category='zone_type')
-            self.room.tags.add('instance_spawn_testing', category='zone_id')
-            self.room.tags.add('has_spawn')
-            self.rooms_list.append(self.room)
+        self._save_instance(instance_type, instance_id, zone_type, creation_time, epoch_creation,
+            epoch_expiration, rooms_list, exits_list)
 
-    def _generate_exits(self):
-        for num, room in enumerate(self.rooms_list, start=1):
+    def _generate_rooms(self, zone_type, instance_id):
+        rooms_list = []
+        min_room_qty = 6
+        max_room_qty = 11
+
+        room_qty = random.randrange(min_room_qty, max_room_qty)
+
+        for _ in range(1, room_qty + 1):
+            room = create_object(typeclass='rooms.rooms.Room', key=self._generate_room_key(zone_type))
+            room.tags.add(instance_id, category='instance_id')
+            room.tags.add(zone_type, category='zone_type')
+            room.tags.add('instance_spawn_testing', category='zone_id')
+            room.tags.add('has_spawn')
+            rooms_list.append(room)
+
+        return rooms_list
+
+    def _generate_exits(self, rooms_list):
+        exits_list = []
+        used_coords = []
+        origin_room = self.owner.location
+        for num, room in enumerate(rooms_list, start=1):
             if num == 1:
                 # Generate a portal in origin room that leads to first room of the instance.
                 portal_to_instance = create_object(typeclass='travel.exits.Exit', key=room.name,
-                    location=self.origin_room, aliases=['port', 'portal'],
+                    location=origin_room, aliases=['port', 'portal'],
                     tags=[('portal', 'exits'), ('enter_instance', 'exits')], destination=room)
-                self.exits_list.append(portal_to_instance)
+                exits_list.append(portal_to_instance)
 
                 # Room 1 Coordinates
                 current_room_coords = {'x': 0, 'y': 0}
                 room.attributes.add('coords', current_room_coords)
-                self.used_coords.append(current_room_coords)
+                used_coords.append(current_room_coords)
 
                 # Decide next room's coordinates.
-                self._generate_new_room_coords(current_room_coords)
+                dir_choice, next_room_coords = self._generate_new_room_coords(current_room_coords, used_coords)
 
                 # The first room only requires 1 exit.
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.tags.add(self.dir_choice, category='card_dir')
-                self.exits_list.append(exit_to_next_room)
+                exit_to_next_room.tags.add(dir_choice, category='card_dir')
+                exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
                 prev_room = room
                 prev_room_exit = exit_to_next_room
 
-            elif num > 1 and num < len(self.rooms_list): # All rooms between first and last.
+            elif num > 1 and num < len(rooms_list): # All rooms between first and last.
                 # Connect the previous room to this room.
                 prev_room_exit.destination = room
                 prev_room_exit.key = room.name
 
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.tags.add(self._opposite_card_dir(self.dir_choice), category='card_dir')
-                self.exits_list.append(exit_to_previous_room)
+                exit_to_previous_room.tags.add(self._opposite_card_dir(dir_choice), category='card_dir')
+                exits_list.append(exit_to_previous_room)
                 
                 # Room Coordinates
-                current_room_coords = self.next_room_coords
+                current_room_coords = next_room_coords
                 room.attributes.add('coords', current_room_coords)
-                self.used_coords.append(current_room_coords)
+                used_coords.append(current_room_coords)
 
                 # Decide next room's coordinates.
-                self._generate_new_room_coords(current_room_coords)
+                dir_choice, next_room_coords = self._generate_new_room_coords(current_room_coords, used_coords)
 
                 exit_to_next_room = create_object(typeclass='travel.exits.Exit', key='temp',
                                         location=room)
-                exit_to_next_room.tags.add(self.dir_choice, category='card_dir')
-                self.exits_list.append(exit_to_next_room)
+                exit_to_next_room.tags.add(dir_choice, category='card_dir')
+                exits_list.append(exit_to_next_room)
 
                 # Store this iteration's objects for the next room.
                 prev_room = room
                 prev_room_exit = exit_to_next_room
             
-            elif num == len(self.rooms_list):
+            elif num == len(rooms_list):
                 # Connect the previous room to this room.
                 prev_room_exit.destination = room
                 prev_room_exit.key = room.name
@@ -121,27 +129,25 @@ class InstanceHandler:
                 # The final room requires an exit back to previous room.
                 exit_to_previous_room = create_object(typeclass='travel.exits.Exit', key=prev_room.name,
                                         location=room, destination=prev_room)
-                exit_to_previous_room.tags.add(self._opposite_card_dir(self.dir_choice), category='card_dir')
-                self.exits_list.append(exit_to_previous_room)
+                exit_to_previous_room.tags.add(self._opposite_card_dir(dir_choice), category='card_dir')
+                exits_list.append(exit_to_previous_room)
 
                 # Room Coordinates
-                current_room_coords = self.next_room_coords
+                current_room_coords = next_room_coords
                 room.attributes.add('coords', current_room_coords)
-                self.used_coords.append(current_room_coords)
+                used_coords.append(current_room_coords)
 
                 # Create a portal that returns back to the location the instance was generated from.
-                portal_to_origin = create_object(typeclass='travel.exits.Exit', key=self.origin_room.name,
+                portal_to_origin = create_object(typeclass='travel.exits.Exit', key=origin_room.name,
                                     location=room, aliases=['port', 'portal'],
                                     tags=[('portal', 'exits'), ('exit_instance', 'exits')], 
-                                    destination=self.origin_room)
-                self.exits_list.append(portal_to_origin)
-
-        for exit in self.exits_list:
-            exit.tags.add(self.instance_id, category='instance_id')
+                                    destination=origin_room)
+                exits_list.append(portal_to_origin)
+        return exits_list
 
 #----------------------
 # Static Instance Generation
-    def generate_static_instance(self, zone):
+    def generate_static_instance(self, zone_type):
         """
         Takes a list of dictionaries, each dictionary with instructions for a single room and its exits
         and generates them into the world. Coordinates and cardinal directions are required.
@@ -153,11 +159,12 @@ class InstanceHandler:
         Example:
             https://gist.github.com/kovitikus/b561663ec5c75f1598d50f2cd7b741b7
         """
-        self.rooms_list = []
-        self.exits_list = []
-        instructions = self.static_zones[zone]
-        self.instance_id = zone
-        self.epoch_creation = time.time()
+        rooms_list = []
+        exits_list = []
+        instructions = self.static_zones[zone_type]
+        instance_id = zone_type
+        instance_type = 'static_instance'
+        creation_time, epoch_creation, epoch_expiration = self._set_time(instance_type)
 
         #----------
         # Room Generation
@@ -166,7 +173,7 @@ class InstanceHandler:
             room_key = dict['key']
             room_desc = dict.get('desc', f"You see nothing special about {room_key}.")
 
-            room = create_object("rooms.rooms.Room", key=room_key, tags=[(zone, 'zone_id')],
+            room = create_object("rooms.rooms.Room", key=room_key, tags=[(zone_type, 'zone_id')],
             attributes=[('coords', dict['coords']), ('desc', room_desc)])
 
             # Checks to see if the room has any static sentients and if so, calls the spawner.
@@ -175,19 +182,19 @@ class InstanceHandler:
                 for sentient in static_sentients:
                     room.spawn.static_sentient(sentient, room)
 
-            self.rooms_list.append(room)
+            rooms_list.append(room)
 
         #----------
         # Exit Generation
         for num, dict in enumerate(instructions, start=0):
             # There exists the same number of created rooms as dictionaries in the instructions list.
             # This can be used to match the dictionary entry to the room object.
-            current_room = self.rooms_list[num]
+            current_room = rooms_list[num]
             for card_dir in dict['exits']:
                 # First the exit destination's coordinates are calculated and then checked against
                 # the list of rooms already generated to find the appropriate destination.
                 card_dir_room_coords = self._card_dir_to_coords(dict['coords'], card_dir)
-                for room in self.rooms_list:
+                for room in rooms_list:
                     if room.db.coords == card_dir_room_coords:
                         destination_found = True
                         exit_destination = room
@@ -196,34 +203,62 @@ class InstanceHandler:
                     exit_obj = create_object(typeclass='travel.exits.Exit', key=exit_destination.key,
                                             location=current_room, destination=exit_destination)
                     exit_obj.tags.add(card_dir, category='card_dir')
-                    self.exits_list.append(exit_obj)
-        self._save_instance('static_instance')
-        self._create_log_string('static_instance')
+                    exits_list.append(exit_obj)
+
+        self._save_instance(instance_type, instance_id, zone_type, creation_time, epoch_creation,
+            epoch_expiration, rooms_list, exits_list)
 
 #----------------------
 # Instance Save and Destroy
-    def _save_instance(self, instance_type):
+    def _save_instance(self, instance_type, instance_id, zone_type, creation_time, epoch_creation,
+        epoch_expiration, rooms_list, exits_list):
+        """
+        This method saves the instance data to the instance ledger (global script). It also stores the
+        data in a log string, which is saved to a log file.
+
+        Arguments:
+            instance_type (string): One of static_instance or temporary_instance.
+            instance_id (string): The unique identifier for this instance. Temporary instances
+                have an ID generated from a timestamp, while static instances have a static ID based
+                on the zone's name.
+            zone_type (string): The type of zone used to generate the instance. Such as forest, caves,
+                sewer, etc.
+            creation_time (string): The human-readable instance creation timestamp.
+            epoch_creation (float): The epoch variation of the instance's creation timestamp.
+            epoch_expiration (float): The timestamp used to determine when the instance will automatically
+                be destroyed. This is set to 0 if the instance is static.
+            rooms_list (list): A list of room objects that were generated for this instance.
+            exits_list (list); A list of exit objects that were generated for this instance.
+        """
+        owner = self.owner
+        log_str = self._create_log_string(instance_type, instance_id, zone_type, creation_time,
+            epoch_creation, epoch_expiration, rooms_list)
+        logger.log_file(log_str, filename=f'{instance_type}.log')
+
         # Save to ledger.
-        ledger = self.ledger.attributes.get(instance_type, {})
-        ledger[self.instance_id] = {}
-        ledger[self.instance_id]['creator'] = self.owner
-        ledger[self.instance_id]['epoch_creation'] = self.epoch_creation
-        ledger[self.instance_id]['epoch_expiration'] = self.epoch_expiration
-        ledger[self.instance_id]['rooms'] = self.rooms_list
-        ledger[self.instance_id]['exits'] = self.exits_list
+        ledger_dict = self.ledger.attributes.get(key=instance_type)
+        ledger_dict[instance_id] = {}
+        ledger_dict[instance_id]['creator'] = owner
+        ledger_dict[instance_id]['creation_time'] = creation_time
+        ledger_dict[instance_id]['epoch_creation'] = epoch_creation
+        ledger_dict[instance_id]['epoch_expiration'] = epoch_expiration
+        ledger_dict[instance_id]['rooms'] = rooms_list
+        ledger_dict[instance_id]['exits'] = exits_list
+        ledger_dict[instance_id]['log_str'] = log_str
 
         # Save to object that generated this instance.
         if instance_type == 'temporary_instance':
-            ledger = self.owner.attributes.get(instance_type, {})
-            ledger[self.instance_id] = {}
-            ledger[self.instance_id]['epoch_creation'] = self.epoch_creation
-            ledger[self.instance_id]['epoch_expiration'] = self.epoch_expiration
-            ledger[self.instance_id]['rooms'] = self.rooms_list
-            ledger[self.instance_id]['exits'] = self.exits_list
+            ledger_dict = owner.attributes.get(key=instance_type)
+            ledger_dict[instance_id] = {}
+            ledger_dict[instance_id]['epoch_creation'] = epoch_creation
+            ledger_dict[instance_id]['epoch_expiration'] = epoch_expiration
+            ledger_dict[instance_id]['rooms'] = rooms_list
+            ledger_dict[instance_id]['exits'] = exits_list
+            ledger_dict[instance_id]['log_str'] = log_str
 
     def destroy_instance(self, instance_type, instance_id):
         # Get the proper instance dictionary type.
-        ledger_dict = self.ledger.attributes.get(instance_type)
+        ledger_dict = self.ledger.attributes.get(key=instance_type)
         # Make sure the instance_id exists on the ledger.
         if not instance_id in ledger_dict:
             err_msg = f"destroy_instance could not find instance_id: {instance_id}"
@@ -260,42 +295,63 @@ class InstanceHandler:
 
 #----------------------
 # Helpers
-    def _set_origin_room(self):
-        self.origin_room = self.owner.location
+    def _set_time(self, instance_type):
+        """
+        Sets various timestamps used in saving, managing, and logging the instance.
 
-    def _set_time(self):
-        self.creation_time = datetime.now()
-        self.epoch_creation = time.time()
-        self.epoch_expiration = self.epoch_creation + (3600 * 24) # 3,600s = 1h
+        Arguments:
+            instance_type (string): Determines if this instance will be static or temporary.
+                Only temporary instances expire, automatically destroying themselves.
 
-    def _set_instance_id(self):
-        self.instance_id = f"{self.owner.dbid}_{self.creation_time}"
+        Returns:
+            creation_time (string): A human-readable format of the instance creation time.
+            epoch_creation (float): An epoch timestamp.
+            epoch_expiration (float): An epoch timestamp. Used to determine when the instance is 
+                ready to be destroyed.
+        """
+        now = datetime.now()
+        creation_time = str(now)
+        epoch_creation = now.timestamp()
+        if instance_type == 'static_instance':
+            epoch_expiration = 0
+        elif instance_type == 'temporary_instance':
+            epoch_expiration = epoch_creation + (3600 * 24) # 3,600 seconds = 1 hour
+        
+        return creation_time, epoch_creation, epoch_expiration
 
-    def _get_room_qty(self):
-        # Each instance will, for now, contain a possibility of 5-10 rooms.
-        self.room_qty = random.randrange(6, 11)
+    def _generate_room_key(self, zone_type):
+        """
+        Randomly picks a key for a room, based on the type of zone requested.
 
-    def _get_room_type(self):
-        room_types = ['forest', 'sewer', 'cave', 'alley']
-        self.room_type = random.choice(room_types)
+        Arguments:
+            zone_type (string): The type of zone to choose from.
 
-    def _get_room_key(self):
-        room_type = self.room_type
-        forest = ['a sacred grove of ancient wood', 'a sparsely-populated fledgling forest', 'a cluster of conifer trees']
-        sewer = ['a poorly-maintained sewage tunnel', 'a sewer tunnel constructed of ancient brick', 'a wide walkway along sewage']
-        cave = ['an uncertain rock bridge', 'a wide opening between', 'a damp rock shelf']
-        alley = ['a dark alleyway', 'a filthy alleyway', 'a narrow alleyway']
+        Returns:
+            room_key (string): The randomly chosen room key.
+        """
+        dict = {
+            'forest': ['a sacred grove of ancient wood', 'a sparsely-populated fledgling forest', 
+                'a cluster of conifer trees'],
+            'sewer': ['a poorly-maintained sewage tunnel', 
+                'a sewer tunnel constructed of ancient brick', 'a wide walkway along sewage'],
+            'cave': ['an uncertain rock bridge', 'a wide opening between', 'a damp rock shelf'],
+            'alley': ['a dark alleyway', 'a filthy alleyway', 'a narrow alleyway']
+        }
+        room_key = random.choice(dict[zone_type])
 
-        if room_type == 'forest':
-            self.room_key = random.choice(forest)
-        elif room_type == 'sewer':
-            self.room_key = random.choice(sewer)
-        elif room_type == 'cave':
-            self.room_key = random.choice(cave)
-        elif room_type == 'alley':
-            self.room_key = random.choice(alley)
+        return room_key
 
     def _opposite_card_dir(self, card_dir):
+        """
+        Determines the cardinal direction of the exit of the connected room that would lead
+        back to the cardinal direction passed to this method.
+
+        Arguments:
+            card_dir (string): The originating exit's cardinal direction.
+
+        Returns:
+            opp_dir (string): The destination exit's cardinal direction.
+        """
         if card_dir == 'n':
             opp_dir = 's'
         elif card_dir == 'ne':
@@ -363,21 +419,22 @@ class InstanceHandler:
             new_coords_y = current_coords['y'] - 1
         return {'x': new_coords_x, 'y': new_coords_y}
 
-    def _generate_new_room_coords(self, current_room_coords):
+    def _generate_new_room_coords(self, current_room_coords, used_coords):
         """
         Picks a random cardinal direction and uses it to generate a new set of 
         random x, y coordinates. Tests the new coordinates to ensure that they aren't already in use.
-        When results aren't already in the self.used_coords list, they are set to the handler.
+        When results aren't already in the used_coords list, they are set to the handler.
 
         Arguments:
             current_room_coords (dictionary): A dictionary consisting of an x key and y key
                 both containing an integar.
+            used_coords (list): A list of dictionaries consisting of coordinates already occupied.
         
-        Sets:
-            self.next_room_coords (dictionary): A dictionary consisting of an x key and y key
-                both containing an integar.
-            self.dir_choice (string): A cardinal direction used to determine the exit direction
+        Returns:
+            dir_choice (string): A cardinal direction used to determine the exit direction
                 of the current room to the new room.
+            next_room_coords (dictionary): A dictionary consisting of an x key and y key
+                both containing an integar.
 
         Example:
             https://gist.github.com/kovitikus/f231899a6111f508675596fd8599182f
@@ -390,68 +447,68 @@ class InstanceHandler:
 
             test_coords = self._card_dir_to_coords(current_room_coords, dir_choice)
 
-            if test_coords not in self.used_coords:
-                self.next_room_coords = test_coords
-                self.dir_choice = dir_choice
+            if test_coords not in used_coords:
+                next_room_coords = test_coords
                 free_space = True
             else:
                 card_dirs.remove(dir_choice)
+        return dir_choice, next_room_coords
 
-    def _create_log_string(self, instance_type):
+    def _create_log_string(self, instance_type, instance_id, zone_type, creation_time, epoch_creation,
+        epoch_expiration, rooms_list):
         border = "======================================================"
-        instance_type = f"Instance Type: {self.room_type if instance_type == 'temporary_instance' else self.room_type}"
-        room_type = f"Room Type: {str(self.room_type)}"
-        creation_time = f"Creation Time: {self.creation_time}"
+        instance_type = f"Instance ID: {instance_id}"
+        room_type = f"Zone Type: {zone_type}"
+        creation_time = f"Creation Time: {creation_time}"
         creator = f"Creator: {self.owner.name}"
-        epoch_create = f"Epoch Creation: {self.epoch_creation}"
-        epoch_expire = f"Epoch Expiration: {str(self.epoch_expiration)}"
-        room_count = f"Room Count: {len(self.rooms_list)}"
+        epoch_create = f"Epoch Creation: {epoch_creation}"
+        epoch_expire = f"Epoch Expiration: {str(epoch_expiration)}"
+        room_count = f"Room Count: {len(rooms_list)}"
         log_str = f"{border}\n{instance_type}\n{room_type}\n{creation_time}\n{creator}\n"
         log_str = f"{log_str}\n{epoch_create}\n{epoch_expire}\n{room_count}\n"
 
-        ledger = self.ledger.attributes.get(instance_type)
-        ledger[self.instance_id]['log_str'] = log_str
-
-        owner_attr = self.owner.attributes.get(instance_type)
-        owner_attr[self.instance_id]['log_str'] = log_str
-        logger.log_file(log_str, filename=f'{instance_type}.log')
+        return log_str
 
 #----------------------
 # Character Enter and Exit: at_after_traverse() on the Exit typeclass.
     # Exit tagged with ('enter_instance', category='exits')
     def enter_instance(self):
+        owner = self.owner
+        ledger = self.ledger
         # Determine the currently occupied room's instance_id.
-        if self.owner.location.tags.get(category='instance_id'):
+        if owner.location.tags.get(category='instance_id'):
             instance_id = self.owner.location.tags.get(category='instance_id')
 
             # Add character to instance occupant list.
-            if self.ledger.db.temporary_instance[instance_id].get('occupants') is None:
-                self.ledger.db.temporary_instance[instance_id]['occupants'] = []
-            self.ledger.db.temporary_instance[instance_id]['occupants'].append(self.owner)
+            if ledger.db.temporary_instance[instance_id].get(key='occupants') is None:
+                ledger.db.temporary_instance[instance_id]['occupants'] = []
+            ledger.db.temporary_instance[instance_id]['occupants'].append(owner)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
             err_msg = f"enter_instance could not find instance_id!"
             logger.log_file(err_msg, filename='temporary_instance_errors.log')
-            self.owner.msg('|rCRITICAL ERROR! enter_instance could not find the instance_id!|n')
+            owner.msg('|rCRITICAL ERROR! enter_instance could not find the instance_id!|n')
             return
 
     # Exit tagged with ('exit_instance', category='exits')
     def exit_instance(self, source_location):
+        owner = self.owner
+        ledger = self.ledger
         # This is where the instance cleanup is triggered.
         # Must first determine that all ledger occupants have exited.
 
         if source_location.tags.get(category='instance_id'):
             instance_id = source_location.tags.get(category='instance_id')
 
-            self.ledger.db.temporary_instance[instance_id]['occupants'].remove(self.owner)
+            ledger.db.temporary_instance[instance_id]['occupants'].remove(owner)
 
-            if len(self.ledger.db.temporary_instance[instance_id]['occupants']) == 0:
+            if len(ledger.db.temporary_instance[instance_id]['occupants']) == 0:
                 self.destroy_instance('temporary_instance', instance_id)
         else:
             # This instance_id acquisition should NOT fail. If it does, something went wrong.
             err_msg = f"exit_instance could not find instance_id!"
             logger.log_file(err_msg, filename='instance_errors.log')
-            self.owner.msg('|rCRITICAL ERROR! exit_instance could not find the instance_id!|n')
+            owner.msg('|rCRITICAL ERROR! exit_instance could not find the instance_id!|n')
             return
 
 #----------------------

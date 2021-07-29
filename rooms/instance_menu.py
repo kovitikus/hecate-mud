@@ -14,9 +14,7 @@ from evennia import GLOBAL_SCRIPTS
 from evennia.utils.utils import variable_from_module
 
 zone_list = variable_from_module("rooms.zones", variable='static_zones')
-ledger_dict = {}
-ledger_dict['temporary_instance'] = GLOBAL_SCRIPTS.instance_ledger.attributes.get('temporary_instance', {})
-ledger_dict['static_instance'] = GLOBAL_SCRIPTS.instance_ledger.attributes.get('static_instance', {})
+ledger = GLOBAL_SCRIPTS.instance_ledger
 
 
 def node_main_menu(caller, raw_string, **kwargs):
@@ -24,8 +22,8 @@ def node_main_menu(caller, raw_string, **kwargs):
         f"Main Menu\n\n"
         f"Current Instance Total\n"
         "----------------------\n"
-        f"Temporary Instances: {len(ledger_dict['temporary_instance'])}\n"
-        f"Static Instances: {len(ledger_dict['temporary_instance'])}"
+        f"Temporary Instances: {len(ledger.attributes.get('temporary_instance'))}\n"
+        f"Static Instances: {len(ledger.attributes.get('static_instance'))}"
     )
     options = (
         {'desc': "Create Temporary Instance",
@@ -58,19 +56,28 @@ def node_create_temporary_instance(caller, raw_string, **kwargs):
 def node_create_static_instance(caller, raw_string, **kwargs):
     text = f"Choose the static instance to generate:"
     options = []
+    ledger_dict = ledger.attributes.get('static_instance')
 
     for zone in zone_list.keys():
-        options.append({'desc': zone.capitalize(),
-        'goto': (_call_instance, {'static_instance': True, 'zone_type': zone})})
-    options.append({'desc': "Return to main menu.",
+        if zone in ledger_dict:
+            desc = f"|x{zone.capitalize()} (Already Exists)|n"
+            zone_exists = True
+        else:
+            desc = f"|w{zone.capitalize()}"
+            zone_exists = False
+        options.append({'desc': desc,
+        'goto': (_call_instance,
+            {'static_instance': True, 'zone_exists': zone_exists, 'zone_type': zone})})
+    options.append({'desc': "Return to Main Menu",
                     'goto': 'node_main_menu'})
     return text, options
 
 def node_manage_instances(caller, raw_string, **kwargs):
     instance_type = kwargs['instance_type']
+    ledger_dict = ledger.attributes.get(instance_type)
     text = "Instance Management Menu"
     options = []
-    for key, value in ledger_dict[instance_type].items():
+    for key, value in ledger_dict.items():
         options.append({'desc': f"Instance ID: {key}, Creator: {value['creator']}",
                         'goto': ('node_manage_single_instance', 
                         {'instance_type': instance_type, 'instance_id': key})})
@@ -81,7 +88,7 @@ def node_manage_instances(caller, raw_string, **kwargs):
 def node_manage_single_instance(caller, raw_string, **kwargs):
     instance_type = kwargs['instance_type']
     instance_id = kwargs['instance_id']
-    instance_dict = ledger_dict[instance_type][instance_id]
+    instance_dict = ledger.attributes.get(instance_type)[instance_id]
 
     text = (
         f"Managing {instance_id}\n\n"
@@ -129,9 +136,13 @@ def _delete_instance(caller, raw_string, **kwargs):
 def _call_instance(caller, raw_string, **kwargs):
     zone_type = kwargs.get('zone_type')
     if kwargs.get('static_instance', True):
-        caller.instance.generate_static_instance(zone_type)
+        if kwargs['zone_exists'] == True:
+            caller.msg(f"|r{zone_type} already exists and cannot be created!|n")
+            return 'node_main_menu'
+        else:
+            caller.instance.generate_static_instance(zone_type)
     else:
-        caller.instance.set_room_type(zone_type)
+        caller.instance.generate_temporary_instance(zone_type)
     return 'end_menu'
 
 def end_menu(caller, raw_string, **kwargs):
