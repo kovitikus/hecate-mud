@@ -161,6 +161,7 @@ class InstanceHandler:
         """
         rooms_list = []
         exits_list = []
+        sentients_list = []
         instructions = self.static_zones[zone_type]
         instance_id = zone_type
         instance_type = 'static_instance'
@@ -180,7 +181,8 @@ class InstanceHandler:
             static_sentients = dict.get('static_sentients', None) # A list of strings.
             if static_sentients:
                 for sentient in static_sentients:
-                    room.spawn.static_sentient(sentient, room)
+                    sentient_obj = room.spawn.static_sentient(sentient, room)
+                    sentients_list.append(sentient_obj)
 
             rooms_list.append(room)
 
@@ -206,12 +208,12 @@ class InstanceHandler:
                     exits_list.append(exit_obj)
 
         self._save_instance(instance_type, instance_id, zone_type, creation_time, epoch_creation,
-            epoch_expiration, rooms_list, exits_list)
+            epoch_expiration, rooms_list, exits_list, sentients_list=sentients_list)
 
 #----------------------
 # Instance Save and Destroy
     def _save_instance(self, instance_type, instance_id, zone_type, creation_time, epoch_creation,
-        epoch_expiration, rooms_list, exits_list):
+        epoch_expiration, rooms_list, exits_list, sentients_list=None):
         """
         This method saves the instance data to the instance ledger (global script). It also stores the
         data in a log string, which is saved to a log file.
@@ -231,6 +233,9 @@ class InstanceHandler:
             exits_list (list); A list of exit objects that were generated for this instance.
         """
         owner = self.owner
+        if sentients_list is None:
+            sentients_list = []
+
         log_str = self._create_log_string(instance_type, instance_id, zone_type, creation_time,
             epoch_creation, epoch_expiration, rooms_list)
         logger.log_file(log_str, filename=f'{instance_type}.log')
@@ -244,16 +249,20 @@ class InstanceHandler:
         ledger_dict[instance_id]['epoch_expiration'] = epoch_expiration
         ledger_dict[instance_id]['rooms'] = rooms_list
         ledger_dict[instance_id]['exits'] = exits_list
+        ledger_dict[instance_id]['sentients'] = sentients_list
         ledger_dict[instance_id]['log_str'] = log_str
 
         # Save to object that generated this instance.
         if instance_type == 'temporary_instance':
+            if not owner.attributes.get(key=instance_type):
+                owner.attributes.add(instance_type, {})
             ledger_dict = owner.attributes.get(key=instance_type)
             ledger_dict[instance_id] = {}
             ledger_dict[instance_id]['epoch_creation'] = epoch_creation
             ledger_dict[instance_id]['epoch_expiration'] = epoch_expiration
             ledger_dict[instance_id]['rooms'] = rooms_list
             ledger_dict[instance_id]['exits'] = exits_list
+            ledger_dict[instance_id]['sentients'] = sentients_list
             ledger_dict[instance_id]['log_str'] = log_str
 
     def destroy_instance(self, instance_type, instance_id):
@@ -265,29 +274,39 @@ class InstanceHandler:
             logger.log_file(err_msg, filename='instance_errors.log')
             self.owner.msg('|rCRITICAL ERROR! destroy_instance could not find the instance_id!|n')
             return
+        else:
+            instance_dict = ledger_dict[instance_id]
 
-        # Check to make sure there are no orphaned characters or objects remaining in the instance.
-        # Any left behind will be sent to their default home, so this is not critical.
-        
+        # Delete all sentients.
+        sentients_list = instance_dict['sentients']
+        for sentient in sentients_list:
+            # Delete all objects in the sentient's inventory.
+            for item in sentient.contents:
+                item.delete()
+            sentient.delete()
+        if len(sentients_list) == 0:
+            del ledger_dict[instance_id]['sentients']
+
         # Delete all exits.
-        exits_list = list(ledger_dict[instance_id]['exits'])
+        exits_list = instance_dict['exits']
         for exit in exits_list:
-            ledger_dict[instance_id]['exits'].remove(exit)
             exit.delete()
-        if len(ledger_dict[instance_id]['exits']) == 0:
+        if len(exits_list) == 0:
             del ledger_dict[instance_id]['exits']
 
         # Delete all rooms.
-        rooms_list = list(ledger_dict[instance_id]['rooms'])
+        rooms_list = instance_dict['rooms']
         for room in rooms_list:
-            ledger_dict[instance_id]['rooms'].remove(room)
+            # Delete all objects in the room.
+            for item in room.contents:
+                item.delete()
             room.delete()
-        if len(ledger_dict[instance_id]['rooms']) == 0:
+        if len(rooms_list) == 0:
             del ledger_dict[instance_id]['rooms']
 
         # Remove the instance from the creator object.
         if instance_type == 'temporary_instance':
-            creator = ledger_dict[instance_id]['creator']
+            creator = instance_dict['creator']
             creator_dict = creator.attributes.get(instance_type)
             del creator_dict[instance_id]
         # Exits and Rooms are deleted, remove the instance from the ledger.
@@ -329,16 +348,9 @@ class InstanceHandler:
         Returns:
             room_key (string): The randomly chosen room key.
         """
-        dict = {
-            'forest': ['a sacred grove of ancient wood', 'a sparsely-populated fledgling forest', 
-                'a cluster of conifer trees'],
-            'sewer': ['a poorly-maintained sewage tunnel', 
-                'a sewer tunnel constructed of ancient brick', 'a wide walkway along sewage'],
-            'cave': ['an uncertain rock bridge', 'a wide opening between', 'a damp rock shelf'],
-            'alley': ['a dark alleyway', 'a filthy alleyway', 'a narrow alleyway']
-        }
-        room_key = random.choice(dict[zone_type])
-
+        temporary_zones_dict = variable_from_module('rooms.zones', 'temporary_zones')
+        room_keys_list = temporary_zones_dict.get(zone_type).get('room_keys', [])
+        room_key = random.choice(room_keys_list)
         return room_key
 
     def _opposite_card_dir(self, card_dir):
