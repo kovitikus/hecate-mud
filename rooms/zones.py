@@ -1,3 +1,27 @@
+temporary_zones =  {
+    'forest': {
+        'room_keys': [
+            'a sacred grove of ancient wood', 'a sparsely-populated fledgling forest', 
+                'a cluster of conifer trees'
+        ]
+    },
+    'sewer': {
+        'room_keys': [
+            'a poorly-maintained sewage tunnel', 'a sewer tunnel constructed of ancient brick',
+            'a wide walkway along sewage'
+        ]
+    },
+    'cave': {
+        'room_keys': [
+            'an uncertain rock bridge', 'a wide opening between', 'a damp rock shelf'
+        ]
+    },
+    'alley': {
+        'room_keys': [
+            'a dark alleyway', 'a filthy alleyway', 'a narrow alleyway'
+        ]
+    }
+}
 static_zones = {
     'darkshire': [
         { # Encampment
