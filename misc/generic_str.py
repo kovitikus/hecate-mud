@@ -52,3 +52,19 @@ def proper_name(char):
     elif char.db.figure['gender'] == 'male' or 'female':
         name = cap(char.key)
     return name
+
+def possessive(string):
+    """
+    Determines whether to place an 's or just an ' at the end of a string, to represent possession.
+
+    Arguments:
+        string (string): The string to evaluate.
+    
+    Returns:
+        string (string): The final result with the attached possession.
+    """
+    if string[-1] == 's':
+        string = f"{string}\'"
+    else:
+        string = f"{string}'s"
+    return string
