@@ -1,4 +1,4 @@
-Join the Discord: https://discord.gg/5jvK4FB8ey
+Join the Discord: https://discord.gg/eDYQ3C4ZBc
 
 ***
 
