@@ -81,10 +81,10 @@ static_zones = {
         }
     ],
     'testing_zone': [
-        { # Hoff's Bar
+        { # Hecate's Haven
             'coords': {'x': 0, 'y': 0},
             'exits': ['n', 'e', 's', 'w'], 
-            'key': "Hoff's Bar",
+            'key': "Hecate's Haven",
             'desc': ("You are in a well-constructed room with walls made of red granite rock, "
                 "masterfully crafted from various shapes. Aisles, featuring a worn-in deep crimson "
                 "carpet, connect all four exits to the center of the room. Four large round "
