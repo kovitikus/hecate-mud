@@ -2,6 +2,8 @@ from evennia import create_object
 from evennia.utils import evtable
 from evennia.utils.utils import variable_from_module
 
+DEFAULT_STARTING_LOCATION = variable_from_module("world.hecate_settings", "DEFAULT_STARTING_LOCATION")
+
 # Imports the full adjectives dictionary, which consists of:
 # Category dictionary -> property key -> adjective list value
 adjectives_dic = variable_from_module("characters.character_adjectives", 'character_adjectives')
@@ -199,6 +201,7 @@ def _create_char(caller, raw_string, **kwargs):
     attributes=[('figure', {'Gender': gender, 'Height': height, 'Build': build}),
                 ('facial', {'Face': face, 'Eye Color': eye_color, 'Nose': nose, 'Lips': lips, 'Chin': chin, 'Skin Color': skin_color}),
                 ('hair', {'Hair Color': hair_color, 'texture': hair_texture, 'length': hair_length, 'style': hair_style})])
+    new_char.db.prelogout_location = DEFAULT_STARTING_LOCATION if DEFAULT_STARTING_LOCATION else new_char.home
     caller.db.chars[str(chars_len)] = new_char
     new_char.char.add_char_class(char_class)
     caller.msg("|gChargen completed!|n")

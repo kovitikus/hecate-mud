@@ -97,7 +97,8 @@ static_zones = {
                 "stage. Along the southern half of the middle aisle and against the eastern wall "
                 "rests a heavily padded L-shaped couch. Just in front of the couch sits a "
                 "low-lying table."),
-            'static_sentients': ['hoff']
+            'static_sentients': ['hoff'],
+            'tags': [('hecates_haven', 'rooms')]
         },
         { # Shopper's Paradise
             'coords': {'x': -1, 'y': 0},
