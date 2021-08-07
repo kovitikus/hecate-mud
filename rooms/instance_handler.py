@@ -173,8 +173,10 @@ class InstanceHandler:
         for dict in instructions:
             room_key = dict['key']
             room_desc = dict.get('desc', f"You see nothing special about {room_key}.")
+            tags = dict.get('tags', [])
+            tags.append((zone_type, 'zone_id'))
 
-            room = create_object("rooms.rooms.Room", key=room_key, tags=[(zone_type, 'zone_id')],
+            room = create_object("rooms.rooms.Room", key=room_key, tags=tags,
             attributes=[('coords', dict['coords']), ('desc', room_desc)])
 
             # Checks to see if the room has any static sentients and if so, calls the spawner.
