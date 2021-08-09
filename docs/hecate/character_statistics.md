@@ -1,3 +1,5 @@
+![Example Statistics](https://i.imgur.com/kiOnxJC.png)
+
 There are a total of 9 tiers of statistics in Hecate. 3 tiers in each range of low, mid, and high.
 
 The mid tiers have a minor point spread, whereas the point spread increases at the extreme ends of the spectrum. This is to ensure that movement across a tier is slower at the highest and lowest ends.
