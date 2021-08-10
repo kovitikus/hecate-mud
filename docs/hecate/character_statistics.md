@@ -1,33 +1,33 @@
-![Example Statistics](https://i.imgur.com/kiOnxJC.png)
+![Example Statistics](https://i.imgur.com/kyT8CQ5.png)
 
 There are a total of 9 tiers of statistics in Hecate. 3 tiers in each range of low, mid, and high.
 
-The mid tiers have a minor point spread, whereas the point spread increases at the extreme ends of the spectrum. This is to ensure that movement across a tier is slower at the highest and lowest ends.
+Each tier is worth a total of 50 points, for a total of 450 points.
 
-A character with 115 points in any given statistic will be exactly in the middle of the spectrum. By default, all characters start at 115 points in every statistic, adjusted based on choices made during character creation.
+A character with 225 points in any given statistic will be exactly in the middle of the spectrum. By default, all characters start at 225 points in every statistic, adjusted based on choices made during character creation.
 
 #### High-End
-* **Tier 1** - *50 points*
-    * **181 - 230**
-* **Tier 2** - *30 points*
-    * **151 - 180**
-* **Tier 3** - *20 points*
-    * **131 - 150**
+* **Tier 1**
+    * **401 - 450**
+* **Tier 2**
+    * **351 - 400**
+* **Tier 3**
+    * **301 - 350**
 
 #### Mid-Range
-* **Tier 4** - *10 points*
-    * **121 - 130**
-* **Tier 5** - *10 points*
-    * **111 - 120**
-* **Tier 6** - *10 points*
-    * **101 - 110**
+* **Tier 4**
+    * **251 - 300**
+* **Tier 5**
+    * **201 - 250**
+* **Tier 6**
+    * **151 - 200**
 
 #### Low-End
-* **Tier 7** - *20 points*
-    * **81 - 100**
-* **Tier 8** - *30 points*
-    * **51 - 80**
-* **Tier 9** - *50 points*
+* **Tier 7**
+    * **101 - 150**
+* **Tier 8**
+    * **51 - 100**
+* **Tier 9**
     * **1 - 50**
 
 ***
