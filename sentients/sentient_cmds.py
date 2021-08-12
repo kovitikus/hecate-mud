@@ -26,7 +26,7 @@ class CmdRatBite(BaseCommand):
             return
         target = target[0]
 
-        if not target.attributes.has('hp'):
+        if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
             return
 
@@ -56,7 +56,7 @@ class CmdRatClaw(BaseCommand):
             return
         target = target[0]
 
-        if not target.attributes.has('hp'):
+        if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
             return
 
@@ -88,7 +88,7 @@ class CmdSpiderBite(BaseCommand):
             return
         target = target[0]
 
-        if not target.attributes.has('hp'):
+        if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
             return
 
@@ -120,7 +120,7 @@ class CmdSnakeBite(BaseCommand):
             return
         target = target[0]
 
-        if not target.attributes.has('hp'):
+        if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
             return
 

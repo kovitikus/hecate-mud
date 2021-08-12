@@ -82,7 +82,7 @@ class CmdStaveSwat(BaseCommand):
             caller.msg('That target does not exist!')
             return
         target = target[0]
-        if not target.attributes.has('hp'):
+        if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
             return
         caller.combat.attack(target, 'staves', 'swat')

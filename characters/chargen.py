@@ -191,8 +191,10 @@ def _create_char(caller, raw_string, **kwargs):
     new_char.db.prelogout_location = DEFAULT_STARTING_LOCATION if DEFAULT_STARTING_LOCATION else new_char.home
     caller.db.chars[str(chars_len)] = new_char
     new_char.char.add_char_class(get('char_class'))
-    new_char.stats.set_base_hp()
-    new_char.stats.set_max_hp()
+    new_char.stats.set_base_health()
+    new_char.stats.set_max_health()
+    new_char.stats.set_base_energy()
+    new_char.stats.set_max_energy()
     caller.msg("|gChargen completed!|n")
     return "exit"
 

@@ -388,18 +388,18 @@ class CombatHandler:
         name = owner.key
         location = owner.location
         
-        hp = owner.attributes.get('hp')
-        current_hp = hp['current_hp']
-        current_hp -= damage
-        owner.db.hp['current_hp'] = current_hp
+        health = owner.attributes.get('health')
+        current_health = health['current_health']
+        current_health -= damage
+        owner.db.health['current_health'] = current_health
 
-        location.msg_contents(f'{name} has {current_hp} health remaining!')
-        if current_hp >= 1:
+        location.msg_contents(f'{name} has {current_health} health remaining!')
+        if current_health >= 1:
             owner.db.ko = False
-        elif current_hp <= 0 and owner.db.ko != True:
+        elif current_health <= 0 and owner.db.ko != True:
             owner.db.ko = True
             location.msg_contents(f'{name} falls unconscious!')
-        if current_hp <= -100:
+        if current_health <= -100:
             self.death()
 
     def death(self):
@@ -421,7 +421,7 @@ class CombatHandler:
         if not owner.has_account:
             owner.on_death()
         else:
-            owner.db.hp['current_hp'] = owner.db.hp['max_hp']
+            owner.db.health['current_health'] = owner.db.health['max_health']
             owner.location.msg_contents(f"{owner.name} dies and is resurrected to full health.", exclude=owner)
             owner.msg("You die and are resurrected to full health.")
             owner.db.ko = False
@@ -509,21 +509,21 @@ class CombatHandler:
             return 
 
         heal_rank = owner.db.holy['heal']
-        max_hp = target.db.hp['max_hp']
-        current_hp = target.db.hp['current_hp']
+        max_health = target.db.health['max_health']
+        current_health = target.db.health['current_health']
 
-        if current_hp == max_hp:
+        if current_health == max_health:
             if target == owner:
                 owner.msg(f"|cYou are already at full health!|n")
             else:
                 owner.msg(f"|c{target.name} is already at full health!|n")
             return
 
-        heal_amount = max_hp / 10
-        current_hp += heal_amount
-        if current_hp > max_hp:
-            current_hp = max_hp
-        target.db.hp['current_hp'] = current_hp
+        heal_amount = max_health / 10
+        current_health += heal_amount
+        if current_health > max_health:
+            current_health = max_health
+        target.db.health['current_health'] = current_health
         if target == owner:
             owner.msg(f"|cYou heal yourself for {heal_amount} health.|n")
         else:
