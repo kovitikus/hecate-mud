@@ -47,3 +47,61 @@ class CharacterHandler():
         owner.attributes.add('thirst', 0)
         owner.attributes.add('resistances', {'fire': 0, 'ice': 0, 'light': 0, 'shadow': 0,
             'poison': 0, 'arcane': 0})
+
+    def create_desc(self):
+        """
+        Dynamically generates a character's description.
+
+        The description is broken up into 3 sections, allowing for some to be ommitted.
+        This will become useful in regards to clothing or equipment that may obscure parts
+        of a character's description.
+
+        If a character's figure exists, it will always be shown.
+
+        Returns:
+            desc (string): The final string that represents the character's description.
+        """
+        owner = self.owner
+        desc = "You see a featureless entity."
+
+        figure = owner.attributes.get('figure', default=None)
+        facial = owner.attributes.get('facial', default=None)
+        hair = owner.attributes.get('hair', default=None)
+
+        if figure:
+            height = figure.get('Height')
+            build = figure.get('Build')
+            sex = figure.get('Gender')
+
+            # "You see a <height> <build> <gender>."
+            gender = ('man' if sex == 'male' else 'woman')
+            desc = f"You see a {height} {build} {gender}. "
+
+            # Only add facial and hair descriptions if the character has a figure.
+            if facial:
+                eye_color = facial.get('Eye Color')
+                nose = facial.get('Nose')
+                lips = facial.get('Lips')
+                chin = facial.get('Chin')
+                face = facial.get('Face')
+                skin_color = facial.get('Skin Color')
+
+                #   "He has <color> eyes set above an <shape> nose, <shape> lips and a <shape> chin
+                #   in a <shape> <color> face."
+                gender = ('He' if sex == 'male' else 'She')
+                desc = (f"{desc}{gender} has {eye_color} eyes set above a {nose} nose, "
+                        f"{lips} lips and a {chin} chin in a {face} {skin_color} face. ")
+
+            if hair:
+                length = hair.get('Hair Length')
+                texture = hair.get('Hair Texture')
+                hair_color = hair.get('Hair Color')
+                style = hair.get('Hair Style')
+
+                # "<gender> has <length> <texture> <color> hair <style>."
+                if length == 'bald':
+                    desc = f"{desc}{gender} is {length}. "
+                else:
+                    desc = f"{desc}{gender} has {length} {texture} {hair_color} hair {style}. "
+
+        return desc

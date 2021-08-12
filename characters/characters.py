@@ -10,6 +10,7 @@ from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
 from characters.currency_handler import CurrencyHandler
 from characters.status_handler import StatusHandler
+from characters.stat_handler import StatHandler
 from travel.travel_handler import TravelHandler
 from rooms.instance_handler import InstanceHandler
 from sentients.sentient_handler import SentientHandler
@@ -23,6 +24,9 @@ class Character(DefaultCharacter):
     @lazy_property
     def status(self):
         return StatusHandler(self)
+    @lazy_property
+    def stats(self):
+        return StatHandler(self)
     @lazy_property
     def travel(self):
         return TravelHandler(self)
@@ -202,46 +206,6 @@ class Character(DefaultCharacter):
     def return_appearance(self, looker, **kwargs):
         if not looker:
             return ""
-        
-        # get description, build string
-        string  = self.create_desc()
-        return string
+        return self.char.create_desc()
 
-    def create_desc(self):
-        desc = ""
-        
-        figure = self.db.figure
-        facial = self.db.facial
-        hair = self.db.hair
-
-        height = figure.get('height')
-        build = figure.get('build')
-        sex = figure.get('gender')
-
-        eye_color = facial.get('eye_color')
-        nose = facial.get('nose')
-        lips = facial.get('lips')
-        chin = facial.get('chin')
-        face = facial.get('face')
-        skin_color = facial.get('skin_color')
-
-        length = hair.get('length')
-        texture = hair.get('texture')
-        hair_color = hair.get('hair_color')
-        style = hair.get('style')
-
-        # The figure should result in "You see a <height> <build> <gender>."
-        gender = ('man' if sex == 'male' else 'woman')
-        desc += f"You see a {height} {build} {gender}. "
-        
-        # The facial should result in "He has <color> eyes set above an <shape> nose, <shape> lips and a <shape> chin in a <shape> <color> face."
-        gender = ('He' if sex == 'male' else 'She')
-        desc += (f"{gender} has {eye_color} eyes set above a {nose} nose, "
-                f"{lips} lips and a {chin} chin in a {face} {skin_color} face. ")
-
-        # The hair should result in "<gender> has <length> <texture> <color> hair <style>."
-        if length == 'bald':
-            desc += f"{gender} is {length}. "
-        else:
-            desc += f"{gender} has {length} {texture} {hair_color} hair {style}. "
-        return desc
+    
