@@ -4,9 +4,11 @@ from evennia.utils.utils import variable_from_module
 class StatHandler:
     def __init__(self, owner):
         self.owner = owner
-        self.main_class_dic = variable_from_module("characters.character_classes", variable='main_classes')
-        self.default_character_base_hp = variable_from_module("world.hecate_settings",
-            variable='DEFAULT_CHARACTER_BASE_HP')
+        self.main_class_dict = variable_from_module("characters.character_classes", variable='main_classes')
+        self.default_character_base_HEALTH = variable_from_module("world.hecate_settings",
+            variable='DEFAULT_CHARACTER_BASE_HEALTH')
+        self.default_character_base_energy = variable_from_module("world.hecate_settings",
+            variable='DEFAULT_CHARACTER_BASE_ENERGY')
 
     def init_char_stats(self):
         """
@@ -15,12 +17,23 @@ class StatHandler:
         """
         owner = self.owner
 
-        starting_stats = {'vigor': 115, 'tenacity': 115, 'celerity': 115, 'awareness': 115,
-            'aptitude': 115, 'sanity': 115}
+        starting_stats = {'vigor': 225, 'tenacity': 225, 'celerity': 225, 'awareness': 225,
+            'aptitude': 225, 'sanity': 225}
 
         owner.attributes.add('stats', starting_stats)
-        owner.attributes.add('hp', {'max_hp': 100, 'current_hp': 100})
-        owner.attributes.add('energy', {'max_energy': 100, 'current_energy': 100})
+
+        # Health
+        owner.attributes.add('health', {'base_health': 0, 'max_health': 0, 'current_health': 0})
+        self.set_base_health()
+        self.set_max_health()
+        owner.db.health['current_health'] = owner.db.health['max_health']
+
+        # Energy
+        owner.attributes.add('energy', {'base_energy': 0, 'max_energy': 0, 'current_energy': 0})
+        self.set_base_energy()
+        self.set_max_energy()
+        owner.db.energy['current_energy'] = owner.db.energy['max_energy']
+
         owner.attributes.add('armor', 0)
         owner.attributes.add('hunger', 0)
         owner.attributes.add('thirst', 0)
@@ -30,72 +43,138 @@ class StatHandler:
         self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
 
-    def set_base_hp(self):
+    def set_base_health(self):
         """
-        This method retrieves the base HP of a character (owner) and then subsequently sets
-        the returned base health value to the character's HP dictionary attribute.
+        This method retrieves the base health of a character (owner) and then subsequently sets
+        the returned base health value to the character's health dictionary attribute.
         """
         owner = self.owner
-        base_hp = self.calculate_base_hp()
-        if not base_hp:
-            owner.msg("|rWARNING! Could not set the character base HP with the stat handler!|n")
+        base_health = self.calculate_base_health()
+        if not base_health:
+            owner.msg("|rWARNING! Could not set the character base health with the stat handler!|n")
             return
 
-        char_hp_dict = owner.attributes.get('hp', None)
-        if char_hp_dict:
-            owner.db.hp['base_hp'] = base_hp
-
-    def calculate_base_hp(self):
+        char_health_dict = owner.attributes.get('health', None)
+        if char_health_dict:
+            owner.db.health['base_health'] = base_health
+    def calculate_base_health(self):
         """
-        Checks the hecate_settings module for the default base HP and then adds to that the class
-        choice base HP value.
+        Checks the hecate_settings module for the default base health and then adds to that the class
+        choice base health value.
 
         Returns:
-            base_hp (int): The final base health value for the character (owner).
+            base_health (int): The final base health value for the character (owner).
         """
         owner = self.owner
-        base_hp = self.default_character_base_hp
+        base_health = self.default_character_base_health
         char_class = None
 
-        # Aquire and add the character class base HP value.
+        # Aquire and add the character class base health value.
         if owner.tags.get(category='char_class'):
             char_class = owner.tags.get(category='char_class')
-            char_class_dict = self.main_class_dic.get(char_class, None)
+            char_class_dict = self.main_class_dict.get(char_class, None)
             if char_class_dict:
-                class_base_hp_bonus = char_class_dict.get('base_hp_bonus', 0)
-                base_hp += class_base_hp_bonus
+                class_base_health_bonus = char_class_dict.get('base_health_bonus', 0)
+                base_health += class_base_health_bonus
 
-        return int(base_hp)
+        return int(base_health)
 
-    def set_max_hp(self):
+    def set_max_health(self):
         """
-        This method calls upon another to calculate the maximum HP of a character and then
-        subsequently sets the returned maximum health value to the character's HP dictionary attribute.
+        This method calls upon another to calculate the maximum health of a character and then
+        subsequently sets the returned maximum health value to the character's health dictionary attribute.
         """
         owner = self.owner
-        max_hp = self.calculate_max_hp()
-        if not max_hp:
-            owner.msg("|rWARNING! Could not set the character max HP with the stat handler!|n")
+        max_health = self.calculate_max_health()
+        if not max_health:
+            owner.msg("|rWARNING! Could not set the character max health with the stat handler!|n")
             return
-        char_hp_dict = owner.attributes.get('hp', None)
-        if char_hp_dict:
-            owner.db.hp['max_hp'] = max_hp
+        char_health_dict = owner.attributes.get('health', None)
+        if char_health_dict:
+            owner.db.health['max_health'] = max_health
         else:
-            owner.msg("|rWARNING! Could not find the character HP dictionary attribute|n "
+            owner.msg("|rWARNING! Could not find the character health dictionary attribute|n "
                 "|rwith the stat handler!|n")
-        
-    def calculate_max_hp(self):
+    def calculate_max_health(self):
         owner = self.owner
-        max_hp = 0
-        vigor_hp_multiplier = 0.2
-        tenacity_hp_multiplier = 1.0
+        max_health = 0
+        vigor_health_multiplier = 0.002 # 0.2%
+        tenacity_health_multiplier = 0.01 # 1%
 
-        base_hp = owner.attributes.get('hp').get('base_hp')
+        base_health = owner.attributes.get('health').get('base_health')
         vigor = owner.attributes.get('stats').get('vigor')
         tenacity = owner.attributes.get('stats').get('tenacity')
 
-        bonus_vigor_hp = base_hp * (vigor * vigor_hp_multiplier)
-        bonus_tenacity_hp = base_hp * (tenacity * tenacity_hp_multiplier)
-        max_hp = base_hp + bonus_vigor_hp + bonus_tenacity_hp
+        bonus_vigor_health = base_health * (vigor * vigor_health_multiplier)
+        bonus_tenacity_health = base_health * (tenacity * tenacity_health_multiplier)
+        max_health = base_health + bonus_vigor_health + bonus_tenacity_health
 
-        return int(max_hp)
+        return int(max_health)
+
+    def set_base_energy(self):
+        """
+        This method retrieves the base energy of a character (owner) and then subsequently sets
+        the returned base energy value to the character's energy dictionary attribute.
+        """
+        owner = self.owner
+        base_energy = self.calculate_base_energy()
+        if not base_energy:
+            owner.msg("|rWARNING! Could not set the character base energy with the stat handler!|n")
+            return
+
+        char_energy_dict = owner.attributes.get('energy', None)
+        if char_energy_dict:
+            owner.db.energy['base_energy'] = base_energy
+    def calculate_base_energy(self):
+        """
+        Checks the hecate_settings module for the default base energy and then adds to that the class
+        choice base energy value.
+
+        Returns:
+            base_energy (int): The final base energy value for the character (owner).
+        """
+        owner = self.owner
+        base_energy = self.default_character_base_energy
+        char_class = None
+
+        # Aquire and add the character class base energy value.
+        if owner.tags.get(category='char_class'):
+            char_class = owner.tags.get(category='char_class')
+            char_class_dict = self.main_class_dict.get(char_class, None)
+            if char_class_dict:
+                class_base_energy_bonus = char_class_dict.get('base_energy_bonus', 0)
+                base_energy += class_base_energy_bonus
+
+        return int(base_energy)
+
+    def set_max_energy(self):
+        """
+        This method calls upon another to calculate the maximum energy of a character and then
+        subsequently sets the returned maximum health value to the character's energy dictionary attribute.
+        """
+        owner = self.owner
+        max_energy = self.calculate_max_energy()
+        if not max_energy:
+            owner.msg("|rWARNING! Could not set the character max energy with the stat handler!|n")
+            return
+        char_energy_dict = owner.attributes.get('energy', None)
+        if char_energy_dict:
+            owner.db.energy['max_energy'] = max_energy
+        else:
+            owner.msg("|rWARNING! Could not find the character energy dictionary attribute|n "
+                "|rwith the stat handler!|n")
+    def calculate_max_energy(self):
+        owner = self.owner
+        max_energy = 0
+        vigor_energy_multiplier = 0.01 # 1%
+        tenacity_energy_multiplier = 0.002 # 0.2%
+
+        base_energy = owner.attributes.get('energy').get('base_energy')
+        vigor = owner.attributes.get('stats').get('vigor')
+        tenacity = owner.attributes.get('stats').get('tenacity')
+
+        bonus_vigor_energy = base_energy * (vigor * vigor_energy_multiplier)
+        bonus_tenacity_energy = base_energy * (tenacity * tenacity_energy_multiplier)
+        max_energy = base_energy + bonus_vigor_energy + bonus_tenacity_energy
+
+        return int(max_energy)
