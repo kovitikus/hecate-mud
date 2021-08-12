@@ -63,9 +63,7 @@ class Character(DefaultCharacter):
         self.cmdset.add("travel.travel_cmdset.TravelCmdSet", permanent=True)
 
         # Stats
-        self.char.init_char_stats()
-        self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
-        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        self.stats.init_char_stats()
         self.equip.initialize_equipment_attribute()
 
         # Avoids execution of this code on initial setup of superuser.
