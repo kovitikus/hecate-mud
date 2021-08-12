@@ -53,6 +53,11 @@ def _set_name(caller, raw_string, **kwargs):
     return 'node_main'
 
 def node_appearance(caller, raw_string, **kwargs):
+    """
+    Special Thanks:
+        This appearance node was made possible by Griatch. Thanks a ton for all the help.
+        https://gist.github.com/Griatch/b51d7f086d7cee45e8061752b6de113b
+    """
     choices_dic = caller.ndb._menutree.choices_dic
     table1 = evtable.EvTable(table=[["Name:"], [f"|y{choices_dic.get('char_name')}|n"],
                             ["Class:"], [f"|y{choices_dic.get('char_class')}|n"]],
@@ -103,11 +108,6 @@ def _set_choices(caller, raw_string, **kwargs):
                     'category': category}
     else:
         return 'node_appearance'
-
-# This appearance node is made possible by Griatch. Thanks a ton for all the help.
-# https://gist.github.com/Griatch/b51d7f086d7cee45e8061752b6de113b
-
-
 
 def _char_desc(choices_dic):
     get = choices_dic.get
@@ -167,27 +167,16 @@ def _set_char_class(caller, raw_string, **kwargs):
 
 def _create_char(caller, raw_string, **kwargs):
     get = caller.ndb._menutree.choices_dic.get
-
-    char_name = get('char_name')
-    char_class = get('char_class')
-    #Figure Attributes
-    gender = get('Gender')
-    height = get('Height')
-    build = get('Build')
-
-    #Facial Attributes
-    face = get('Face')
-    eye_color = get('Eye Color')
-    nose = get('Nose')
-    lips = get('Lips')
-    chin = get('Chin')
-    skin_color = get('Skin Color')
-
-    #Hair Attributes
-    hair_color = get('Hair Color')
-    hair_texture = get('Hair Texture')
-    hair_length = get('Hair Length')
-    hair_style = get('Hair Style')
+    attributes = [
+                ('figure',
+                    {'Gender': get('Gender'), 'Height': get('Height'), 'Build': get('Build')}),
+                ('facial',
+                    {'Face': get('Face'), 'Eye Color': get('Eye Color'), 'Nose': get('Nose'),
+                    'Lips': get('Lips'), 'Chin': get('Chin'), 'Skin Color': get('Skin Color')}),
+                ('hair',
+                    {'Hair Color': get('Hair Color'), 'Hair Texture': get('Hair Texture'),
+                    'Hair Length': get('Hair Length'), 'Hair Style': get('Hair Style')})
+    ]
 
 
     # Check for chars attribute and initilize if none.
@@ -197,13 +186,13 @@ def _create_char(caller, raw_string, **kwargs):
     caller.msg(f"You currently have a total of {chars_len} characters.")
 
     #Add the new character object to the chars attribute as next number in the character list.
-    new_char = create_object(typeclass="characters.characters.Character", key=char_name, home=None,
-    attributes=[('figure', {'Gender': gender, 'Height': height, 'Build': build}),
-                ('facial', {'Face': face, 'Eye Color': eye_color, 'Nose': nose, 'Lips': lips, 'Chin': chin, 'Skin Color': skin_color}),
-                ('hair', {'Hair Color': hair_color, 'texture': hair_texture, 'length': hair_length, 'style': hair_style})])
+    new_char = create_object(typeclass="characters.characters.Character", key=get('char_name'),
+        home=None, attributes=attributes)
     new_char.db.prelogout_location = DEFAULT_STARTING_LOCATION if DEFAULT_STARTING_LOCATION else new_char.home
     caller.db.chars[str(chars_len)] = new_char
-    new_char.char.add_char_class(char_class)
+    new_char.char.add_char_class(get('char_class'))
+    new_char.stats.set_base_hp()
+    new_char.stats.set_max_hp()
     caller.msg("|gChargen completed!|n")
     return "exit"
 
