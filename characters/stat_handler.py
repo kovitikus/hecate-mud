@@ -5,15 +5,14 @@ class StatHandler:
     def __init__(self, owner):
         self.owner = owner
         self.main_class_dict = variable_from_module("characters.character_classes", variable='main_classes')
-        self.default_character_base_HEALTH = variable_from_module("world.hecate_settings",
+        self.default_character_base_health = variable_from_module("world.hecate_settings",
             variable='DEFAULT_CHARACTER_BASE_HEALTH')
         self.default_character_base_energy = variable_from_module("world.hecate_settings",
             variable='DEFAULT_CHARACTER_BASE_ENERGY')
 
     def init_char_stats(self):
         """
-        Documentation:
-            https://github.com/kovitikus/hecate/blob/master/docs/hecate/character_statistics.md
+        Logic for adding database attributes to the character and initializing each one.
         """
         owner = self.owner
 
@@ -150,7 +149,7 @@ class StatHandler:
     def set_max_energy(self):
         """
         This method calls upon another to calculate the maximum energy of a character and then
-        subsequently sets the returned maximum health value to the character's energy dictionary attribute.
+        subsequently sets the returned maximum energy value to the character's energy dictionary attribute.
         """
         owner = self.owner
         max_energy = self.calculate_max_energy()
