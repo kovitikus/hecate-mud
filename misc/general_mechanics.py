@@ -48,15 +48,31 @@ def roll_die(sides=100):
     roll = random.randint(1, sides)
     return roll
 
-def return_proto_dic(prototype):
-    proto_dic = search_prototype(prototype)
-    proto_dic = proto_dic[0]
-    name = proto_dic['key']
-    attrs = proto_dic['attrs']
-    attr_dic = {'key': name}
-    for i in attrs:
-        attr_dic[i[0]] = i[1]
-    return attr_dic
+def prototype_to_dictionary(prototype):
+    """
+    Translates a player-provided string into a list of dictionaries, drawn from the pool of prototypes.
+    Each dictionary is comprised of a prototype key and its attributes.
+
+    The purpose of this method is to make the internal prototype data easier to work with.
+
+    Arguments:
+        prototype (string): This is the user input to search for.
+
+    Returns:
+        result_list (list): A list of dictionaries generated, or an empty list.
+    """
+    result_list = []
+    proto_list = search_prototype(prototype)
+    for prototype in proto_list:
+        common_dict = {}
+        common_dict['key'] = prototype['key']
+
+        # Attributes saved within prototype dictionaries are formatted as a list of tuples.
+        attr_list = prototype['attrs']
+        for tuple in attr_list:
+            common_dict[tuple[0]] = tuple[1]
+        result_list.append(common_dict)
+    return result_list
 
 def all_same(items):
     return all(x == items[0] for x in items)
