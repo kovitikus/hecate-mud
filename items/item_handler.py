@@ -1,4 +1,5 @@
 from evennia.utils.create import create_object
+from evennia.utils.utils import variable_from_module
 
 from misc import general_mechanics as gen_mec
 
@@ -9,6 +10,7 @@ This handler decides functions related to items, such as get, put, stacking, etc
 class ItemHandler():
     def __init__(self, owner):
         self.owner = owner
+        self.items_dict = variable_from_module("items.items", variable='items')
 
     def get_object(self, obj, container, owner_possess):
         #TODO: Allow auto-stow of items in hand and continue to pick up obj if more than one exists in location.
@@ -336,3 +338,24 @@ class ItemHandler():
                 qty_stack.currency.add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
                 obj.delete()
             return qty_stack
+
+    def spawn(self, item_type, item_name=None):
+        """
+        Spawn an item from the items.items module.
+
+        Returns:
+            item (object): An item object of the Object typeclass.
+        """
+        owner = self.owner
+        item_type_dict = self.items_dict.get(item_type, None)
+        if not item_type_dict:
+            owner.msg(f"|rWARNING! Could not find {item_type} from the items.items items dictionary "
+                "within the ItemHandler spawn() method.|n")
+            return
+
+        location = owner
+        tags = None
+        attributes = None
+        item = create_object(typeclass="items.objects.Object", key=item_name, location=location,
+            home=None, tags=tags, attributes=attributes)
+        return item
