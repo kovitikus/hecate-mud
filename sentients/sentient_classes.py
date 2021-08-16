@@ -9,7 +9,11 @@ MERCHANT = {
 BASIC_SUPPLIES = {
     'prototype_parent': 'merchant',
     'key': 'basic supplies merchant',
-    'stock': {'crudely_made_torch': 10, 'foul_smelling_bait': 100}
+    'stock': {'crudely-made torch': {
+                'quantity': 10},
+            'foul-smelling bait': {
+                'quantity': 100}
+    }
 }
 
 static_sentients = {
