@@ -30,8 +30,8 @@ class ItemHandler():
             return
         
         # TODO: Check for free inventory slots.
-        # inventory_dic = dict(owner.db.inventory)
-        # if inventory_dic['occupied_slots'] < inventory_dic['max_slots']:
+        # inventory_dict = dict(owner.db.inventory)
+        # if inventory_dict['occupied_slots'] < inventory_dict['max_slots']:
         #     free_slot = True
 
         # All restriction checks passed, move the object to the owner.
@@ -206,7 +206,7 @@ class ItemHandler():
                     msg = "You can't group coins with non-coins!"
                     return msg
             if are_coins:
-                self.stack_coins(obj_loc, qty_stack_objects, stacked_obj_names)
+                self.stack_coins(obj_loc, qty_stack_objects)
                 msg = f"You group together {stacked_obj_names}."
                 return msg
 
@@ -228,10 +228,11 @@ class ItemHandler():
     def ungroup_objects(self, obj, obj_loc):
         if obj.is_typeclass('items.objects.StackQuantity'):
             if obj.tags.get('coin', category='currency'):
-                plat, gold, silver, copper = obj.currency.return_obj_coin(obj)
+                plat, gold, silver, copper = obj.currency.return_each_coin()
                 multi_coin = 0
-                for x in [plat, gold, silver, copper]:
-                    if x > 0:
+
+                for amount in [plat, gold, silver, copper]:
+                    if amount > 0:
                         multi_coin += 1
                 if multi_coin >= 2:
                     if plat > 0:
@@ -280,10 +281,10 @@ class ItemHandler():
             if pile.is_typeclass('items.objects.StackQuantity'):
                 # This is a pile of coins, or other similar pile.
                 if pile.tags.get('coin', category='currency'):
-                    currency = pile.attributes.get('coin')
-                    coin_type = currency.get(qty_obj)
+                    coin_dict = pile.attributes.get('coin')
+                    coin_type = coin_dict.get(qty_obj)
                     if coin_type >= quantity:
-                        currency[coin_type] -= quantity
+                        coin_dict[coin_type] -= quantity
                         # We also have to determine here if the coin pile has homogenized and change its description.
 
                         # Now we need to make a new coin pile with the value of the
@@ -326,7 +327,7 @@ class ItemHandler():
                     pile.delete()
         return msg
 
-    def stack_coins(self, obj_loc, qty_stack_objects, stacked_obj_names):
+    def stack_coins(self, obj_loc, qty_stack_objects):
         qty_stack = create_object(key=f'a pile of coins', 
                 typeclass='items.objects.StackQuantity', 
                 location=obj_loc)
@@ -334,8 +335,7 @@ class ItemHandler():
             qty_stack.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
             qty_stack.tags.add('coin', category='currency')
             for obj in qty_stack_objects:
-                plat, gold, silver, copper = qty_stack.currency.return_obj_coin(obj)
-                qty_stack.currency.add_coin(qty_stack, plat=plat, gold=gold, silver=silver, copper=copper)
+                qty_stack.currency.add_coin_to_owner(dict(obj.db.coin))
                 obj.delete()
             return qty_stack
 
