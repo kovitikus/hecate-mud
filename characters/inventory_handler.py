@@ -76,7 +76,7 @@ class InventoryHandler():
 
                 string = f"|wYou are carrying:\n{category_string}\n{table}"
         # Add currency
-        string = f"{string}\n{owner.currency.return_currency(owner)}"
+        string = f"{string}\n{owner.currency.return_coin_string(owner)}"
         owner.msg(string)
     
     def get_inv_final_list(self, filtered_items, arg_type):
