@@ -49,8 +49,8 @@ class Coin(Object):
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            currency = self.currency.return_currency(self)
-            looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
+            coin_str = self.currency.return_coin_string(self)
+            looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class InventoryContainer(Container):
     def at_object_creation(self):
@@ -66,8 +66,8 @@ class StackQuantity(Object):
         self.attributes.add('quantity', 0)
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            currency = self.currency.return_currency(self)
-            looker.msg(f"You see {self.get_display_name(looker)} worth {currency}.")
+            coin_str = self.currency.return_coin_string(self)
+            looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class StackInventory(Object):
     # Stacking objects that have unique attributes and must be preserved.
