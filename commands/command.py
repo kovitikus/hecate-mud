@@ -758,16 +758,25 @@ class CmdLight(Command):
 
 class CmdStock(Command):
     """
-    Usage: stock
+    Usage:
+        stock - Returns the stock of all merchants in the room.
 
-    Returns the stock of a merchant in the room.
+        stock <merchant> - Displays the stock of a specific merchant.
     """
     key = 'stock'
     def func(self):
-        room_contents = self.caller.location.contents
-        for i in room_contents:
-            if i.tags.get('merchant', category='sentient_class'):
-                self.caller.msg(i.merch.return_stock())
+        caller = self.caller
+        if self.args:
+            args = self.args.strip()
+            merchant = caller.search(args, quiet=True)[0]
+            if merchant is not None:
+                if merchant.tags.get('merchant', category='sentient_class'):
+                    caller.msg(merchant.merch.list_stock())
+        else:
+            room_contents = self.caller.location.contents
+            for obj in room_contents:
+                if obj.tags.get('merchant', category='sentient_class'):
+                    caller.msg(obj.merch.list_stock())
 
 class CmdBuy(Command):
     """
