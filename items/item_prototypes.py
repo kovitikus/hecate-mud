@@ -12,42 +12,42 @@ FOOD = {
 RASPBERRY_CAKE = {
     'prototype_parent': 'food',
     'key': 'raspberry cake',
-    'price': 10,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 10},
     'hunger': 10
 }
 
 BEEF_STEAK = {
     'prototype_parent': 'food',
     'key': 'beef steak',
-    'price': 50,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 50},
     'hunger': 25
 }
 
 MILLET_PORRIDGE = {
     'prototype_parent': 'food',
     'key': 'millet porridge',
-    'price': 4,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
 
 BARLEY_PORRIDGE = {
     'prototype_parent': 'food',
     'key': 'barley porridge',
-    'price': 4,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
 
 STEWED_BEETROOT = {
     'prototype_parent': 'food',
     'key': 'stewed beetroot',
-    'price': 4,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
 
 BOILED_MUTTON_AND_PEAS = {
     'prototype_parent': 'food',
     'key': 'boiled mutton and peas',
-    'price': 11,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 11},
     'hunger': 25
 }
 
@@ -62,14 +62,14 @@ DRINK = {
 BLACK_TEA = {
     'prototype_parent': 'drink',
     'key': 'black tea',
-    'price': 3,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 3},
     'thirst': 5
 }
 
 WATER = {
     'prototype_parent': 'drink',
     'key': 'water',
-    'price': 1,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 1},
     'thirst': 5
 }
 
@@ -87,10 +87,10 @@ TORCH = {
 
 CRUDELY_MADE_TORCH = {
     'prototype_parent': 'lighting',
-    'prototype_key': 'CRUDELY_MADE_TORCH',
+    'prototype_key': 'crudely-made torch',
     'key': 'crudely-made torch',
     'typeclass': 'items.objects.Torch',
-    'price': 10,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 10},
     'fuel': 90,
     'burn_rate': 30
 }
@@ -117,10 +117,10 @@ BAIT = {
 
 FOUL_SMELLING_BAIT = {
     'prototype_parent': 'bait',
-    'prototype_key': 'FOUL_SMELLING_BAIT',
+    'prototype_key': 'foul-smelling bait',
     'key': 'foul-smelling bait',
     'lure': 1,
-    'price': 2,
+    'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 2}
 }
 
 def generate_random_bag_key():
