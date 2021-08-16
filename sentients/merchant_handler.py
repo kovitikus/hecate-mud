@@ -1,80 +1,108 @@
 from evennia.prototypes.spawner import spawn
+from evennia.utils.evtable import EvTable, EvCell
 
 from misc import general_mechanics as gen_mec
+from misc import generic_str
 
 class MerchantHandler:
     def __init__(self, owner):
         self.owner = owner
 
-    def return_stock(self):
-        # Example stock.
+    def list_stock(self):
         """
-        =========[Stock]===============
-        a poorly-crafted torch    Price: 4c    Qty: 50
-        an unappetizing food ration    Price: 10c    Qty: 25
-        a dirty flask of oil    Price: 20c    Qty: 25
-        a crude iron lantern    Price: 100c    Qty: 5
-        a make-shift fishing rod    Price: 15c    Qty: 10
-        a piece of foul-smelling bait    Price: 1c    Qty: 100
-        ===============================
+        Uses the stock attribute on the merchant (owner) to display a list of items available
+        for purchase.
+
+        Returns:
+            (string): An error message or the resulting stock listing.
         """
         owner = self.owner
-        if owner.attributes.has('stock'):
-            stocked_items = owner.attributes.get('stock')
+        owner_possessive = generic_str.possessive(owner.key)
+        stocked_items = owner.attributes.get('stock', default=None)
+        if not stocked_items:
+            return f"{owner.key} currently has no stock!"
 
-        header = "=========[Stock]==============="
-        body = []
-        footer = "==============================="
-        name = None
-        price = None
-        quantity = 0
+        header = EvCell(f"[{owner_possessive} Stock]", align='c', width=25, fill_char='=')
+        stock_table = EvTable(border=None, pad_width=0)
+        footer = EvCell("", align='c', width=25, fill_char='=')
 
-        for k, v in stocked_items.items():
-            item_dic = gen_mec.return_proto_dic(k)
+        for item, properties in stocked_items.items():
+            # Stock is manually added to the merchant. This should always have at least 1 result.
+            proto_dict_list = gen_mec.prototype_to_dictionary(item)
+            if len(proto_dict_list) > 0:
+                proto_dict = proto_dict_list[0]
+            else:
+                # The prototype for this stock item couldn't be found, abandon it.
+                continue
 
-            name = item_dic.get('key')
-            price = item_dic.get('price', 0)
-            quantity = v
+            item_name = proto_dict.get('key')
+            price_str = owner.currency.positive_coin_to_string(proto_dict.get('price'))
+            quantity = properties.get('quantity', 0)
 
-            body.append(f"{name}    Price: {price}c    Qty: {quantity}\n")
+            stock_table.add_row(f"{item_name} ", f"Price: {price_str}", f"Qty: {quantity}")
 
-        msg = f"{header}\n{''.join(body)}{footer}"
-        return msg
+        stock_table.reformat_column(0, fill_char='.')
+        stock_table.reformat_column(1, pad_left=1, fill_char='.')
+        stock_table.reformat_column(2, pad_left=1)
+
+        return f"{header}\n{stock_table}{footer}"
             
     def sell_item(self, buyer, item, quantity=1):
+        """
+        Enables a character to purchase items from this merchant (owner).
+
+        Arguments:
+            buyer (Character): The character object that requested to purchase an item.
+            item (string): The user input for the requested item.
+
+        Keyword Arguments:
+            quantity (int): The number of items requested. Defaults to 1 if not set.
+
+        Returns:
+            (string): The resulting message. Either an error explaining why the purchase can't be
+                made or the details of a successful sale.
+        """
         owner = self.owner
-        if owner.attributes.has('stock'):
-            stocked_items = owner.attributes.get('stock')
+        stocked_items = owner.attributes.get('stock', default={})
+        potential_proto_list = gen_mec.prototype_to_dictionary(item)
+        proto_dict = None
+
+        buyer_coin_dict = buyer.attributes.get('coin', default=None)
+        if not buyer_coin_dict:
+            return "You don't have any coin!"
+
+        # Check each potential prototype result and compare it to the merchant's stock
+        # to find an exact matching result.
+        for proto in potential_proto_list:
+            if proto['key'] in stocked_items.keys():
+                proto_dict = proto
+                break
         
-        if item not in stocked_items.keys():
-            msg = f"{owner.name} is not selling {item}!"
-        elif stocked_items[item] <= 0:
-            msg = f"{item} is out of stock!"
-        elif stocked_items[item] < quantity:
-            msg = f"{owner.name} does haven't {quantity} of {item} in stock!"
+        if not proto_dict:
+            return f"{owner.name} is not selling {item}!"
+
+        item = proto_dict['key']
+        price_dict = proto_dict['price']
+
+        if stocked_items[item]['quantity'] <= 0:
+            return f"{item} is out of stock!"
+        elif stocked_items[item]['quantity'] < quantity:
+            return f"{owner.name} does haven't {quantity} of {item} in stock!"
+
+        # multiply it by the quantity
+        total_price_dict = owner.currency.multiply_coin(price_dict, quantity)
+        total_price_str = owner.currency.positive_coin_to_string(total_price_dict)
+
+        # Check if the player has enough money
+        if owner.currency.greater_or_equal_coin(buyer_coin_dict, total_price_dict):
+            owner.db.coin = owner.currency.subtract_coin(buyer_coin_dict, total_price_dict)
         else:
-            # get the price of the item
-            item_dic = gen_mec.return_proto_dic(item)
-            price = item_dic['price']
+            return f"You do not possess {total_price_str} to make that purchase!"
 
-            # multiply it by the quantity
-            total_price = price * quantity
-
-            # Check if the player has enough money
-            coin_shortage = f"You do not possess {total_price}c to make that purchase!"
-            if buyer.attributes.has('coin'):
-                buyer_coin = buyer.attributes.get('coin')
-                buyer_copper = buyer_coin.get('copper', 0)
-                if buyer_copper < total_price:
-                    return coin_shortage
-                else:
-                    buyer_coin['copper'] -= total_price
-            else:
-                return coin_shortage
-
-            stocked_items[item] -= quantity
-            msg = f"You buy {quantity} of {item} for a total of {total_price}. {owner.name} places them in the room."
-            for _ in range(quantity):
-                spawned_item = spawn(item)[0]
-                spawned_item.move_to(owner.location, quiet=True)
-        return msg
+        stocked_items[item] -= quantity
+        for _ in range(quantity):
+            spawned_item = spawn(item)[0]
+            spawned_item.move_to(owner.location, quiet=True)
+        purchase_str = (f"You buy {quantity} of {item} for a total of {total_price_str}. "
+                        f"{owner.name} places them in the room.")
+        return purchase_str
