@@ -107,7 +107,7 @@ class MerchantHandler:
         total_price_str = owner.currency.positive_coin_types_to_string(coin_dict=total_price_dict)
 
         # Check if the player has enough money
-        if buyer_copper > total_copper_price:
+        if buyer_copper >= total_copper_price:
             buyer_copper -= total_copper_price
             buyer.db.coin = buyer.copper_to_coin_dict(buyer_copper)
         else:
