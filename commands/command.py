@@ -844,13 +844,13 @@ class CmdConvertCoin(Command):
         result_type = self.result_type
 
         if coin_type == 'plat':
-            result_value = self.caller.currency.convert_coin(plat=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin_type(plat=coin_value, result_type=result_type)
         elif coin_type == 'gold':
-            result_value = self.caller.currency.convert_coin(gold=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin_type(gold=coin_value, result_type=result_type)
         elif coin_type == 'silver':
-            result_value = self.caller.currency.convert_coin(silver=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin_type(silver=coin_value, result_type=result_type)
         elif coin_type == 'copper':
-            result_value = self.caller.currency.convert_coin(copper=coin_value, result_type=result_type)
+            result_value = self.caller.currency.convert_coin_type(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
 class CmdGroup(Command):
