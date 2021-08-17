@@ -8,8 +8,9 @@ class CurrencyHandler:
             coin_dict = owner.attributes.get('coin')
             return self.all_coin_to_string(self, coin_dict)
 
-    def return_each_coin(self):
-        coin_dict = dict(self.owner.attributes.get('coin'))
+    def return_all_coin_types(self, coin_dict=None):
+        if not coin_dict:
+            coin_dict = dict(self.owner.attributes.get('coin'))
         return coin_dict['plat'], coin_dict['gold'], coin_dict['silver'], coin_dict['copper']
 
     def all_coin_to_string(self, coin_dict):
@@ -66,7 +67,7 @@ class CurrencyHandler:
         """
         for k in original_coin_dict:
             original_coin_dict[k] += added_coin_dict[k]
-        return self.balance_coin(original_coin_dict)
+        return self.balance_coin_dict(original_coin_dict)
 
     def subtract_coin_from_owner(self, subtracted_coin_dict):
         owner = self.owner
@@ -75,10 +76,10 @@ class CurrencyHandler:
             owner.db.coin = self.subtract_coin(current_coin_dict, subtracted_coin_dict)
 
     def subtract_coin(self, original_coin_dict, subtracted_coin_dict):
-        original_copper = self.convert_coin_dict_to_copper(original_coin_dict)
-        subtracted_copper = self.convert_coin_dict_to_copper(subtracted_coin_dict)
+        original_copper = self.coin_dict_to_copper(original_coin_dict)
+        subtracted_copper = self.coin_dict_to_copper(subtracted_coin_dict)
         result_copper = original_copper - subtracted_copper
-        return self.balance_coin(self.generate_coin_dict(copper=result_copper))
+        return self.balance_coin_dict(self.generate_coin_dict(copper=result_copper))
 
     def multiply_coin(self, coin_dict, multiplier):
         """
@@ -92,27 +93,25 @@ class CurrencyHandler:
         Returns:
             coin_dict (dict): The resulting multiplied and balanced coin dictionary.
         """
-        copper = self.convert_coin_dict_to_copper(coin_dict)
+        copper = self.coin_dict_to_copper(coin_dict)
         result_copper = copper * multiplier
-        return self.balance_coin(self.generate_coin_dict(copper=result_copper))
+        return self.balance_coin_dict(self.generate_coin_dict(copper=result_copper))
 
     def greater_or_equal_coin(self, original_coin_dict, comparison_coin_dict):
-        original_copper = self.convert_coin_dict_to_copper(original_coin_dict)
-        comparison_copper = self.convert_coin_dict_to_copper(comparison_coin_dict)
+        original_copper = self.coin_dict_to_copper(original_coin_dict)
+        comparison_copper = self.coin_dict_to_copper(comparison_coin_dict)
         return original_copper >= comparison_copper
 
-    
-
-    def convert_coin_dict_to_copper(self, coin_dict):
+    def coin_dict_to_copper(self, coin_dict):
         copper = 0
         for coin_type, amount in coin_dict.items():
-            copper += self.convert_coin(**{coin_type:amount})
+            copper += self.convert_coin_type(**{coin_type:amount})
         return copper
 
-    def balance_coin(self, coin_dict):
+    def balance_coin_dict(self, coin_dict):
         """
-        Takes a coin dictionary and balances all coins to a maximum of 999, pushing the
-        remainder up to the next coin type.
+        Takes a coin dictionary and balances all coins in excess of 999.
+        Pushes the quotient of 1,000 up to the next coin type and leaves the remainder.
 
         Arguments:
             coin_dict (dictionary): {'plat': value, 'gold': value, 'silver': value, 'copper': value}
@@ -120,27 +119,32 @@ class CurrencyHandler:
         Returns:
             coin_dict (dictionary): {'plat': value, 'gold': value, 'silver': value, 'copper': value}
         """
-        plat, gold, silver, copper = self.return_each_coin(coin_dict)
+        def quotient(value):
+            return value // 1_000
+        def remainder(value):
+            return value % 1_000
+
+        plat, gold, silver, copper = self.return_all_coin_types(coin_dict=coin_dict)
 
         if copper > 999:
-            silver += int(self.convert_coin(copper=copper, result_type=silver))
-            copper = 999
+            silver += quotient(copper)
+            copper = remainder(copper)
 
         if silver > 999:
-            gold += int(self.convert_coin(silver=silver, result_type=gold))
-            silver = 999
+            gold += quotient(silver)
+            silver = remainder(silver)
         
         if gold > 999:
-            plat += int(self.convert_coin(gold=gold, result_type=plat))
-            gold = 999
+            plat += quotient(gold)
+            gold = remainder(gold)
 
-        return {'plat': plat, 'gold': gold, 'silver': silver, 'copper': copper}
+        return self.generate_coin_dict(plat=plat, gold=gold, silver=silver, copper=copper)
 
-    def convert_coin(self, plat=0, gold=0, silver=0, copper=0, result_type='copper'):
+    def convert_coin_type(self, plat=0, gold=0, silver=0, copper=0, result_type='copper'):
         """
         Converts any number of coin types into a single type of coin.
-        For example, it can convert 25 gold and 35 plat and result in a total amount of copper.
-        (Don't worry about how much copper that is. It's what this method is for!)
+        For example, it can convert 585433 copper + 35 plat into silver.
+        (Don't worry about how much silver that is. It's what this method is for!)
 
         Keyword Arguments:
             plat (int): Amount of platinum to convert.
@@ -148,15 +152,41 @@ class CurrencyHandler:
             silver (int): Amount of silver to convert.
             coppper (int): Amount of copper to convert.
             result_type (string): The type of coin the result should be. Defaults to copper.
+
+        Returns:
+            plat (int) or (float)
+            gold (int) or (float)
+            silver (int) or (float)
+            coppper (int) or (float)
         """
+        def convert_upward(current_tier_amount):
+            return current_tier_amount / 1_000
+        def convert_downward(current_tier_amount):
+            return current_tier_amount * 1_000
+
         if result_type == 'plat':
-            return (copper / 1_000_000_000) + (silver / 1_000_000) + (gold / 1_000) + plat
+            silver += convert_upward(copper)
+            gold += convert_upward(silver)
+            plat += convert_upward(gold)
+            return plat
         elif result_type == 'gold':
-            return (copper / 1_000_000) + (silver / 1_000) + gold + (plat * 1_000)
+            silver += convert_upward(copper)
+            gold += convert_upward(silver)
+            gold += convert_downward(plat)
+            return gold
         elif result_type == 'silver':
-            return (copper / 1_000) + silver + (gold * 1_000) + (plat * 1_000_000)
+            silver += convert_upward(copper)
+            gold += convert_downward(plat)
+            silver += convert_downward(gold)
+            return silver
         else: # result_type == copper
-            return copper + (silver * 1_000) + (gold * 1_000_000) + (plat * 1_000_000_000)
+            gold += convert_downward(plat)
+            silver += convert_downward(gold)
+            copper += convert_downward(silver)
+            return copper
 
     def generate_coin_dict(self, plat=0, gold=0, silver=0, copper=0):
         return {'plat': plat, 'gold': gold, 'silver': silver, 'copper': copper}
+
+    def copper_to_coin_dict(self, copper):
+        return self.balance_coin_dict(self.generate_coin_dict(copper=copper))
