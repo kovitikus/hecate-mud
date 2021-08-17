@@ -36,7 +36,7 @@ class MerchantHandler:
                 continue
 
             item_name = proto_dict.get('key')
-            price_str = owner.currency.positive_coin_to_string(proto_dict.get('price'))
+            price_str = owner.currency.positive_coin_types_to_string(coin_dict=proto_dict.get('price'))
             quantity = properties.get('quantity', 0)
 
             stock_table.add_row(f"{item_name} ", f"Price: {price_str}", f"Qty: {quantity}")
@@ -63,39 +63,53 @@ class MerchantHandler:
                 made or the details of a successful sale.
         """
         owner = self.owner
-        stocked_items = owner.attributes.get('stock', default={})
-        potential_proto_list = gen_mec.prototype_to_dictionary(item)
-        proto_dict = None
 
+        # Confirm that the merchant has stock.
+        stocked_items = owner.attributes.get('stock', default=None)
+        if not stocked_items:
+            return f"{owner.name} has no stock for sale."
+
+        # Confirm that the buyer has a coin dictionary.
         buyer_coin_dict = buyer.attributes.get('coin', default=None)
         if not buyer_coin_dict:
-            return "You don't have any coin!"
+            return "You don't have any coin."
+        else:
+            buyer_copper = buyer.currency.coin_dict_to_copper(buyer_coin_dict)
+
+        potential_prototype_list = gen_mec.prototype_to_dictionary(item) # Returns a list of dictionaries.
+        prototype_dict = None
 
         # Check each potential prototype result and compare it to the merchant's stock
         # to find an exact matching result.
-        for proto in potential_proto_list:
-            if proto['key'] in stocked_items.keys():
-                proto_dict = proto
+        for prototype in potential_prototype_list:
+            if prototype['key'] in stocked_items.keys():
+                prototype_dict = prototype
                 break
-        
-        if not proto_dict:
+        if not prototype_dict:
             return f"{owner.name} is not selling {item}!"
 
-        item = proto_dict['key']
-        price_dict = proto_dict['price']
+        # Get the item name and its price from the prototype dictionary.
+        item = prototype_dict['key']
+        price_dict = prototype_dict.get('price', None)
+        if not price_dict: # TODO: Add error logging here, including a mail sent to the admin.
+            return f"|rERROR! The price for {item} could not be found! Please report this to the admin.|n"
+        else:
+            copper_price = owner.currency.coin_dict_to_copper(price_dict)
 
+        # Check to make sure that the merchant has the item in stock, in the requested quantity.
         if stocked_items[item]['quantity'] <= 0:
             return f"{item} is out of stock!"
         elif stocked_items[item]['quantity'] < quantity:
             return f"{owner.name} does haven't {quantity} of {item} in stock!"
 
-        # multiply it by the quantity
-        total_price_dict = owner.currency.multiply_coin(price_dict, quantity)
-        total_price_str = owner.currency.positive_coin_to_string(total_price_dict)
+        total_copper_price = copper_price * quantity
+        total_price_dict = owner.currency.copper_to_coin_dict(total_copper_price)
+        total_price_str = owner.currency.positive_coin_types_to_string(coin_dict=total_price_dict)
 
         # Check if the player has enough money
-        if owner.currency.greater_or_equal_coin(buyer_coin_dict, total_price_dict):
-            owner.db.coin = owner.currency.subtract_coin(buyer_coin_dict, total_price_dict)
+        if buyer_copper > total_copper_price:
+            buyer_copper -= total_copper_price
+            buyer.db.coin = buyer.copper_to_coin_dict(buyer_copper)
         else:
             return f"You do not possess {total_price_str} to make that purchase!"
 

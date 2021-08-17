@@ -49,7 +49,7 @@ class Coin(Object):
         self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            coin_str = self.currency.return_coin_string(self)
+            coin_str = self.currency.positive_coin_types_to_string()
             looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class InventoryContainer(Container):
@@ -66,7 +66,7 @@ class StackQuantity(Object):
         self.attributes.add('quantity', 0)
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            coin_str = self.currency.return_coin_string(self)
+            coin_str = self.currency.positive_coin_types_to_string()
             looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class StackInventory(Object):

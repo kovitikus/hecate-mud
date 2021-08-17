@@ -2,18 +2,12 @@ class CurrencyHandler:
     def __init__(self, owner):
         self.owner = owner
 
-    def return_coin_string(self):
-        owner = self.owner
-        if owner.attributes.has('coin'):
-            coin_dict = owner.attributes.get('coin')
-            return self.all_coin_to_string(self, coin_dict)
-
     def return_all_coin_types(self, coin_dict=None):
         if not coin_dict:
-            coin_dict = dict(self.owner.attributes.get('coin'))
+            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
         return coin_dict['plat'], coin_dict['gold'], coin_dict['silver'], coin_dict['copper']
 
-    def all_coin_to_string(self, coin_dict):
+    def all_coin_types_to_string(self, coin_dict=None):
         """
         Converts all coin elements into a string, no matter their value.
 
@@ -22,9 +16,11 @@ class CurrencyHandler:
         Returns:
             (string): The resulting string.
         """
+        if not coin_dict:
+            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
         return f"{coin_dict['plat']}p {coin_dict['gold']}g {coin_dict['silver']}s {coin_dict['copper']}c"
 
-    def positive_coin_to_string(self, coin_dict):
+    def positive_coin_types_to_string(self, coin_dict=None):
         """
         Converts only the coin elements that are greater than 0 into a string.
 
@@ -33,6 +29,8 @@ class CurrencyHandler:
         Returns:
             (string): The resulting string.
         """
+        if not coin_dict:
+            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
         plat = ""
         gold = ""
         silver = ""
@@ -68,45 +66,6 @@ class CurrencyHandler:
         for k in original_coin_dict:
             original_coin_dict[k] += added_coin_dict[k]
         return self.balance_coin_dict(original_coin_dict)
-
-    def subtract_coin_from_owner(self, subtracted_coin_dict):
-        owner = self.owner
-        current_coin_dict = owner.attributes.get('coin', default=None)
-        if current_coin_dict:
-            owner.db.coin = self.subtract_coin(current_coin_dict, subtracted_coin_dict)
-
-    def subtract_coin(self, original_coin_dict, subtracted_coin_dict):
-        original_copper = self.coin_dict_to_copper(original_coin_dict)
-        subtracted_copper = self.coin_dict_to_copper(subtracted_coin_dict)
-        result_copper = original_copper - subtracted_copper
-        return self.balance_coin_dict(self.generate_coin_dict(copper=result_copper))
-
-    def multiply_coin(self, coin_dict, multiplier):
-        """
-        Takes a coin dictionary and multiplies each value by a multiplier.
-        Balances the result and returns it.
-
-        Arguments:
-            coin_dict (dict): The dictionary of coins to multiply.
-            multiplier (int): The multiplier to use on the coins.
-
-        Returns:
-            coin_dict (dict): The resulting multiplied and balanced coin dictionary.
-        """
-        copper = self.coin_dict_to_copper(coin_dict)
-        result_copper = copper * multiplier
-        return self.balance_coin_dict(self.generate_coin_dict(copper=result_copper))
-
-    def greater_or_equal_coin(self, original_coin_dict, comparison_coin_dict):
-        original_copper = self.coin_dict_to_copper(original_coin_dict)
-        comparison_copper = self.coin_dict_to_copper(comparison_coin_dict)
-        return original_copper >= comparison_copper
-
-    def coin_dict_to_copper(self, coin_dict):
-        copper = 0
-        for coin_type, amount in coin_dict.items():
-            copper += self.convert_coin_type(**{coin_type:amount})
-        return copper
 
     def balance_coin_dict(self, coin_dict):
         """
@@ -187,6 +146,12 @@ class CurrencyHandler:
 
     def generate_coin_dict(self, plat=0, gold=0, silver=0, copper=0):
         return {'plat': plat, 'gold': gold, 'silver': silver, 'copper': copper}
+
+    def coin_dict_to_copper(self, coin_dict):
+        copper = 0
+        for coin_type, amount in coin_dict.items():
+            copper += self.convert_coin_type(**{coin_type:amount})
+        return copper
 
     def copper_to_coin_dict(self, copper):
         return self.balance_coin_dict(self.generate_coin_dict(copper=copper))
