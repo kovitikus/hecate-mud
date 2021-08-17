@@ -228,7 +228,7 @@ class ItemHandler():
     def ungroup_objects(self, obj, obj_loc):
         if obj.is_typeclass('items.objects.StackQuantity'):
             if obj.tags.get('coin', category='currency'):
-                plat, gold, silver, copper = obj.currency.return_each_coin()
+                plat, gold, silver, copper = obj.currency.return_all_coin_types()
                 multi_coin = 0
 
                 for amount in [plat, gold, silver, copper]:
