@@ -3,21 +3,37 @@ class CurrencyHandler:
         self.owner = owner
 
     def return_all_coin_types(self, coin_dict=None):
+        """
+        Takes a coin dictionary and returns the value of all 4 types of coins, as individual variables.
+
+        If a coin dictionary is not provided, the method attempts to pull one from the owner object.
+        If that fails, a coin dictionary is created with all 0 values.
+
+        Keyword Arguments:
+            coin_dict (dict): A dictionary of coins and their values.
+
+        Returns:
+            plat (int): The value of platinum coin.
+            gold (int): The value of gold coin.
+            silver (int): The value of silver coin.
+            copper (int): The value of copper coin.
+        """
         if not coin_dict:
-            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
+            coin_dict = self.owner.attributes.get('coin', default=self.create_coin_dict())
         return coin_dict['plat'], coin_dict['gold'], coin_dict['silver'], coin_dict['copper']
 
     def all_coin_types_to_string(self, coin_dict=None):
         """
         Converts all coin elements into a string, no matter their value.
 
-        Arguments:
-            coin_dict (dictionary): A dictionary consisting of all 4 coin types.
+        Keyword Arguments:
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
+
         Returns:
             (string): The resulting string.
         """
         if not coin_dict:
-            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
+            coin_dict = self.owner.attributes.get('coin', default=self.create_coin_dict())
         return f"{coin_dict['plat']}p {coin_dict['gold']}g {coin_dict['silver']}s {coin_dict['copper']}c"
 
     def positive_coin_types_to_string(self, coin_dict=None):
@@ -25,12 +41,13 @@ class CurrencyHandler:
         Converts only the coin elements that are greater than 0 into a string.
 
         Arguments:
-            coin_dict (dictionary): A dictionary consisting of all 4 coin types.
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
+
         Returns:
             (string): The resulting string.
         """
         if not coin_dict:
-            coin_dict = self.owner.attributes.get('coin', default=self.generate_coin_dict())
+            coin_dict = self.owner.attributes.get('coin', default=self.create_coin_dict())
         plat = ""
         gold = ""
         silver = ""
@@ -73,10 +90,10 @@ class CurrencyHandler:
         Pushes the quotient of 1,000 up to the next coin type and leaves the remainder.
 
         Arguments:
-            coin_dict (dictionary): {'plat': value, 'gold': value, 'silver': value, 'copper': value}
-        
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
+
         Returns:
-            coin_dict (dictionary): {'plat': value, 'gold': value, 'silver': value, 'copper': value}
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
         """
         def quotient(value):
             return value // 1_000
@@ -97,13 +114,17 @@ class CurrencyHandler:
             plat += quotient(gold)
             gold = remainder(gold)
 
-        return self.generate_coin_dict(plat=plat, gold=gold, silver=silver, copper=copper)
+        return self.create_coin_dict(plat=plat, gold=gold, silver=silver, copper=copper)
 
     def convert_coin_type(self, plat=0, gold=0, silver=0, copper=0, result_type='copper'):
         """
         Converts any number of coin types into a single type of coin.
         For example, it can convert 585433 copper + 35 plat into silver.
         (Don't worry about how much silver that is. It's what this method is for!)
+
+        Converting upward will likely result in a float, whereas only converting downward
+        will always result in an integer. This is critical information to keep in mind when
+        using this method.
 
         Keyword Arguments:
             plat (int): Amount of platinum to convert.
@@ -144,14 +165,43 @@ class CurrencyHandler:
             copper += convert_downward(silver)
             return copper
 
-    def generate_coin_dict(self, plat=0, gold=0, silver=0, copper=0):
+    def create_coin_dict(self, plat=0, gold=0, silver=0, copper=0):
+        """
+        Creates a new dictionary with all 4 coin types.
+        Any coin type that doesn't have a value passed to this method defaults to 0.
+
+        Keyword Arguments:
+            plat (int): The value of platinum coin.
+            gold (int): The value of gold coin.
+            silver (int): The value of silver coin.
+            copper (int): The value of copper coin.
+        Returns:
+            coin_dict (dict): A dictionary consisting of all 4 coin types. 
+        """
         return {'plat': plat, 'gold': gold, 'silver': silver, 'copper': copper}
 
     def coin_dict_to_copper(self, coin_dict):
-        copper = 0
-        for coin_type, amount in coin_dict.items():
-            copper += self.convert_coin_type(**{coin_type:amount})
-        return copper
+        """
+        Converts a coin dictionary down to a total amount of copper.
+
+        Arguments:
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
+
+        Returns:
+            copper (int): The total copper value of the coin dictionary.
+        """
+        return self.convert_coin_type(**coin_dict)
 
     def copper_to_coin_dict(self, copper):
-        return self.balance_coin_dict(self.generate_coin_dict(copper=copper))
+        """
+        Takes any amount of coppper and converts it into a dictionary with that same
+        amount of copper.
+        It then balances the dictionary, pushing values above 999 up to the next coin type.
+
+        Arguments:
+            copper (int): The amount of copper to convert into a coin dictionary.
+
+        Returns:
+            coin_dict (dict): A dictionary consisting of all 4 coin types.
+        """
+        return self.balance_coin_dict(self.create_coin_dict(copper=copper))
