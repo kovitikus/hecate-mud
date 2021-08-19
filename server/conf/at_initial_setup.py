@@ -1,4 +1,3 @@
-from evennia.utils import create
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object
 
