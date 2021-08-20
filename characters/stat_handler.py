@@ -39,8 +39,8 @@ class StatHandler:
         owner.attributes.add('resistances', {'fire': 0, 'ice': 0, 'light': 0, 'shadow': 0,
             'poison': 0, 'arcane': 0})
 
-        self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
-        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        owner.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
+        owner.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
 
     def set_base_health(self):
         """
