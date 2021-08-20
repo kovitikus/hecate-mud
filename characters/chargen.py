@@ -1,8 +1,14 @@
 from evennia import create_object
 from evennia.utils import evtable
 from evennia.utils.utils import variable_from_module
+from evennia.utils.search import search_object_by_tag
 
 DEFAULT_STARTING_LOCATION = variable_from_module("world.hecate_settings", "DEFAULT_STARTING_LOCATION")
+DEFAULT_STARTING_LOCATION = search_object_by_tag(key=DEFAULT_STARTING_LOCATION, category="rooms")
+if len(DEFAULT_STARTING_LOCATION) > 0:
+    DEFAULT_STARTING_LOCATION = DEFAULT_STARTING_LOCATION[0]
+else:
+    DEFAULT_STARTING_LOCATION = None
 
 # Imports the full adjectives dictionary, which consists of:
 # Category dictionary -> property key -> adjective list value
