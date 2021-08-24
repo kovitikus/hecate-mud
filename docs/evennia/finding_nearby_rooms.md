@@ -41,4 +41,4 @@ for exit in exit_list:
         room_list.append(exit.destination)
 ```
 
-It's important to understand that the destination property holds a reference to the object. This means that you are also able to directly access the object's properties with that refereance.
+It's important to understand that the destination property holds a reference to the object. This means that you are also able to directly access the object's properties with that reference.

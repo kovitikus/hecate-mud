@@ -1,10 +1,16 @@
 #### Introduction
-A handler is a Python object that you attach to other objects, granting access to methods located on the handler. A handler lives only in memory and therefore does not survive a server reload; neither does the information stored within.
+
+A handler is a very simple concept. It is a Python object that holds its own state only in memory. It is used to compartmentalize code into a single unit, designed to function for specific purposes. 
+
+Compartmentalization of code is an extremely critical practice in software development. It helps prevent breaking other pieces of a project from making changes in an unrelated system.
+
+Handlers allow you to keep your logic contained within a single module.
+
+A handler lives only in memory and therefore does not survive a server reload; neither does the information stored on the handler object.
 
 > **Question:** Should I worry about how many handler objects are created on my server?
+>
 > **Answer:** No. The only portion of them that is "alive" per say is the data you store on the instance of that specific handler. Handlers get all of their instructions from the same copy of the code loaded into memory. The python object is really just a reference back to the code. Computers these days have more than sufficient RAM to handle these requests and purchasing more is always cheap. Add as many handlers to your game as you desire.
-
-All existing handler objects are destroyed when the server is reloaded. When the server restarts, all handlers remain non-existent until the code is called to spawn them. 
 
 Handlers spawn for the first time when they are called upon within code by calling a handler's method. This handler will stay spawned on this object and will fulfill the object's requests, until any arbitrary event destroys it; in which case a new one will spawn in it's place.
 
