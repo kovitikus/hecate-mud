@@ -60,7 +60,7 @@ class CurrencyHandler:
             silver = f"{coin_dict['silver']}s "
         if coin_dict['copper'] > 0:
             copper = f"{coin_dict['copper']}c"
-        return f"{plat}{gold}{silver}{copper}"
+        return f"{plat}{gold}{silver}{copper}".strip()
 
     def add_coin_to_owner(self, added_coin_dict):
         owner = self.owner
@@ -80,6 +80,9 @@ class CurrencyHandler:
         Returns:
             (dict): The added and balanced coin dictionary.
         """
+        original_coin_dict = dict(original_coin_dict)
+        added_coin_dict = dict(added_coin_dict)
+
         for k in original_coin_dict:
             original_coin_dict[k] += added_coin_dict[k]
         return self.balance_coin_dict(original_coin_dict)
