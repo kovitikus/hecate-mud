@@ -88,7 +88,16 @@ def objects_to_display_names(objects, looker):
         string_list.append(i.get_display_name(looker))
     return string_list
 
-def comma_separated_string_list(string_list, end_sep="and"):
+def comma_separated_string_list(string_list):
+    """
+    Formats a list of strings into a single string, with each element properly separated.
+
+    Arguments:
+        string_list (list): A list of strings to be formatted.
+    
+    Returns:
+        formatted_string (string): The resulting formatted string.
+    """
     num = 1
     list_len = len(string_list)
     formatted_string = ''
@@ -103,5 +112,5 @@ def comma_separated_string_list(string_list, end_sep="and"):
         elif list_len > 2 and num < list_len:
             formatted_string = f"{formatted_string}{string}, "
         if num == list_len:
-            formatted_string = f"{formatted_string}{end_sep} {string}"
+            formatted_string = f"{formatted_string}and {string}"
     return formatted_string
