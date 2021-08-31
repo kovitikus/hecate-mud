@@ -1010,9 +1010,9 @@ class CmdSplit(Command):
         pile = caller.search(pile, location=pile_loc, quiet=True)[0]
         if pile is not None:
             if split_type == 'default':
-                msg = caller.item.split_pile(split_type, pile, pile_loc)
+                msg = caller.item.split_group(split_type, pile, pile_loc)
             elif split_type == 'from':
-                msg = caller.item.split_pile(split_type, pile, pile_loc, self.quantity, self.qty_obj)
+                msg = caller.item.split_group(split_type, pile, pile_loc, self.quantity, self.qty_obj)
 
         caller.msg(msg)
 
