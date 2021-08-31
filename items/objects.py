@@ -43,10 +43,9 @@ class Container(Object):
 
 class Coin(Object):
     def at_object_creation(self):
-        self.tags.add('stackable')
-        self.tags.add('quantity', category='stack')
+        self.tags.add('quantity', category='groupable')
         self.tags.add('coin', category='currency')
-        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+        self.attributes.add('coin', self.currency.create_coin_dict())
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
             coin_str = self.currency.positive_coin_types_to_string()
@@ -57,11 +56,11 @@ class InventoryContainer(Container):
         self.tags.add('inventory_container', category='container')
         self.attributes.add('max_slots', 50)
 
-class StackQuantity(Object):
-    # Stacking objects which have no unique attributes, such as coin.
-    # Only accepts objects tagged with ('quantity', category='stack').
-    # Objects added to this stack are destroyed and a counter on the stack object is increased.
-    # Objects removed from this stack are created and a counter on the stack object is decreased.
+class QuantityGroup(Object):
+    # Grouping category for objects which have no unique attributes, such as coin.
+    # Only groups with other objects tagged with ('quantity', category='groupable').
+    # Objects added to this group are destroyed and a quantity value on the group object is increased.
+    # Objects removed from this group are created and the quantity on the group object is decreased.
     def at_object_creation(self):
         self.attributes.add('quantity', 0)
     def return_appearance(self, looker, **kwargs):
@@ -69,11 +68,11 @@ class StackQuantity(Object):
             coin_str = self.currency.positive_coin_types_to_string()
             looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
-class StackInventory(Object):
-    # Stacking objects that have unique attributes and must be preserved.
-    # Only accepts objects tagged with ('inventory', category='stack').
-    # Objects added to this stack are stored in the contents of the stack object.
-    # Objects removed from this stack are pulled from the contents of the stack object.
+class InventoryGroup(Object):
+    # Grouping category for objects that have unique attributes and must be preserved.
+    # Only accepts objects tagged with ('inventory', category='groupable').
+    # Objects added to this group are stored in the contents of the group object.
+    # Objects removed from this group are pulled from the contents of the group object.
     def at_object_creation(self):
         self.attributes.add('quantity', 0)
     def return_appearance(self, looker, **kwargs):
@@ -91,9 +90,7 @@ class Torch(Lighting):
     def at_object_creation(self):
         self.attributes.add('fuel', 100)
         # Torches burn at the rate of 10 fuel per minute, or 5 fuel every 30 seconds.
-
-        self.tags.add('stackable')
-        self.tags.add('inventory', category='stack')
+        self.tags.add('inventory', category='groupable')
 
     def ignite(self, lighter):
         room, held_by = self.find_location()
@@ -124,7 +121,8 @@ class Torch(Lighting):
         tickerhandler.remove(30, self.on_burn_tick, persistent=True)
         if inherits_from(held_by, "characters.characters.Character"):
             held_by.msg(f"Your {self.name} torch dies out and it collapses into a tiny pile of ash.")
-            room.msg_contents(f"{held_by.name}'s {self.name} dies out and it collapses into a tiny pile of ash.", exclude=held_by)
+            room.msg_contents(f"{held_by.name}'s {self.name} dies out and it collapses into a tiny pile of ash.",
+                exclude=held_by)
         else:
             room.msg_contents(f"{self.name} dies out and it collapses into a tiny pile of ash.")
         self.delete()
