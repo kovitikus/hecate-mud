@@ -62,31 +62,6 @@ class CurrencyHandler:
             copper = f"{coin_dict['copper']}c"
         return f"{plat}{gold}{silver}{copper}".strip()
 
-    def add_coin_to_owner(self, added_coin_dict):
-        owner = self.owner
-        original_coin_dict = owner.attributes.get('coin', None)
-        if original_coin_dict:
-            owner.db.coin = self.add_coin(original_coin_dict, added_coin_dict) 
-
-    def add_coin(self, original_coin_dict, added_coin_dict):
-        """
-        Adds one coin dictionary to another, then balances the results to maintain a maximum
-        of 999 in each coin.
-
-        Arguments:
-            original_coin_dict (dict): The original coin values.
-            added_coin_dict (dict): The dictionary of coin to add to original.
-
-        Returns:
-            (dict): The added and balanced coin dictionary.
-        """
-        original_coin_dict = dict(original_coin_dict)
-        added_coin_dict = dict(added_coin_dict)
-
-        for k in original_coin_dict:
-            original_coin_dict[k] += added_coin_dict[k]
-        return self.balance_coin_dict(original_coin_dict)
-
     def balance_coin_dict(self, coin_dict):
         """
         Takes a coin dictionary and balances all coins in excess of 999.

@@ -1,5 +1,3 @@
-from unittest import result
-from evennia.utils.create import create_object
 from misc.test_resources import HecateTest
 
 class TestCurrency(HecateTest):
@@ -33,42 +31,6 @@ class TestCurrency(HecateTest):
         coin_str = f"{self.coin_dict2['plat']}p {self.coin_dict2['silver']}s"
         result_str = self.char1.currency.positive_coin_types_to_string(self.coin_dict2)
         self.assertEqual(coin_str, result_str)
-
-    def test_add_coin_to_owner(self):
-        char1 = self.char1
-        coin_dict1 = self.coin_dict1
-        coin_dict2 = self.coin_dict2
-
-        char1.db.coin = coin_dict1
-        self.assertEqual(coin_dict1, char1.db.coin)
-
-        char1.currency.add_coin_to_owner(coin_dict2)
-
-        plat = coin_dict1['plat'] + coin_dict2['plat']
-        gold = coin_dict1['gold'] + coin_dict2['gold']
-        silver = coin_dict1['silver'] + coin_dict2['silver']
-        copper = coin_dict1['copper'] + coin_dict2['copper']
-
-        self.assertEqual(plat, char1.db.coin['plat'])
-        self.assertEqual(gold, char1.db.coin['gold'])
-        self.assertEqual(silver, char1.db.coin['silver'])
-        self.assertEqual(copper, char1.db.coin['copper'])
-
-    def test_add_coin(self):
-        coin_dict1 = self.coin_dict1
-        coin_dict2 = self.coin_dict2
-
-        result_coin_dict = self.char1.currency.add_coin(coin_dict1, coin_dict2)
-
-        plat = coin_dict1['plat'] + coin_dict2['plat']
-        gold = coin_dict1['gold'] + coin_dict2['gold']
-        silver = coin_dict1['silver'] + coin_dict2['silver']
-        copper = coin_dict1['copper'] + coin_dict2['copper']
-
-        self.assertEqual(plat, result_coin_dict['plat'])
-        self.assertEqual(gold, result_coin_dict['gold'])
-        self.assertEqual(silver, result_coin_dict['silver'])
-        self.assertEqual(copper, result_coin_dict['copper'])
 
     def test_balance_coin_dict(self):
         unbalanced_coin_dict = {'plat': 2358, 'gold': 1280, 'silver': 998, 'copper': 2200}
