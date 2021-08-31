@@ -88,21 +88,20 @@ def objects_to_display_names(objects, looker):
         string_list.append(i.get_display_name(looker))
     return string_list
 
-def comma_separated_string_list(string_list):
+def comma_separated_string_list(string_list, end_sep="and"):
     num = 1
     list_len = len(string_list)
     formatted_string = ''
 
     # In case the list only contains 1 string.
     if list_len == 1:
-        return string_list[0]
+        return str(string_list[0])
 
     for num, string in enumerate(string_list, start=1):
-        if list_len == 2:
-            if num == 1:
-                formatted_string = f"{string} "
+        if list_len == 2 and num == 1:
+            formatted_string = f"{string} "
         elif list_len > 2 and num < list_len:
             formatted_string = f"{formatted_string}{string}, "
         if num == list_len:
-            formatted_string = f"{formatted_string}and {string}"
+            formatted_string = f"{formatted_string}{end_sep} {string}"
     return formatted_string
