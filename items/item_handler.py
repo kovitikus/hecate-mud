@@ -172,63 +172,167 @@ class ItemHandler():
         # Call the object script's at_drop() method.
         obj.at_drop(owner)
 
-
     def group_objects(self, objects, obj_loc):
-        msg = ''
-        inv_stack_objects = []
-        qty_stack_objects = []
-        stacked_obj_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(objects))
-
-        # Check of every object in list is stackable. Abort if not.
-        for obj in objects:
-            if not obj.tags.get('stackable'):
-                msg = f"{obj} is not able to be grouped!"
-                return msg
+        """
+        Takes a list of objects and organizes them into two categories:
+            Objects that are unique and grouped as inventory.
+            Objects that are identical and grouped as a quantity attribute.
         
-        # Check if all objects in the list have the same name.
-        same_name = gen_mec.all_same(gen_mec.objects_to_strings(objects))
+        Generates a new group object and transfers the listed objects into this group object.
 
-        # Sort objects into quantity or inventory stack type lists.
+        Arguments:
+            objects (list): This is the list of objects passed in from the grouping command.
+            obj_loc (object): This is a reference to the object that houses the listed objects.
+                This is often times a room or the player's character.
+        
+        Returns:
+            msg (string): The resulting string of the grouping action, which is sent back to the
+                caller of the command.
+        """
+        msg = ''
+        qty_msg = False
+        inv_msg = False
+        groupables = []
+        inv_groupables = []
+        qty_groupables = []
+
+    #==[Parse the objects into appropriate lists.]==#
+        # Filter ungroupables from the list.
         for obj in objects:
-            if obj.tags.get('quantity', category='stack'):
-                qty_stack_objects.append(obj)
-            elif obj.tags.get('inventory', category='stack'):
-                inv_stack_objects.append(obj)
+            if obj.tags.get(category='groupable'):
+                groupables.append(obj)
+            else:
+                # Generate error strings for each object not able to be grouped.
+                msg = f"{msg}{obj} is not able to be grouped.\n"
 
-        # Quantity Stackables
-        if len(qty_stack_objects) > 1:
-            are_coins = False
-            #Check to see if all quantity stack objects are coins.
-            for obj in qty_stack_objects:
-                if obj.is_typeclass('items.objects.Coin', exact=True):
-                    are_coins = True
-                else:
-                    msg = "You can't group coins with non-coins!"
-                    return msg
-            if are_coins:
-                self.stack_coins(obj_loc, qty_stack_objects)
-                msg = f"You group together {stacked_obj_names}."
-                return msg
+        if len(groupables) < 2:
+            # Only one of the objects was groupable. Method requires at least 2 objects to group.
+            msg = f"{msg}|rNot enough objects to group. Request aborted!|n"
+            return msg
 
-        # Inventory Stackables
-        if len(inv_stack_objects) > 1:
-            inv_quantity = 0
-            if same_name:
-                inv_stack = create_object(key=f'a pile of {inv_stack_objects[0].name}es', 
-                    typeclass='items.objects.StackInventory', 
-                    location=obj_loc)
-                if inv_stack:
-                    for obj in inv_stack_objects:
-                        obj.move_to(inv_stack, quiet=True, move_hooks=False)
-                        inv_quantity += 1
-                    inv_stack.db.quantity = inv_quantity
-                    msg = f"You group together some {inv_stack_objects[0].name}es into a pile."
-                    return msg
+        # Sort objects into quantity or inventory group type lists.
+        for obj in groupables:
+            if obj.tags.get('quantity', category='groupable'):
+                qty_groupables.append(obj)
+            elif obj.tags.get('inventory', category='groupable'):
+                inv_groupables.append(obj)
 
-    def ungroup_objects(self, obj, obj_loc):
-        if obj.is_typeclass('items.objects.StackQuantity'):
+    #==[Execute the grouping and generate result strings.]==#
+        # Quantity Groupables
+        if len(qty_groupables) > 1:
+            qty_msg = self._group_quantity_objects(qty_groupables, obj_loc)
+            msg = f"{msg}{qty_msg}"
+
+        # Inventory Groupables
+        if len(inv_groupables) > 1:
+            inv_msg = self._group_inventory_objects(inv_groupables, obj_loc)
+            if qty_msg:
+                msg = f"{msg}\n"
+            msg = f"{msg}{inv_msg}"
+
+        return msg
+
+    def _group_quantity_objects(self, qty_groupables, obj_loc):
+        """
+        Sorts a list of quantity groupables into sub-categories and performs a grouping execution
+        on each type.
+
+        Arguments:
+            qty_groupables (list): The objects to be grouped.
+            obj_loc (object): The object that contains these groupable objects. Their location.
+        """
+        qty_msg = ''
+        coin_groupables = []
+        # Categorize the quantity objects.
+        for obj in qty_groupables:
             if obj.tags.get('coin', category='currency'):
-                plat, gold, silver, copper = obj.currency.return_all_coin_types()
+                coin_groupables.append(obj)
+            else:
+                # This object is a quantity object, but there is currently no logic to handle it.
+                qty_msg = f"{qty_msg}{obj.name} cannot be grouped.\n"
+
+        if len(coin_groupables) > 1:
+            coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
+            self._group_coins(coin_groupables, obj_loc)
+            qty_msg = f"{qty_msg}You group together {coin_names}."
+        elif len(coin_groupables) == 1:
+            qty_msg = f"{qty_msg}{coin_groupables[0].name} has no other coins to group with."
+        return qty_msg
+
+    def _group_coins(self, coin_groupables, obj_loc):
+        """
+        Creates a pile of coins.
+
+        Arguments:
+            coin_groupables (list): The various coin objects to be grouped.
+            obj_loc (object): 
+        Returns:
+            qty_group_obj
+            obj_loc (object): The object that contains these groupable objects. Their location.
+        """
+        total_copper = 0
+        qty_group_obj = create_object(key='a pile of coins', typeclass='items.objects.QuantityGroup',
+            location=obj_loc)
+        qty_group_obj.attributes.add('coin', qty_group_obj.currency.create_coin_dict())
+        qty_group_obj.tags.add('coin', category='currency')
+        for obj in coin_groupables:
+            total_copper += obj.currency.coin_dict_to_copper(obj.db.coin)
+        
+        for obj in coin_groupables:
+            obj.delete()
+
+        qty_group_obj.db.coin = qty_group_obj.currency.copper_to_coin_dict(total_copper)
+            
+        return qty_group_obj
+
+    def _group_inventory_objects(self, inv_groupables, obj_loc):
+        """
+        Groups together objects with unique properties by generating a group object and placing
+        the groupable objects into its inventory.
+        If all objects have the same key, a pile is generated with the key of the objects being grouped.
+        
+        Arguments:
+            inv_groupables (list): A list of groupable objects to be placed in the inventory.
+            obj_loc (object): The object that contains these groupable objects. Their location.
+
+        Returns:
+            inv_msg: The resulting string that is sent back to the caller that executed the grouping
+                command.
+        """
+        inv_quantity = 0
+        # Check if all objects in the list have the same name.
+        same_name = gen_mec.all_same(gen_mec.objects_to_strings(inv_groupables))
+
+        if same_name:
+            # Create a pile of the same name of the groupable objects.
+            inv_group_obj = create_object(key=f'a pile of {inv_groupables[0].name}es', 
+                typeclass='items.objects.InventoryGroup', 
+                location=obj_loc)
+            inv_msg = f"You group together some {inv_groupables[0].name}es into a pile."
+        else:
+            # Items have various names and the pile should be generic.
+            item_str_list = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(inv_groupables))
+            inv_group_obj = create_object(key=f"a pile of various items", 
+                typeclass='items.objects.InventoryGroup', 
+                location=obj_loc)
+            inv_msg = f"You group together {item_str_list} into a pile."
+
+        # Pile object is generated, time to move groupables into its inventory.
+        for obj in inv_groupables:
+            obj.move_to(inv_group_obj, quiet=True, move_hooks=False)
+            inv_quantity += 1
+        inv_group_obj.db.quantity = inv_quantity
+        return inv_msg
+
+    def ungroup_objects(self, group_obj, obj_loc):
+        """
+        Arguments:
+            obj_loc (object): The object that contains these groupable objects. Their location.
+        """
+        delete_group_obj = False
+        if group_obj.is_typeclass('items.objects.QuantityGroup'):
+            if group_obj.tags.get('coin', category='currency'):
+                plat, gold, silver, copper = group_obj.currency.return_all_coin_types()
                 multi_coin = 0
 
                 for amount in [plat, gold, silver, copper]:
@@ -240,37 +344,43 @@ class ItemHandler():
                                                     typeclass='items.objects.Coin')
                         if plat_pile:
                             plat_pile.db.coin['plat'] = plat
-                            obj.db.coin['plat'] = 0
+                            group_obj.db.coin['plat'] = 0
                     if gold > 0:
                         gold_pile = create_object(key='a pile of gold coins', location=obj_loc,
                                                     typeclass='items.objects.Coin')
                         if gold_pile:
                             gold_pile.db.coin['gold'] = gold
-                            obj.db.coin['gold'] = 0
+                            group_obj.db.coin['gold'] = 0
                     if silver > 0:
                         silver_pile = create_object(key='a pile of silver coins', location=obj_loc,
                                                     typeclass='items.objects.Coin')
                         if silver_pile:
                             silver_pile.db.coin['silver'] = silver
-                            obj.db.coin['silver'] = 0
+                            group_obj.db.coin['silver'] = 0
                     if copper > 0:
                         copper_pile = create_object(key='a pile of copper coins', location=obj_loc,
                                                     typeclass='items.objects.Coin')
                         if copper_pile:
                             copper_pile.db.coin['copper'] = copper
-                            obj.db.coin['copper'] = 0
-                    msg = f"You ungroup {obj.name} into separate piles of coins."
-                    obj.delete()
-                    return msg
-        elif obj.is_typeclass('items.objects.StackInventory'):
-            stack_contents = obj.contents
-            for x in stack_contents:
+                            group_obj.db.coin['copper'] = 0
+                    msg = f"You ungroup {group_obj.name} into separate piles of coins."
+                    delete_group_obj = True
+        elif group_obj.is_typeclass('items.objects.InventoryGroup'):
+            group_contents = group_obj.contents
+            for x in group_contents:
                 x.move_to(obj_loc, quiet=True, move_hooks=False)
-            msg = f"You ungroup {obj.name}, producing {gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(stack_contents))}."
-            obj.delete()
-            return msg
+            msg = (f"You ungroup {group_obj.name}, producing "
+                f"{gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(group_contents))}.")
+            delete_group_obj = True
+        if delete_group_obj:
+            group_obj.delete()
+        return msg
 
-    def split_pile(self, split_type, pile, obj_loc, quantity=0, qty_obj=None):
+    def split_group(self, split_type, pile, obj_loc, quantity=0, qty_obj=None):
+        """
+        Arguments:
+            obj_loc (object): The object that contains these groupable objects. Their location.
+        """
         pile_name = pile.name
 
         if split_type == 'default':
@@ -278,7 +388,7 @@ class ItemHandler():
             # The original pile always contains the higher quantity of items, if not evenly split.
             pass
         elif split_type == 'from':
-            if pile.is_typeclass('items.objects.StackQuantity'):
+            if pile.is_typeclass('items.objects.QuantityGroup'):
                 # This is a pile of coins, or other similar pile.
                 if pile.tags.get('coin', category='currency'):
                     coin_dict = pile.attributes.get('coin')
@@ -295,7 +405,7 @@ class ItemHandler():
                         msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
                         return msg
                 pass
-            elif pile.is_typeclass('items.objects.StackInventory'):
+            elif pile.is_typeclass('items.objects.InventoryGroup'):
                 # Object has contents
                 qty_obj_names = []
 
@@ -326,18 +436,6 @@ class ItemHandler():
                 if len(pile.contents) == 0:
                     pile.delete()
         return msg
-
-    def stack_coins(self, obj_loc, qty_stack_objects):
-        qty_stack = create_object(key=f'a pile of coins', 
-                typeclass='items.objects.StackQuantity', 
-                location=obj_loc)
-        if qty_stack:
-            qty_stack.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
-            qty_stack.tags.add('coin', category='currency')
-            for obj in qty_stack_objects:
-                qty_stack.currency.add_coin_to_owner(dict(obj.db.coin))
-                obj.delete()
-            return qty_stack
 
     def spawn(self, item_type, item_name=None):
         """
