@@ -92,12 +92,17 @@ def comma_separated_string_list(string_list):
     num = 1
     list_len = len(string_list)
     formatted_string = ''
-    for i in string_list:
-        if list_len == num:
-            formatted_string = f"{formatted_string} and {i}"
-        elif num == 1:
-            formatted_string = f"{formatted_string}{i},"
-        else:
-            formatted_string = f"{formatted_string} {i},"
-        num += 1
+
+    # In case the list only contains 1 string.
+    if list_len == 1:
+        return string_list[0]
+
+    for num, string in enumerate(string_list, start=1):
+        if list_len == 2:
+            if num == 1:
+                formatted_string = f"{string} "
+        elif list_len > 2 and num < list_len:
+            formatted_string = f"{formatted_string}{string}, "
+        if num == list_len:
+            formatted_string = f"{formatted_string}and {string}"
     return formatted_string
