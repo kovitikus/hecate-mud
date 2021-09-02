@@ -17,6 +17,24 @@ class TestItemHandler(HecateTest):
 
         self.two_coin_groupables = [coin1, coin2]
 
+        coin3_value = 389294
+        coin4_value = 849283
+        coin5_value = 289748
+        # Total value of coin3 + coin4 + coin5 = 1,528,325 (0 plat, 1 gold, 528 silver, 325 copper)
+
+        coin3 = create_object(typeclass="items.objects.Coin", key="coin3", location=self.obj_loc)
+        coin3.db.coin = coin3.currency.copper_to_coin_dict(coin3_value)
+
+        coin4 = create_object(typeclass="items.objects.Coin", key="coin4", location=self.obj_loc)
+        coin4.db.coin = coin4.currency.copper_to_coin_dict(coin4_value)
+
+        coin5 = create_object(typeclass="items.objects.Coin", key="coin5", location=self.obj_loc)
+        coin5.db.coin = coin5.currency.copper_to_coin_dict(coin5_value)
+
+        self.three_coin_groupables = [coin3, coin4, coin5]
+
+        # Total value of coins 1-5 = 2,754,631 (0 plat, 2 gold, 754 silver, 631 copper)
+
         #--------------------------
 
         torch1 = create_object(typeclass="items.objects.Torch", key="crude torch",
@@ -37,7 +55,11 @@ class TestItemHandler(HecateTest):
             location=self.obj_loc)
         towel1.tags.add('inventory', category='groupable')
 
-        self.variety_groupables = [torch1, chalk1, towel1]
+        cup1 = create_object(typeclass="items.objects.Object", key="tin cup",
+            location=self.obj_loc)
+        cup1.tags.add('inventory', category='groupable')
+
+        self.variety_groupables = [chalk1, towel1, cup1]
 
     def test_group_objects1(self):
         """
@@ -62,7 +84,7 @@ class TestItemHandler(HecateTest):
         Tests the outcome of 3 grouped inventory objects that all have the same key.
         """
         final_msg = self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
-        self.assertEqual("You group together some crude torches into a pile.", final_msg)
+        self.assertEqual("You group together some crude torches.", final_msg)
 
         # Asssess the final group object.
         torch_pile = self.obj_loc.contents[-1]
@@ -81,7 +103,7 @@ class TestItemHandler(HecateTest):
         Tests the outcome of 3 grouped inventory objects that have different keys.
         """
         final_msg = self.char1.item.group_objects(self.variety_groupables, self.obj_loc)
-        self.assertEqual("You group together crude torch, piece of chalk, and dirty towel into a pile.", final_msg)
+        self.assertEqual("You group together piece of chalk, dirty towel, and tin cup.", final_msg)
 
         # Asssess the final group object.
         variety_pile = self.obj_loc.contents[-1]
@@ -91,9 +113,9 @@ class TestItemHandler(HecateTest):
         self.assertTrue(variety_pile.attributes.has('quantity'))
         self.assertEqual(3, variety_pile.db.quantity)
         self.assertEqual(3, len(variety_pile.contents))
-        self.assertEqual("crude torch", variety_pile.contents[0].key)
-        self.assertEqual("piece of chalk", variety_pile.contents[1].key)
-        self.assertEqual("dirty towel", variety_pile.contents[2].key)
+        self.assertEqual("piece of chalk", variety_pile.contents[0].key)
+        self.assertEqual("dirty towel", variety_pile.contents[1].key)
+        self.assertEqual("tin cup", variety_pile.contents[2].key)
 
     def test_group_objects4(self):
         """
@@ -106,8 +128,8 @@ class TestItemHandler(HecateTest):
         """
         combined_list = [*self.two_coin_groupables, *self.variety_groupables]
         final_msg = self.char1.item.group_objects(combined_list, self.obj_loc)
-        temp = ("You group together coin1 and coin2.\nYou group together crude torch, "
-                "piece of chalk, and dirty towel into a pile.")
+        temp = ("You group together coin1 and coin2.\n"
+                "You group together piece of chalk, dirty towel, and tin cup.")
         self.assertEqual(temp, final_msg)
 
         # Assess the final coin group object.
@@ -129,9 +151,9 @@ class TestItemHandler(HecateTest):
         self.assertTrue(variety_pile.attributes.has('quantity'))
         self.assertEqual(3, variety_pile.db.quantity)
         self.assertEqual(3, len(variety_pile.contents))
-        self.assertEqual("crude torch", variety_pile.contents[0].key)
-        self.assertEqual("piece of chalk", variety_pile.contents[1].key)
-        self.assertEqual("dirty towel", variety_pile.contents[2].key)
+        self.assertEqual("piece of chalk", variety_pile.contents[0].key)
+        self.assertEqual("dirty towel", variety_pile.contents[1].key)
+        self.assertEqual("tin cup", variety_pile.contents[2].key)
     
     def test_group_quantity_objects1(self):
         """
@@ -152,7 +174,7 @@ class TestItemHandler(HecateTest):
         final_msg = self.char1.item._group_quantity_objects(self.two_coin_groupables, self.obj_loc)
         self.assertEqual("misc cannot be grouped.\nYou group together coin1 and coin2.", final_msg)
 
-    def test_group_coins(self):
+    def test_group_coins1(self):
         """
         Tests the outcome of 2 grouped coins.
         """
@@ -166,12 +188,30 @@ class TestItemHandler(HecateTest):
         self.assertEqual('a pile of coins', qty_group_obj.key)
         self.assertEqual(self.obj_loc, qty_group_obj.location)
 
+    def test_group_coins2(self):
+        """
+        Combines two groups of coins into one.
+        """
+        coin_group1 = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
+        coin_group2 = self.char1.item._group_coins(self.three_coin_groupables, self.obj_loc)
+
+        coin_groups = [coin_group1, coin_group2]
+
+        result_coin_group = self.char1.item._group_coins(coin_groups, self.obj_loc)
+        self.assertTrue(result_coin_group.is_typeclass("items.objects.QuantityGroup", exact=True))
+        self.assertEqual(0, result_coin_group.db.coin['plat'])
+        self.assertEqual(2, result_coin_group.db.coin['gold'])
+        self.assertEqual(754, result_coin_group.db.coin['silver'])
+        self.assertEqual(631, result_coin_group.db.coin['copper'])
+        self.assertEqual('a pile of coins', result_coin_group.key)
+        self.assertEqual(self.obj_loc, result_coin_group.location)
+
     def test_group_inventory_objects1(self):
         """
         Tests the outcome of 3 grouped inventory objects that all have the same key.
         """
-        final_msg = self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
-        self.assertEqual("You group together some crude torches into a pile.", final_msg)
+        final_msg = self.char1.item._group_inventory_objects(self.three_torch_groupables, self.obj_loc)
+        self.assertEqual("You group together some crude torches.", final_msg)
 
         # Asssess the final group object.
         torch_pile = self.obj_loc.contents[-1]
@@ -185,12 +225,12 @@ class TestItemHandler(HecateTest):
         self.assertEqual("crude torch", torch_pile.contents[1].key)
         self.assertEqual("crude torch", torch_pile.contents[2].key)
     
-    def test_group_inventory_objects1(self):
+    def test_group_inventory_objects2(self):
         """
         Tests the outcome of 3 grouped inventory objects that have different keys.
         """
-        final_msg = self.char1.item.group_objects(self.variety_groupables, self.obj_loc)
-        self.assertEqual("You group together crude torch, piece of chalk, and dirty towel into a pile.", final_msg)
+        final_msg = self.char1.item._group_inventory_objects(self.variety_groupables, self.obj_loc)
+        self.assertEqual("You group together piece of chalk, dirty towel, and tin cup.", final_msg)
 
         # Asssess the final group object.
         variety_pile = self.obj_loc.contents[-1]
@@ -200,6 +240,36 @@ class TestItemHandler(HecateTest):
         self.assertTrue(variety_pile.attributes.has('quantity'))
         self.assertEqual(3, variety_pile.db.quantity)
         self.assertEqual(3, len(variety_pile.contents))
-        self.assertEqual("crude torch", variety_pile.contents[0].key)
-        self.assertEqual("piece of chalk", variety_pile.contents[1].key)
-        self.assertEqual("dirty towel", variety_pile.contents[2].key)
+        self.assertEqual("piece of chalk", variety_pile.contents[0].key)
+        self.assertEqual("dirty towel", variety_pile.contents[1].key)
+        self.assertEqual("tin cup", variety_pile.contents[2].key)
+
+    def test_group_inventory_objects3(self):
+        """
+        Tests the outcome of combining a pile of items with a single item.
+        """
+        self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
+        torch_pile = self.obj_loc.contents[-1]
+        self.char1.item.group_objects(self.variety_groupables, self.obj_loc)
+        variety_pile = self.obj_loc.contents[-1]
+        piles = [torch_pile, variety_pile]
+
+        result_str = self.char1.item._group_inventory_objects(piles, self.obj_loc)
+        result_pile = self.obj_loc.contents[-1]
+        expected_str = (
+            "You combine the contents of a pile of crude torches and a pile of various items.\n"
+            "You group together crude torch, crude torch, crude torch, "
+            "piece of chalk, dirty towel, and tin cup."
+        )
+
+        self.assertEqual(expected_str, result_str)
+        self.assertEqual("a pile of various items", result_pile.key)
+        self.assertTrue(result_pile.is_typeclass("items.objects.InventoryGroup", exact=True))
+        self.assertEqual(6, len(result_pile.contents))
+        self.assertEqual(6, result_pile.db.quantity)
+        self.assertEqual("crude torch", result_pile.contents[0].key)
+        self.assertEqual("crude torch", result_pile.contents[1].key)
+        self.assertEqual("crude torch", result_pile.contents[2].key)
+        self.assertEqual("piece of chalk", result_pile.contents[3].key)
+        self.assertEqual("dirty towel", result_pile.contents[4].key)
+        self.assertEqual("tin cup", result_pile.contents[5].key)

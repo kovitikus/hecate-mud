@@ -299,8 +299,27 @@ class ItemHandler():
             inv_msg: The resulting string that is sent back to the caller that executed the grouping
                 command.
         """
+        inv_msg = ''
         inv_quantity = 0
-        # Check if all objects in the list have the same name.
+        group_groupables = []
+
+        # Separate out objects that are already groups, for additional parsing.
+        temp_list = list(inv_groupables)
+        for obj in temp_list:
+            if obj.is_typeclass("items.objects.InventoryGroup", exact=True):
+                group_groupables.append(obj)
+                inv_groupables.remove(obj)
+
+        # Generate a string to inform the user they are combining groups.
+        # Dump the contents of each group into the inv_groupables for normal combining operations.
+        if len(group_groupables) > 0:
+            group_str_list = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(group_groupables))
+            inv_msg = f"{inv_msg}You combine the contents of {group_str_list}.\n"
+            for group in group_groupables:
+                inv_groupables.extend(group.contents)
+                group.delete()
+
+        # Check if all objects in the inv_groupables list have the same name.
         same_name = gen_mec.all_same(gen_mec.objects_to_strings(inv_groupables))
 
         if same_name:
@@ -308,20 +327,21 @@ class ItemHandler():
             inv_group_obj = create_object(key=f'a pile of {inv_groupables[0].name}es', 
                 typeclass='items.objects.InventoryGroup', 
                 location=obj_loc)
-            inv_msg = f"You group together some {inv_groupables[0].name}es into a pile."
+            inv_msg = f"{inv_msg}You group together some {inv_groupables[0].name}es."
         else:
             # Items have various names and the pile should be generic.
             item_str_list = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(inv_groupables))
             inv_group_obj = create_object(key=f"a pile of various items", 
                 typeclass='items.objects.InventoryGroup', 
                 location=obj_loc)
-            inv_msg = f"You group together {item_str_list} into a pile."
+            inv_msg = f"{inv_msg}You group together {item_str_list}."
 
         # Pile object is generated, time to move groupables into its inventory.
         for obj in inv_groupables:
             obj.move_to(inv_group_obj, quiet=True, move_hooks=False)
             inv_quantity += 1
         inv_group_obj.db.quantity = inv_quantity
+
         return inv_msg
 
     def ungroup_objects(self, group_obj, obj_loc):
