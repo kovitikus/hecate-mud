@@ -109,6 +109,7 @@ class HecateTest(TestCase):
                             "objects that are considered worthless. Any object entering this room is "
                             "automatically deleted via the at_object_receive method.")
         black_hole.tags.add('black_hole', category='rooms')
+        self.black_hole = black_hole
 
         # Statis Chamber
         statis_chamber = create.create_object(typeclass=self.room_typeclass, key='statis_chamber')
@@ -116,6 +117,7 @@ class HecateTest(TestCase):
                                 "objects that are of significant value, unique, or otherwise should "
                                 "not be destroyed for any reason.")
         statis_chamber.tags.add('statis_chamber', category='rooms')
+        self.statis_chamber = statis_chamber
 
         # Trash Bin
         trash_bin = create.create_object(typeclass=self.room_typeclass, key='trash_bin')
@@ -123,6 +125,7 @@ class HecateTest(TestCase):
                                 "It is the default home for objects of some value and the destination "
                                 "of said objects when discarded by players.")
         trash_bin.tags.add('trash_bin', category='rooms')
+        self.trash_bin = trash_bin
 
         # Create the superuser's home room.
         self.main_office = create.create_object(typeclass=self.room_typeclass, key='Main Office')
@@ -182,6 +185,19 @@ class HecateTest(TestCase):
         self.session = session
 
     def tearDown(self):
+        def clean_objects(objects):
+            for object in objects:
+                for obj in object.contents:
+                    obj.delete()
+                object.delete()
+
+        clean_chars = [self.char1, self.char2]
+        clean_objects(clean_chars)
+
+        clean_rooms = [self.main_office, self.common_room, self.room1, self.room2,
+            self.black_hole, self.statis_chamber, self.trash_bin, self.default_home]
+        clean_objects(clean_rooms)
+
         flush_cache()
         SESSIONS.data_out = self.backups[0]
         SESSIONS.disconnect = self.backups[1]
@@ -190,4 +206,5 @@ class HecateTest(TestCase):
         del SESSIONS[self.session.sessid]
         self.account.delete()
         self.account2.delete()
+
         super().tearDown()
