@@ -63,6 +63,7 @@ class QuantityGroup(Object):
     # Objects removed from this group are created and the quantity on the group object is decreased.
     def at_object_creation(self):
         self.attributes.add('quantity', 0)
+        self.tags.add('quantity', category='groupable')
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
             coin_str = self.currency.positive_coin_types_to_string()
@@ -75,6 +76,7 @@ class InventoryGroup(Object):
     # Objects removed from this group are pulled from the contents of the group object.
     def at_object_creation(self):
         self.attributes.add('quantity', 0)
+        self.tags.add('inventory', category='groupable')
     def return_appearance(self, looker, **kwargs):
         inventory = self.contents
         msg = f"You see {self.get_display_name(looker)}.\n"
