@@ -69,8 +69,8 @@ def prototype_to_dictionary(prototype):
 
         # Attributes saved within prototype dictionaries are formatted as a list of tuples.
         attr_list = prototype['attrs']
-        for tuple in attr_list:
-            common_dict[tuple[0]] = tuple[1]
+        for (key, value, category, lock) in attr_list:
+            common_dict[key] = value
         result_list.append(common_dict)
     return result_list
 
