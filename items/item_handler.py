@@ -1,3 +1,4 @@
+from evennia.utils import create
 from evennia.utils.create import create_object
 from evennia.utils.utils import variable_from_module
 
@@ -190,11 +191,14 @@ class ItemHandler():
                 caller of the command.
         """
         msg = ''
+        coin_msg = False
         qty_msg = False
         inv_msg = False
         groupables = []
-        inv_groupables = []
+        coin_groupables = []
         qty_groupables = []
+        inv_groupables = []
+        
 
     #==[Parse the objects into appropriate lists.]==#
         # Filter ungroupables from the list.
@@ -212,78 +216,61 @@ class ItemHandler():
 
         # Sort objects into quantity or inventory group type lists.
         for obj in groupables:
-            if obj.tags.get('quantity', category='groupable'):
+            if obj.tags.get('coin', category='groupable'):
+                coin_groupables.append(obj)
+            elif obj.tags.get('quantity', category='groupable'):
                 qty_groupables.append(obj)
             elif obj.tags.get('inventory', category='groupable'):
                 inv_groupables.append(obj)
 
     #==[Execute the grouping and generate result strings.]==#
+        # Coin Groupables
+        if len(coin_groupables) > 1:
+            coin_msg = self._group_coins(coin_groupables, obj_loc)
+            msg = f"{msg}{coin_msg}"
         # Quantity Groupables
         if len(qty_groupables) > 1:
-            qty_msg = self._group_quantity_objects(qty_groupables, obj_loc)
+            # This object is a quantity object, but there is currently no logic to handle it.
+            obj_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(qty_groupables))
+            qty_msg = f"{obj_names} cannot be grouped. (Code functionality doesn't exist yet!)"
+            if coin_msg:
+                msg = f"{msg}\n"
             msg = f"{msg}{qty_msg}"
-
         # Inventory Groupables
         if len(inv_groupables) > 1:
             inv_msg = self._group_inventory_objects(inv_groupables, obj_loc)
-            if qty_msg:
+            if qty_msg or coin_msg:
                 msg = f"{msg}\n"
             msg = f"{msg}{inv_msg}"
 
         return msg
-
-    def _group_quantity_objects(self, qty_groupables, obj_loc):
-        """
-        Sorts a list of quantity groupables into sub-categories and performs a grouping execution
-        on each type.
-
-        Arguments:
-            qty_groupables (list): The objects to be grouped.
-            obj_loc (object): The object that contains these groupable objects. Their location.
-        """
-        qty_msg = ''
-        coin_groupables = []
-        # Categorize the quantity objects.
-        for obj in qty_groupables:
-            if obj.tags.get('coin', category='currency'):
-                coin_groupables.append(obj)
-            else:
-                # This object is a quantity object, but there is currently no logic to handle it.
-                qty_msg = f"{qty_msg}{obj.name} cannot be grouped.\n"
-
-        if len(coin_groupables) > 1:
-            coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
-            self._group_coins(coin_groupables, obj_loc)
-            qty_msg = f"{qty_msg}You group together {coin_names}."
-        elif len(coin_groupables) == 1:
-            qty_msg = f"{qty_msg}{coin_groupables[0].name} has no other coins to group with."
-        return qty_msg
 
     def _group_coins(self, coin_groupables, obj_loc):
         """
         Creates a pile of coins.
 
         Arguments:
-            coin_groupables (list): The various coin objects to be grouped.
-            obj_loc (object): 
-        Returns:
-            qty_group_obj
+            coin_groupables (list): The coin objects to be grouped.
             obj_loc (object): The object that contains these groupable objects. Their location.
+        Returns:
+            coin_group_obj (object): The resulting coin grouping.
         """
+        coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
+
         total_copper = 0
-        qty_group_obj = create_object(key='a pile of coins', typeclass='items.objects.QuantityGroup',
+        coin_group_obj = create_object(key='a pile of coins', typeclass='items.objects.Coin',
             location=obj_loc)
-        qty_group_obj.attributes.add('coin', qty_group_obj.currency.create_coin_dict())
-        qty_group_obj.tags.add('coin', category='currency')
         for obj in coin_groupables:
             total_copper += obj.currency.coin_dict_to_copper(obj.db.coin)
         
         for obj in coin_groupables:
             obj.delete()
 
-        qty_group_obj.db.coin = qty_group_obj.currency.copper_to_coin_dict(total_copper)
-            
-        return qty_group_obj
+        coin_group_obj.db.coin = coin_group_obj.currency.copper_to_coin_dict(total_copper)
+
+        coin_msg = f"You group together {coin_names}."
+
+        return coin_msg
 
     def _group_inventory_objects(self, inv_groupables, obj_loc):
         """
@@ -346,55 +333,112 @@ class ItemHandler():
 
     def ungroup_objects(self, group_obj, obj_loc):
         """
+        Ungroups grouped objects.
+
         Arguments:
+            group_obj (object): The group object to ungroup.
             obj_loc (object): The object that contains these groupable objects. Their location.
+        
+        Returns:
+            msg (string): The resulting message that will be sent back to the caller that executed
+                the ungroup command.
         """
         delete_group_obj = False
-        if group_obj.is_typeclass('items.objects.QuantityGroup'):
-            if group_obj.tags.get('coin', category='currency'):
-                plat, gold, silver, copper = group_obj.currency.return_all_coin_types()
-                multi_coin = 0
-
-                for amount in [plat, gold, silver, copper]:
-                    if amount > 0:
-                        multi_coin += 1
-                if multi_coin >= 2:
-                    if plat > 0:
-                        plat_pile = create_object(key='a pile of platinum coins', location=obj_loc,
-                                                    typeclass='items.objects.Coin')
-                        if plat_pile:
-                            plat_pile.db.coin['plat'] = plat
-                            group_obj.db.coin['plat'] = 0
-                    if gold > 0:
-                        gold_pile = create_object(key='a pile of gold coins', location=obj_loc,
-                                                    typeclass='items.objects.Coin')
-                        if gold_pile:
-                            gold_pile.db.coin['gold'] = gold
-                            group_obj.db.coin['gold'] = 0
-                    if silver > 0:
-                        silver_pile = create_object(key='a pile of silver coins', location=obj_loc,
-                                                    typeclass='items.objects.Coin')
-                        if silver_pile:
-                            silver_pile.db.coin['silver'] = silver
-                            group_obj.db.coin['silver'] = 0
-                    if copper > 0:
-                        copper_pile = create_object(key='a pile of copper coins', location=obj_loc,
-                                                    typeclass='items.objects.Coin')
-                        if copper_pile:
-                            copper_pile.db.coin['copper'] = copper
-                            group_obj.db.coin['copper'] = 0
-                    msg = f"You ungroup {group_obj.name} into separate piles of coins."
-                    delete_group_obj = True
+        # Coin Groupable
+        if group_obj.tags.get('coin', category='groupable'):
+            msg, delete_group_obj = self._ungroup_coins(group_obj, obj_loc)
+        # Quantity Groupable
+        elif group_obj.tags.get('quantity', category='groupable'):
+            msg = "You cannot ungroup a homogenized group. Use the split command instead."
+        # Inventory Groupable
         elif group_obj.is_typeclass('items.objects.InventoryGroup'):
-            group_contents = group_obj.contents
+            group_contents = list(group_obj.contents)
             for x in group_contents:
                 x.move_to(obj_loc, quiet=True, move_hooks=False)
             msg = (f"You ungroup {group_obj.name}, producing "
                 f"{gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(group_contents))}.")
             delete_group_obj = True
+
         if delete_group_obj:
             group_obj.delete()
         return msg
+
+    def _ungroup_coins(self, group_obj, obj_loc):
+        """
+        Takes a pile of coins and ungroups them into the 4 coin types. (Plat, Gold, Silver, Copper)
+        Will NOT ungroup a coin pile if it is already a single type of coin. (100 gold into 100 objects)
+        Single coin objects are only generated from this action if they are part of a coin pile
+        that contains additional coin types.
+
+        Arguments:
+            group_obj (object): The pile of coins to ungroup.
+            obj_loc (object): The location that the group_obj resides and the ungroup objects will
+                be placed in.
+        
+        Returns:
+            msg (string): The resulting message that will be sent back to the caller that executed
+                the ungroup command.
+            delete_group_obj (boolean): Determines if the group_obj (original pile of coins) will be
+                deleted in the main ungroup_objects() method. This is set to false if the coins are
+                only of a single type of coin.
+        """
+        def create_coin(coin_type, coin_value, group_obj, obj_loc):
+            """
+            A helper method to allow a single point of coin generation and removal of its value from
+            the original group_obj, no matter the coin type being passed in.
+
+            Arguments:
+                coin_type (string): The coin type being evaluated within this group_obj.
+                coin_value (integer): The value of the specific coin type.
+                group_obj (object): The pile of coins to ungroup.
+                obj_loc (object): The location that the group_obj resides and the ungroup objects will
+                    be placed in.
+            Returns:
+                coin_obj.key (string): The name of the resulting coin that has been separated from
+                    the group_obj
+            """
+            # Fix the name for platinum coins.
+            if coin_type == 'plat':
+                coin_name = 'platinum'
+            else:
+                coin_name = coin_type
+
+            # Abandon the ungrouping if the coin value is 0 for the coin type.
+            if coin_value < 1:
+                return None
+
+            if coin_value > 1:
+                coin_obj = create_object(key=f"a pile of {coin_name} coins", location=obj_loc,
+                    typeclass='items.objects.Coin')
+            elif coin_value == 1:
+                coin_obj = create_object(key=f"a {coin_name} coin", location=obj_loc,
+                    typeclass='items.objects.Coin')
+            if coin_obj is not None:
+                coin_obj.db.coin[coin_type] = coin_value
+                group_obj.db.coin['coin_type'] = 0
+                return coin_obj.key
+        #------------------------------------------------------------------------------------
+        delete_group_obj = False
+        num_of_coin_types = 0
+
+        for value in group_obj.values():
+            if value > 0:
+                num_of_coin_types += 1
+        if num_of_coin_types > 1:
+            new_coin_names = []
+            # Iterate over the group object's coin dictionary and generate new coin piles.
+            for coin_type, coin_value in group_obj.db.coin.items():
+                new_coin_name = create_coin(coin_type, coin_value, group_obj, obj_loc)
+                if new_coin_name is not None:
+                    new_coin_names.append(new_coin_name)
+            # Generate the resulting string.
+            names = gen_mec.comma_separated_string_list(new_coin_names)
+            msg = f"You ungroup {group_obj.name}, producing {names}."
+            delete_group_obj = True
+        else:
+            msg = (f"{group_obj.key} consists of a single coin type and cannot be ungrouped. "
+                "Use the split command instead.")
+        return msg, delete_group_obj
 
     def split_group(self, split_type, pile, obj_loc, quantity=0, qty_obj=None):
         """

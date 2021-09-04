@@ -43,7 +43,7 @@ class Container(Object):
 
 class Coin(Object):
     def at_object_creation(self):
-        self.tags.add('quantity', category='groupable')
+        self.tags.add('coin', category='groupable')
         self.tags.add('coin', category='currency')
         self.attributes.add('coin', self.currency.create_coin_dict())
     def return_appearance(self, looker, **kwargs):
@@ -55,19 +55,6 @@ class InventoryContainer(Container):
     def at_object_creation(self):
         self.tags.add('inventory_container', category='container')
         self.attributes.add('max_slots', 50)
-
-class QuantityGroup(Object):
-    # Grouping category for objects which have no unique attributes, such as coin.
-    # Only groups with other objects tagged with ('quantity', category='groupable').
-    # Objects added to this group are destroyed and a quantity value on the group object is increased.
-    # Objects removed from this group are created and the quantity on the group object is decreased.
-    def at_object_creation(self):
-        self.attributes.add('quantity', 0)
-        self.tags.add('quantity', category='groupable')
-    def return_appearance(self, looker, **kwargs):
-        if self.attributes.has('coin'):
-            coin_str = self.currency.positive_coin_types_to_string()
-            looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class InventoryGroup(Object):
     # Grouping category for objects that have unique attributes and must be preserved.

@@ -1,3 +1,4 @@
+from typing_extensions import final
 from evennia.utils.create import create_object
 from misc.test_resources import HecateTest
 
@@ -72,7 +73,7 @@ class TestItemHandler(HecateTest):
         coin_pile = self.obj_loc.contents[-1]
         self.assertTrue(coin_pile is not None)
         self.assertEqual('a pile of coins', coin_pile.key)
-        self.assertTrue(coin_pile.is_typeclass("items.objects.QuantityGroup", exact=True))
+        self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
         self.assertTrue(coin_pile.attributes.has('coin'))
         self.assertEqual(0, coin_pile.db.coin['plat'])
         self.assertEqual(1, coin_pile.db.coin['gold'])
@@ -136,7 +137,7 @@ class TestItemHandler(HecateTest):
         coin_pile = self.obj_loc.contents[-2]
         self.assertTrue(coin_pile is not None)
         self.assertEqual('a pile of coins', coin_pile.key)
-        self.assertTrue(coin_pile.is_typeclass("items.objects.QuantityGroup", exact=True))
+        self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
         self.assertTrue(coin_pile.attributes.has('coin'))
         self.assertEqual(0, coin_pile.db.coin['plat'])
         self.assertEqual(1, coin_pile.db.coin['gold'])
@@ -154,57 +155,60 @@ class TestItemHandler(HecateTest):
         self.assertEqual("piece of chalk", variety_pile.contents[0].key)
         self.assertEqual("dirty towel", variety_pile.contents[1].key)
         self.assertEqual("tin cup", variety_pile.contents[2].key)
-    
-    def test_group_quantity_objects1(self):
-        """
-        Tests the outcome of 2 grouped coins.
-        """
-        final_msg = self.char1.item._group_quantity_objects(self.two_coin_groupables, self.obj_loc)
-        self.assertEqual("You group together coin1 and coin2.", final_msg)
 
-    def test_group_quanity_objects2(self):
+    def test_group_objects5(self):
         """
-        Tests the outcome of 1 misc quantity obj and 2 grouped coins.
+        Tests the outcome of 2 misc quantity obj and 2 grouped coins.
         """
         misc_quantity_object = create_object(typeclass="items.objects.Object", key="misc",
             location=self.obj_loc)
         misc_quantity_object.tags.add('quantity', category='groupable')
 
+        misc_quantity_object2 = create_object(typeclass="items.objects.Object", key="misc",
+            location=self.obj_loc)
+        misc_quantity_object2.tags.add('quantity', category='groupable')
+
         self.two_coin_groupables.append(misc_quantity_object)
-        final_msg = self.char1.item._group_quantity_objects(self.two_coin_groupables, self.obj_loc)
-        self.assertEqual("misc cannot be grouped.\nYou group together coin1 and coin2.", final_msg)
+        self.two_coin_groupables.append(misc_quantity_object2)
+
+        final_msg = self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
+        expected_str = ("You group together coin1 and coin2.\n"
+            "misc and misc cannot be grouped. (Code functionality doesn't exist yet!)")
+        self.assertEqual(expected_str, final_msg)
 
     def test_group_coins1(self):
         """
         Tests the outcome of 2 grouped coins.
         """
         self.assertEqual(2, len(self.two_coin_groupables))
-        qty_group_obj = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
-        self.assertTrue(qty_group_obj.is_typeclass("items.objects.QuantityGroup", exact=True))
-        self.assertEqual(0, qty_group_obj.db.coin['plat'])
-        self.assertEqual(1, qty_group_obj.db.coin['gold'])
-        self.assertEqual(226, qty_group_obj.db.coin['silver'])
-        self.assertEqual(306, qty_group_obj.db.coin['copper'])
-        self.assertEqual('a pile of coins', qty_group_obj.key)
-        self.assertEqual(self.obj_loc, qty_group_obj.location)
+        final_msg = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
+        coin_pile = self.obj_loc.contents[-1]
+        self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
+        self.assertEqual(0, coin_pile.db.coin['plat'])
+        self.assertEqual(1, coin_pile.db.coin['gold'])
+        self.assertEqual(226, coin_pile.db.coin['silver'])
+        self.assertEqual(306, coin_pile.db.coin['copper'])
+        self.assertEqual('a pile of coins', coin_pile.key)
+        self.assertEqual(self.obj_loc, coin_pile.location)
 
     def test_group_coins2(self):
         """
         Combines two groups of coins into one.
         """
-        coin_group1 = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
-        coin_group2 = self.char1.item._group_coins(self.three_coin_groupables, self.obj_loc)
+        self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
+        self.char1.item._group_coins(self.three_coin_groupables, self.obj_loc)
 
-        coin_groups = [coin_group1, coin_group2]
+        coin_groups = [self.obj_loc.contents[-2], self.obj_loc.contents[-1]]
 
-        result_coin_group = self.char1.item._group_coins(coin_groups, self.obj_loc)
-        self.assertTrue(result_coin_group.is_typeclass("items.objects.QuantityGroup", exact=True))
-        self.assertEqual(0, result_coin_group.db.coin['plat'])
-        self.assertEqual(2, result_coin_group.db.coin['gold'])
-        self.assertEqual(754, result_coin_group.db.coin['silver'])
-        self.assertEqual(631, result_coin_group.db.coin['copper'])
-        self.assertEqual('a pile of coins', result_coin_group.key)
-        self.assertEqual(self.obj_loc, result_coin_group.location)
+        final_msg = self.char1.item._group_coins(coin_groups, self.obj_loc)
+        coin_pile = self.obj_loc.contents[-1]
+        self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
+        self.assertEqual(0, coin_pile.db.coin['plat'])
+        self.assertEqual(2, coin_pile.db.coin['gold'])
+        self.assertEqual(754, coin_pile.db.coin['silver'])
+        self.assertEqual(631, coin_pile.db.coin['copper'])
+        self.assertEqual('a pile of coins', coin_pile.key)
+        self.assertEqual(self.obj_loc, coin_pile.location)
 
     def test_group_inventory_objects1(self):
         """
