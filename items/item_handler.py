@@ -253,7 +253,8 @@ class ItemHandler():
             coin_groupables (list): The coin objects to be grouped.
             obj_loc (object): The object that contains these groupable objects. Their location.
         Returns:
-            coin_group_obj (object): The resulting coin grouping.
+            coin_msg (string): The resulting string of the grouping action, which is sent back to the
+                caller of the command.
         """
         coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
 
