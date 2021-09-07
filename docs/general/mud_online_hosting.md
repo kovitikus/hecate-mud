@@ -1,19 +1,21 @@
+**This guide requires that  you use Windows Subsystem for Linux. I make no attempt to account for deviation from the steps I have taken while writing this guide.**
+
 **Please use this [Evennia referral link](https://m.do.co/c/8f64fec2670c) when signing up for a new Digital Ocean account to get free credit, good for the first 60 days of hosting.** 
 
 Following this link helps out production of Evennia by providing referral credit toward hosting the [Evennia Demo](https://demo.evennia.com/) server. This link grants new accounts free bonus credit. The credit amount changes at times, but it is generally anywhere from $25 to $100 for the first 60 days.
 
 ### Table of Contents
-* [TLDR Setup Guide](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#tldr-setup-guide)
-* [Introduction](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#introduction)
-* [Windows Subsystem for Linux](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#windows-subsystem-for-linux)
-    * [WSL Quick Reference](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#wsl-quick-reference)
-* [Setting Up Ubuntu](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#setting-up-ubuntu)
-* [Creating a Digital Ocean Droplet](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#creating-a-digital-ocean-droplet)
-* [Logging into the Droplet](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#logging-into-the-droplet)
-* [SSH Setup](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#ssh-setup)
-* [Disabling Password Authentication](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#disabling-password-authentication)
-* [Creating a New User](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#creating-a-new-user)
-* [Setting Up Evennia](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#setting-up-evennia)
+* [TLDR Setup Guide](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#tldr-setup-guide)
+* [Introduction](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#introduction)
+* [Windows Subsystem for Linux](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#windows-subsystem-for-linux)
+    * [WSL Quick Reference](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#wsl-quick-reference)
+* [Setting Up Ubuntu](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#setting-up-ubuntu)
+* [Creating a Digital Ocean Droplet](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#creating-a-digital-ocean-droplet)
+* [Logging into the Droplet](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#logging-into-the-droplet)
+* [SSH Setup](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#ssh-setup)
+* [Disabling Password Authentication](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#disabling-password-authentication)
+* [Creating a New User](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#creating-a-new-user)
+* [Setting Up Evennia](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#setting-up-evennia)
 
 ### TLDR Setup Guide
 1) Install [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu 20.04. This is used to login to the Droplet.
@@ -25,7 +27,7 @@ Following this link helps out production of Evennia by providing referral credit
 
 ***
 ### Introduction
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 
 This tutorial is geared toward those using Windows 10. It can still be used as a reference for Linux users, but those users shouldn't need much guidance, if any. 
 
@@ -35,12 +37,12 @@ You can find a list of recommended hosting options [here](https://github.com/eve
 
 ***
 ### Windows Subsystem for Linux
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Microsft - WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-The first thing that needs doing is setup of Windows Subsystem for Linux. This will be the method used to connect to the remote server that hosts the game.
+The first thing that needs doing is the setting up of Windows Subsystem for Linux. This will be the method used to connect to the remote server that hosts the game.
 
-**All steps should be executed via the Windows PowerShell, ran as administrator.**
+**All steps within the WSL installation section must be executed via the Windows PowerShell, ran as administrator.**
 
 > **TIP:** The Windows PowerShell can be opened by bringing up the [Windows start menu](https://i.imgur.com/yTeHBnX.png) and typing `powershell` and it can also be pinned to the [taskbar](https://i.imgur.com/iBgASIc.png).
 
@@ -66,7 +68,7 @@ Once Ubuntu is installed, it can be found in the start menu under the `All apps`
 
 ***
 ### Setting Up Ubuntu
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 
 Opening up Ubuntu will launch a command prompt. It will take a moment to install and then begin the new user creation process.
 
@@ -84,7 +86,7 @@ Now that the Ubuntu distro is fully up-to-date, it is ready for use with SSH. Th
 
 ***
 ### Creating a Digital Ocean Droplet
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Digital Ocean - Droplet Quickstart Guide](https://www.digitalocean.com/docs/droplets/quickstart/)
 
 Login to your Digital Ocean account and click the `+ New Project` option in the menu on the left side of the screen.
@@ -121,7 +123,7 @@ If everything went well, the Droplet should be added to the project. It will hav
 
 ***
 ### Logging into the Droplet
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Digital Ocean - Connect to Droplets](https://www.digitalocean.com/docs/droplets/quickstart/#connect-to-droplets)
 
 Hover over the new IP address of the Droplet and click the `Copy` option. Navigate over to the Ubuntu 20.04 WSL command prompt and enter:
@@ -140,7 +142,7 @@ Now run `sudo apt update && sudo apt upgrade` to upgrade the server's packages.
 
 ***
 ### SSH Setup
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Digital Ocean - How to Set Up SSH Keys on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-20-04)
 
 To setup SSH you must be back on the local Windows Subsystem for Linux Ubuntu distribution. Type `exit` to close the connection to the Droplet and return to the local machine.
@@ -159,7 +161,7 @@ Login to the Droplet using `ssh root@ip-address`, but this time enter the passph
 
 ***
 ### Disabling Password Authentication
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Digital Ocean - Disabling Password Authentication On Your Server](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-20-04#step-4-%E2%80%94-disabling-password-authentication-on-your-server)
 
 Now that SSH is working properly, the root password is no longer required to connect to the server.
@@ -198,7 +200,7 @@ SSH is now fully functional and password authentication has been disabled. It is
 
 ***
 ### Creating a New User
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Digital Ocean - Create a New Sudo-Enabled User Guide](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-sudo-enabled-user-on-ubuntu-20-04-quickstart)
 
 Ensure you are logged into your Droplet as root user.
@@ -240,7 +242,7 @@ If all went well, you should be able to SSH in as the new user.
 
 ***
 ### Setting Up Evennia
-* [Table of Contents](https://github.com/kovitikus/hecate/wiki/MUD-Online-Hosting#table-of-contents)
+* [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Evennia - Getting Started - Linux Setup](https://github.com/evennia/evennia/wiki/Getting-Started#linux-install)
 
 Connect to the Droplet server with SSH as your regular user, if not already connected. If already connected and logged in as root, use `su - username` to switch to your normal user account. 
