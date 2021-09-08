@@ -198,7 +198,6 @@ class ItemHandler():
         coin_groupables = []
         qty_groupables = []
         inv_groupables = []
-        
 
     #==[Parse the objects into appropriate lists.]==#
         # Filter ungroupables from the list.
@@ -226,18 +225,32 @@ class ItemHandler():
     #==[Execute the grouping and generate result strings.]==#
         # Coin Groupables
         if len(coin_groupables) > 1:
-            coin_msg = self._group_coins(coin_groupables, obj_loc)
+            coin_msg, coin_group_obj = self._group_coins(coin_groupables, obj_loc)
             msg = f"{msg}{coin_msg}"
+
+            # Reset the coin groupables and add the new coin object to the list.
+            # This will be used to evaluate if the coins should be grouped with the inventory logic.
+            coin_groupables.clear()
+            coin_groupables.append(coin_group_obj)
+
         # Quantity Groupables
         if len(qty_groupables) > 1:
-            # This object is a quantity object, but there is currently no logic to handle it.
-            obj_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(qty_groupables))
-            qty_msg = f"{obj_names} cannot be grouped. (Code functionality doesn't exist yet!)"
+            # Merge and filter the list of quantity objects.
+            qty_groupables, qty_names = self._group_quantity_objects(qty_groupables)
+
+            obj_names = gen_mec.comma_separated_string_list(qty_names)
+            qty_msg = f"You combine {obj_names}."
             if coin_msg:
                 msg = f"{msg}\n"
             msg = f"{msg}{qty_msg}"
+
         # Inventory Groupables
-        if len(inv_groupables) > 1:
+        # Decide if there are enough objects to group, including coin and quantity results.
+        # Inventory groupales must still be at least 1 + 1 from either coin or quantity to execute.
+        if len(inv_groupables) > 1 or len(inv_groupables) + len(coin_groupables) > 1 \
+        or len(inv_groupables) + len(qty_groupables) > 1:
+            inv_groupables.extend(coin_groupables)
+            inv_groupables.extend(qty_groupables)
             inv_msg = self._group_inventory_objects(inv_groupables, obj_loc)
             if qty_msg or coin_msg:
                 msg = f"{msg}\n"
@@ -255,6 +268,7 @@ class ItemHandler():
         Returns:
             coin_msg (string): The resulting string of the grouping action, which is sent back to the
                 caller of the command.
+            coin_group_obj (object): The new coin pile produced by this grouping.
         """
         coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
 
@@ -269,9 +283,52 @@ class ItemHandler():
 
         coin_group_obj.db.coin = coin_group_obj.currency.copper_to_coin_dict(total_copper)
 
-        coin_msg = f"You group together {coin_names}."
+        coin_msg = f"You combine {coin_names}."
 
-        return coin_msg
+        return coin_msg, coin_group_obj
+
+    def _group_quantity_objects(self, qty_groupables):
+        """
+        Combines objects that have no unique attributes into a single object.
+        Adds the quantity value of duplicate objects to the first object found and then
+        deletes any duplicates.
+
+        Arguments:
+            qty_groupables (list): The list of objects to iterate over and combine.
+        
+        Returns:
+            qty_groupables (list): The filtered list of combined objects.
+            qty_names (list): The quantity and name of each final object, used in the final string
+                that is sent back to the caller of the grouping command.
+        """
+        qty_names = []
+        qty_dict = {}
+        # Spawn a new list to iterate over, while manipulating the qty_groupables list.
+        test_list = list(qty_groupables)
+        for obj in test_list:
+            # Homogenize the name of the objects being combined. Account for groupings already
+            # included for this object.
+            obj_key = obj.db.singular_key
+
+            if qty_dict.get(obj_key, None) is not None:
+                # This is a duplicate of an already found object.
+                # Add its quantity to the original object and delete the duplicate.
+                qty_dict[obj_key].db.quantity += obj.db.quantity
+                qty_groupables.remove(obj)
+                obj.delete()
+            else:
+                # Generate a new dictionary key and assign the first object encountered.
+                # Preserving the first object found also preserves the common properties assigned to
+                # this object. Such as tags, etc.
+                qty_dict[obj_key] = obj
+
+        # Iterate over the list of final objects and modify the keys of grouped objects.
+        for obj in qty_groupables:
+            if obj.db.quantity > 1:
+                obj.key = f"a pile of {obj.db.plural_key}"
+            qty_names.append(f"{obj.db.quantity} {obj.db.plural_key}")
+
+        return qty_groupables, qty_names
 
     def _group_inventory_objects(self, inv_groupables, obj_loc):
         """
@@ -422,7 +479,7 @@ class ItemHandler():
         delete_group_obj = False
         num_of_coin_types = 0
 
-        for value in group_obj.values():
+        for value in group_obj.db.coin.values():
             if value > 0:
                 num_of_coin_types += 1
         if num_of_coin_types > 1:
