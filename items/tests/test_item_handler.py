@@ -291,3 +291,8 @@ class TestItemHandler(HecateTest):
         gold_coin = self.obj_loc.contents[-3]
         silver_pile = self.obj_loc.contents[-2]
         copper_pile = self.obj_loc.contents[-1]
+
+        self.assertEqual(1, gold_coin.db.coin['gold'])
+        self.assertEqual('a gold coin', gold_coin.key)
+        self.assertEqual(226, silver_pile.db.coin['silver'])
+        self.assertEqual(306, copper_pile.db.coin['copper'])
