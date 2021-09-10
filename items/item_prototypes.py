@@ -39,7 +39,7 @@ PLAT_COIN = {
     'prototype_key': 'plat_coin',
     'key': 'a platinum coin',
     'plural_key': 'platinum coins',
-    'singular_key': 'a platinum coin'
+    'singular_key': 'platinum coin'
 }
 
 GOLD_COIN = {
@@ -47,7 +47,7 @@ GOLD_COIN = {
     'prototype_key': 'gold_coin',
     'key': 'a gold coin',
     'plural_key': 'gold coins',
-    'singular_key': 'a gold coin'
+    'singular_key': 'gold coin'
 }
 
 SILVER_COIN = {
@@ -55,7 +55,7 @@ SILVER_COIN = {
     'prototype_key': 'silver_coin',
     'key': 'a silver coin',
     'plural_key': 'silver coins',
-    'singular_key': 'a silver coin'
+    'singular_key': 'silver coin'
 }
 
 COPPER_COIN = {
@@ -63,7 +63,7 @@ COPPER_COIN = {
     'prototype_key': 'copper_coin',
     'key': 'a copper coin',
     'plural_key': 'copper coins',
-    'singular_key': 'a copper coin'
+    'singular_key': 'copper coin'
 }
 
 COIN_PILE = { # A mix of various coin types and values.

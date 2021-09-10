@@ -1,4 +1,4 @@
-from evennia.utils import create
+from evennia.prototypes.spawner import spawn
 from evennia.utils.create import create_object
 from evennia.utils.utils import variable_from_module
 
@@ -455,22 +455,17 @@ class ItemHandler():
                 coin_obj.key (string): The name of the resulting coin that has been separated from
                     the group_obj
             """
-            # Fix the name for platinum coins.
-            if coin_type == 'plat':
-                coin_name = 'platinum'
-            else:
-                coin_name = coin_type
-
             # Abandon the ungrouping if the coin value is 0 for the coin type.
             if coin_value < 1:
                 return None
 
+            coin_obj = spawn(f"{coin_type}_coin")[0]
+            coin_obj.location = obj_loc
             if coin_value > 1:
-                coin_obj = create_object(key=f"a pile of {coin_name} coins", location=obj_loc,
-                    typeclass='items.objects.Coin')
-            elif coin_value == 1:
-                coin_obj = create_object(key=f"a {coin_name} coin", location=obj_loc,
-                    typeclass='items.objects.Coin')
+                coin_obj.key = f"a pile of {coin_obj.db.plural_key}"
+            else:
+                coin_obj.key = f"a {coin_obj.db.singular_key}"
+
             if coin_obj is not None:
                 coin_obj.db.coin[coin_type] = coin_value
                 group_obj.db.coin['coin_type'] = 0
