@@ -39,7 +39,7 @@ PLAT_COIN = {
     'prototype_key': 'plat_coin',
     'key': 'a platinum coin',
     'plural_key': 'platinum coins',
-    'singular_key': 'platinum coin'
+    'singular_key': 'a platinum coin'
 }
 
 GOLD_COIN = {
@@ -47,7 +47,7 @@ GOLD_COIN = {
     'prototype_key': 'gold_coin',
     'key': 'a gold coin',
     'plural_key': 'gold coins',
-    'singular_key': 'gold coin'
+    'singular_key': 'a gold coin'
 }
 
 SILVER_COIN = {
@@ -55,7 +55,7 @@ SILVER_COIN = {
     'prototype_key': 'silver_coin',
     'key': 'a silver coin',
     'plural_key': 'silver coins',
-    'singular_key': 'silver coin'
+    'singular_key': 'a silver coin'
 }
 
 COPPER_COIN = {
@@ -63,7 +63,7 @@ COPPER_COIN = {
     'prototype_key': 'copper_coin',
     'key': 'a copper coin',
     'plural_key': 'copper coins',
-    'singular_key': 'copper coin'
+    'singular_key': 'a copper coin'
 }
 
 COIN_PILE = { # A mix of various coin types and values.
@@ -97,14 +97,18 @@ FOOD = {
 
 RASPBERRY_CAKE = {
     'prototype_parent': 'food',
-    'key': 'raspberry cake',
+    'key': 'a raspberry cake',
+    'plural_key': 'raspberry cakes',
+    'singular_key': 'a raspberry cake',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 10},
     'hunger': 10
 }
 
 BEEF_STEAK = {
     'prototype_parent': 'food',
-    'key': 'beef steak',
+    'key': 'a beef steak',
+    'plural_key': 'beef steaks',
+    'singular_key': 'a beef steak',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 50},
     'hunger': 25
 }
@@ -112,6 +116,8 @@ BEEF_STEAK = {
 MILLET_PORRIDGE = {
     'prototype_parent': 'food',
     'key': 'millet porridge',
+    'plural_key': 'millet porridge',
+    'singular_key': 'millet porridge',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
@@ -119,6 +125,8 @@ MILLET_PORRIDGE = {
 BARLEY_PORRIDGE = {
     'prototype_parent': 'food',
     'key': 'barley porridge',
+    'plural_key': 'barley porridge',
+    'singular_key': 'barley porridge',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
@@ -126,6 +134,8 @@ BARLEY_PORRIDGE = {
 STEWED_BEETROOT = {
     'prototype_parent': 'food',
     'key': 'stewed beetroot',
+    'plural_key': 'stewed beetroot',
+    'singular_key': 'stewed beetroot',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 4},
     'hunger': 15
 }
@@ -133,6 +143,8 @@ STEWED_BEETROOT = {
 BOILED_MUTTON_AND_PEAS = {
     'prototype_parent': 'food',
     'key': 'boiled mutton and peas',
+    'plural_key': 'boiled mutton and peas',
+    'singular_key': 'boiled mutton and peas',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 11},
     'hunger': 25
 }
@@ -151,6 +163,8 @@ DRINK = {
 BLACK_TEA = {
     'prototype_parent': 'drink',
     'key': 'black tea',
+    'plural_key': 'black tea',
+    'singular_key': 'black tea',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 3},
     'thirst': 5
 }
@@ -158,6 +172,8 @@ BLACK_TEA = {
 WATER = {
     'prototype_parent': 'drink',
     'key': 'water',
+    'plural_key': 'water',
+    'singular_key': 'water',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 1},
     'thirst': 5
 }
@@ -172,14 +188,18 @@ LIGHTING = {
 
 TORCH = {
     'prototype_parent': ('lighting', 'inventory_object'),
-    'key': 'torch',
+    'key': 'a torch',
+    'plural_key': 'torches',
+    'singular_key': 'a torch',
     'typeclass': 'items.objects.Torch'
 }
 
 CRUDELY_MADE_TORCH = {
     'prototype_parent': 'lighting',
     'prototype_key': 'crudely-made torch',
-    'key': 'crudely-made torch',
+    'key': 'a crudely-made torch',
+    'plural_key': 'crudely-made torches',
+    'singular_key': 'a crudely-made torch',
     'typeclass': 'items.objects.Torch',
     'price': {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 10},
     'fuel': 90,
@@ -197,7 +217,7 @@ INVENTORY_CONTAINER = {
 INVENTORY_BAG = {
     'prototype_parent': 'inventory_container',
     'key': lambda: generate_random_bag_key(),
-    'home': lambda: trash_bin_dbref()
+    'home': lambda: trash_bin()
 }
 # Bags
 # Satchels
@@ -232,6 +252,6 @@ def generate_random_bag_key():
     bag_key = f"a {random.choice(adjective)} {random.choice(color)} bag"
     return bag_key
 
-def trash_bin_dbref():
+def trash_bin():
     trash_bin = search_object_by_tag(key='trash_bin', category='rooms')[0]
-    return trash_bin.dbref
+    return trash_bin

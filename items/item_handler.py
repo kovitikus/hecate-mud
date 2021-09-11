@@ -199,7 +199,7 @@ class ItemHandler():
         qty_groupables = []
         inv_groupables = []
 
-    #==[Parse the objects into appropriate lists.]==#
+        #==[Parse the objects into appropriate lists.]==#
         # Filter ungroupables from the list.
         for obj in objects:
             if obj.tags.get(category='groupable'):
@@ -222,7 +222,7 @@ class ItemHandler():
             elif obj.tags.get('inventory', category='groupable'):
                 inv_groupables.append(obj)
 
-    #==[Execute the grouping and generate result strings.]==#
+        #==[Execute the grouping and generate result strings.]==#
         # Coin Groupables
         if len(coin_groupables) > 1:
             coin_msg, coin_group_obj = self._group_coins(coin_groupables, obj_loc)
@@ -273,8 +273,8 @@ class ItemHandler():
         coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
 
         total_copper = 0
-        coin_group_obj = create_object(key='a pile of coins', typeclass='items.objects.Coin',
-            location=obj_loc)
+        coin_group_obj = spawn('coin_pile')[0]
+        coin_group_obj.location = obj_loc
         for obj in coin_groupables:
             total_copper += obj.currency.coin_dict_to_copper(obj.db.coin)
         
@@ -369,10 +369,10 @@ class ItemHandler():
 
         if same_name:
             # Create a pile of the same name of the groupable objects.
-            inv_group_obj = create_object(key=f'a pile of {inv_groupables[0].name}es', 
+            inv_group_obj = create_object(key=f'a pile of {inv_groupables[0].db.plural_key}', 
                 typeclass='items.objects.InventoryGroup', 
                 location=obj_loc)
-            inv_msg = f"{inv_msg}You group together some {inv_groupables[0].name}es."
+            inv_msg = f"{inv_msg}You group together some {inv_groupables[0].db.plural_key}."
         else:
             # Items have various names and the pile should be generic.
             item_str_list = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(inv_groupables))
@@ -464,7 +464,7 @@ class ItemHandler():
             if coin_value > 1:
                 coin_obj.key = f"a pile of {coin_obj.db.plural_key}"
             else:
-                coin_obj.key = f"a {coin_obj.db.singular_key}"
+                coin_obj.key = f"{coin_obj.db.singular_key}"
 
             if coin_obj is not None:
                 coin_obj.db.coin[coin_type] = coin_value

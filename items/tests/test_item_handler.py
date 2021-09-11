@@ -74,8 +74,9 @@ class TestItemHandler(HecateTest):
         """
         Tests the outcome of 2 grouped coins.
         """
-        final_msg = self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
-        self.assertEqual("You combine a pile of coins and a pile of coins.", final_msg)
+        result_msg = self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
+        expected_msg = "You combine a pile of coins and a pile of coins."
+        self.assertEqual(expected_msg, result_msg)
 
         # Assess the final group object.
         coin_pile = self.obj_loc.contents[-1]
@@ -92,8 +93,9 @@ class TestItemHandler(HecateTest):
         """
         Tests the outcome of 3 grouped inventory objects that all have the same key.
         """
-        final_msg = self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
-        self.assertEqual("You group together some crudely-made torches.", final_msg)
+        result_msg = self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
+        expected_msg = "You group together some crudely-made torches."
+        self.assertEqual(expected_msg, result_msg)
 
         # Asssess the final group object.
         torch_pile = self.obj_loc.contents[-1]
@@ -103,16 +105,17 @@ class TestItemHandler(HecateTest):
         self.assertTrue(torch_pile.attributes.has('quantity'))
         self.assertEqual(3, torch_pile.db.quantity)
         self.assertEqual(3, len(torch_pile.contents))
-        self.assertEqual("crudely-made torch", torch_pile.contents[0].key)
-        self.assertEqual("crudely-made torch", torch_pile.contents[1].key)
-        self.assertEqual("crudely-made torch", torch_pile.contents[2].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[0].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[1].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[2].key)
 
     def test_group_objects3(self):
         """
         Tests the outcome of 3 grouped inventory objects that have different keys.
         """
-        final_msg = self.char1.item.group_objects(self.variety_groupables, self.obj_loc)
-        self.assertEqual("You group together piece of chalk, dirty towel, and tin cup.", final_msg)
+        result_msg = self.char1.item.group_objects(self.variety_groupables, self.obj_loc)
+        expected_msg = "You group together piece of chalk, dirty towel, and tin cup."
+        self.assertEqual(expected_msg, result_msg)
 
         # Asssess the final group object.
         variety_pile = self.obj_loc.contents[-1]
@@ -136,10 +139,10 @@ class TestItemHandler(HecateTest):
         of the variety items. Results in a combined grouping string.
         """
         combined_list = [*self.two_coin_groupables, *self.variety_groupables]
-        final_msg = self.char1.item.group_objects(combined_list, self.obj_loc)
-        temp = ("You combine a pile of coins and a pile of coins.\n"
+        result_msg = self.char1.item.group_objects(combined_list, self.obj_loc)
+        expected_msg = ("You combine a pile of coins and a pile of coins.\n"
                 "You group together piece of chalk, dirty towel, tin cup, and a pile of coins.")
-        self.assertEqual(temp, final_msg)
+        self.assertEqual(expected_msg, result_msg)
 
         variety_pile = self.obj_loc.contents[-1]
 
@@ -172,18 +175,20 @@ class TestItemHandler(HecateTest):
         """
         self.two_coin_groupables.extend(self.qty_groupables)
 
-        final_msg = self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
-        expected_str = ("You combine a pile of coins and a pile of coins.\n"
+        result_msg = self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
+        expected_msg = ("You combine a pile of coins and a pile of coins.\n"
             "You combine 2 rocks.")
-        self.assertEqual(expected_str, final_msg)
+        self.assertEqual(expected_msg, result_msg)
 
     def test_group_coins1(self):
         """
         Tests the outcome of 2 grouped coins.
         """
         self.assertEqual(2, len(self.two_coin_groupables))
-        final_msg = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
-        coin_pile = self.obj_loc.contents[-1]
+        result_msg, coin_pile = self.char1.item._group_coins(self.two_coin_groupables, self.obj_loc)
+        expected_msg = "You combine a pile of coins and a pile of coins."
+        self.assertEqual(expected_msg, result_msg)
+
         self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
         self.assertEqual(0, coin_pile.db.coin['plat'])
         self.assertEqual(1, coin_pile.db.coin['gold'])
@@ -201,8 +206,10 @@ class TestItemHandler(HecateTest):
 
         coin_groups = [self.obj_loc.contents[-2], self.obj_loc.contents[-1]]
 
-        final_msg = self.char1.item._group_coins(coin_groups, self.obj_loc)
-        coin_pile = self.obj_loc.contents[-1]
+        result_msg, coin_pile = self.char1.item._group_coins(coin_groups, self.obj_loc)
+        expected_msg = "You combine a pile of coins and a pile of coins."
+        self.assertEqual(expected_msg, result_msg)
+
         self.assertTrue(coin_pile.is_typeclass("items.objects.Coin", exact=True))
         self.assertEqual(0, coin_pile.db.coin['plat'])
         self.assertEqual(2, coin_pile.db.coin['gold'])
@@ -215,8 +222,10 @@ class TestItemHandler(HecateTest):
         """
         Tests the outcome of 3 grouped inventory objects that all have the same key.
         """
-        final_msg = self.char1.item._group_inventory_objects(self.three_torch_groupables, self.obj_loc)
-        self.assertEqual("You group together some crudely-made torches.", final_msg)
+        result_msg = self.char1.item._group_inventory_objects(self.three_torch_groupables,
+            self.obj_loc)
+        expected_msg = "You group together some crudely-made torches."
+        self.assertEqual(expected_msg, result_msg)
 
         # Asssess the final group object.
         torch_pile = self.obj_loc.contents[-1]
@@ -226,16 +235,17 @@ class TestItemHandler(HecateTest):
         self.assertTrue(torch_pile.attributes.has('quantity'))
         self.assertEqual(3, torch_pile.db.quantity)
         self.assertEqual(3, len(torch_pile.contents))
-        self.assertEqual("crudely-made torch", torch_pile.contents[0].key)
-        self.assertEqual("crudely-made torch", torch_pile.contents[1].key)
-        self.assertEqual("crudely-made torch", torch_pile.contents[2].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[0].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[1].key)
+        self.assertEqual("a crudely-made torch", torch_pile.contents[2].key)
     
     def test_group_inventory_objects2(self):
         """
         Tests the outcome of 3 grouped inventory objects that have different keys.
         """
-        final_msg = self.char1.item._group_inventory_objects(self.variety_groupables, self.obj_loc)
-        self.assertEqual("You group together piece of chalk, dirty towel, and tin cup.", final_msg)
+        result_msg = self.char1.item._group_inventory_objects(self.variety_groupables, self.obj_loc)
+        expected_msg = "You group together piece of chalk, dirty towel, and tin cup."
+        self.assertEqual(expected_msg, result_msg)
 
         # Asssess the final group object.
         variety_pile = self.obj_loc.contents[-1]
@@ -259,34 +269,37 @@ class TestItemHandler(HecateTest):
         variety_pile = self.obj_loc.contents[-1]
         piles = [torch_pile, variety_pile]
 
-        result_str = self.char1.item._group_inventory_objects(piles, self.obj_loc)
+        result_msg = self.char1.item._group_inventory_objects(piles, self.obj_loc)
         result_pile = self.obj_loc.contents[-1]
-        expected_str = (
+        expected_msg = (
             "You combine the contents of a pile of crudely-made torches and a pile of various items.\n"
-            "You group together crudely-made torch, crudely-made torch, crudely-made torch, "
+            "You group together a crudely-made torch, a crudely-made torch, a crudely-made torch, "
             "piece of chalk, dirty towel, and tin cup."
         )
 
-        self.assertEqual(expected_str, result_str)
+        self.assertEqual(expected_msg, result_msg)
         self.assertEqual("a pile of various items", result_pile.key)
         self.assertTrue(result_pile.is_typeclass("items.objects.InventoryGroup", exact=True))
         self.assertEqual(6, len(result_pile.contents))
         self.assertEqual(6, result_pile.db.quantity)
-        self.assertEqual("crudely-made torch", result_pile.contents[0].key)
-        self.assertEqual("crudely-made torch", result_pile.contents[1].key)
-        self.assertEqual("crudely-made torch", result_pile.contents[2].key)
+        self.assertEqual("a crudely-made torch", result_pile.contents[0].key)
+        self.assertEqual("a crudely-made torch", result_pile.contents[1].key)
+        self.assertEqual("a crudely-made torch", result_pile.contents[2].key)
         self.assertEqual("piece of chalk", result_pile.contents[3].key)
         self.assertEqual("dirty towel", result_pile.contents[4].key)
         self.assertEqual("tin cup", result_pile.contents[5].key)
 
-    def test_ungroup_objects(self):
+    def test_ungroup_objects1(self):
+        """
+        Testing of coin group ungrouping.
+        """
         self.char1.item.group_objects(self.two_coin_groupables, self.obj_loc)
         coin_pile = self.obj_loc.contents[-1]
 
-        final_msg = self.char1.item.ungroup_objects(coin_pile, self.obj_loc)
+        result_msg = self.char1.item.ungroup_objects(coin_pile, self.obj_loc)
         expected_msg = ("You ungroup a pile of coins, producing a gold coin, a pile of silver coins, "
             "and a pile of copper coins.")
-        self.assertEqual(expected_msg, final_msg)
+        self.assertEqual(expected_msg, result_msg)
 
         gold_coin = self.obj_loc.contents[-3]
         silver_pile = self.obj_loc.contents[-2]
@@ -296,3 +309,29 @@ class TestItemHandler(HecateTest):
         self.assertEqual('a gold coin', gold_coin.key)
         self.assertEqual(226, silver_pile.db.coin['silver'])
         self.assertEqual(306, copper_pile.db.coin['copper'])
+
+    def test_ungroup_objects2(self):
+        """
+        Testing of quantity group ungrouping.
+        """
+        self.char1.item.group_objects(self.qty_groupables, self.obj_loc)
+        rock_pile = self.obj_loc.contents[-1]
+
+        result_msg = self.char1.item.ungroup_objects(rock_pile, self.obj_loc)
+        expected_msg = "You cannot ungroup a homogenized group. Use the split command instead."
+        self.assertEqual(expected_msg, result_msg)
+
+    def test_ungroup_objects3(self):
+        """
+        Testing of inventory group ungrouping, with all same named objects.
+        """
+        self.char1.item.group_objects(self.three_torch_groupables, self.obj_loc)
+        torch_pile = self.obj_loc.contents[-1]
+
+        result_msg = self.char1.item.ungroup_objects(torch_pile, self.obj_loc)
+        expected_msg = ("You ungroup a pile of crudely-made torches, producing a crudely-made torch, "
+        "a crudely-made torch, and a crudely-made torch.")
+
+        self.assertEqual(expected_msg, result_msg)
+
+    
