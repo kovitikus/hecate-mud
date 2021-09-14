@@ -173,3 +173,22 @@ def copper_to_coin_dict(copper):
         coin_dict (dict): A dictionary consisting of all 4 coin types.
     """
     return balance_coin_dict(create_coin_dict(copper=copper))
+
+def is_homogenized(coin_dict):
+    """
+    Checks a coin dictionary to find out if there's only 1 type of coin with a value above 0.
+
+    Arguments:
+        coin_dict (dictionary): The coin dictionary to evaluate.
+    
+    Returns:
+        is_homogenized (boolean): True or False
+    """
+    num = 0
+    for coin_value in coin_dict.values():
+        if coin_value > 0:
+            num += 1
+    if num > 1:
+        return False
+    else:
+        return True

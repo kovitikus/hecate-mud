@@ -96,3 +96,10 @@ class TestCoin(HecateTest):
         self.assertEqual(2, result_dict['gold'])
         self.assertEqual(2, result_dict['silver'])
         self.assertEqual(2, result_dict['copper'])
+
+    def test_is_homogenized(self):
+        test_result = coin.is_homogenized(self.coin_dict1)
+        self.assertFalse(test_result)
+
+        test_result = coin.is_homogenized({'plat': 0, 'gold': 0, 'silver': 41, 'copper': 0})
+        self.assertTrue(test_result)
