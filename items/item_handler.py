@@ -3,6 +3,7 @@ from evennia.utils.create import create_object
 from evennia.utils.utils import variable_from_module
 
 from misc import general_mechanics as gen_mec
+from misc import coin
 
 '''
 This handler decides functions related to items, such as get, put, stacking, etc.
@@ -276,12 +277,12 @@ class ItemHandler():
         coin_group_obj = spawn('coin_pile')[0]
         coin_group_obj.location = obj_loc
         for obj in coin_groupables:
-            total_copper += obj.currency.coin_dict_to_copper(obj.db.coin)
+            total_copper += coin.coin_dict_to_copper(obj.db.coin)
         
         for obj in coin_groupables:
             obj.delete()
 
-        coin_group_obj.db.coin = coin_group_obj.currency.copper_to_coin_dict(total_copper)
+        coin_group_obj.db.coin = coin.copper_to_coin_dict(total_copper)
 
         coin_msg = f"You combine {coin_names}."
 
@@ -503,24 +504,41 @@ class ItemHandler():
         if split_type == 'default':
             # This condition splits the pile as evenly as possible into 2 piles.
             # The original pile always contains the higher quantity of items, if not evenly split.
+            if pile.tags.get('coin', category='currency'):
+                total_copper = coin.coin_dict_to_copper(pile.db.coin)
+
+                if total_copper > 1:
+                    original_copper = total_copper // 2
+                    new_copper = (total_copper // 2) + (total_copper % 2)
+                else:
+                    return "You cannot split 1 copper!"
+
+                # Convert the coppers back to coin dictionaries.
+                original_coin_dict = coin.copper_to_coin_dict(original_copper)
+                new_coin_dict = coin.copper_to_coin_dict(new_copper)
+
+                #
             pass
         elif split_type == 'from':
-            if pile.is_typeclass('items.objects.QuantityGroup'):
-                # This is a pile of coins, or other similar pile.
-                if pile.tags.get('coin', category='currency'):
-                    coin_dict = pile.attributes.get('coin')
-                    coin_type = coin_dict.get(qty_obj)
-                    if coin_type >= quantity:
-                        coin_dict[coin_type] -= quantity
-                        # We also have to determine here if the coin pile has homogenized and change its description.
+            if pile.tags.get('coin', category='currency'):
+                coin_dict = pile.attributes.get('coin')
 
-                        # Now we need to make a new coin pile with the value of the
-                        # new coins split from the original.
+                if qty_obj == 'platinum':
+                    qty_obj = 'plat'
+                coin_type = coin_dict.get(qty_obj)
+                if coin_type >= quantity:
+                    coin_dict[coin_type] -= quantity
+                    # We also have to determine here if the coin pile has homogenized and change its description.
 
-                    else:
-                        # There's not enough coin in the pile to execute the action.
-                        msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
-                        return msg
+                    # Now we need to make a new coin pile with the value of the
+                    # new coins split from the original.
+
+                else:
+                    # There's not enough coin in the pile to execute the action.
+                    msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
+                    return msg
+            if pile.tags.get('quantity', category='groupable'):
+                # This is a pile of quantity objects, or other similar pile.
                 pass
             elif pile.is_typeclass('items.objects.InventoryGroup'):
                 # Object has contents

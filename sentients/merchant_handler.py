@@ -1,6 +1,7 @@
 from evennia.prototypes.spawner import spawn
 from evennia.utils.evtable import EvTable, EvCell
 
+from misc import coin
 from misc import general_mechanics as gen_mec
 from misc import generic_str
 
@@ -36,7 +37,7 @@ class MerchantHandler:
                 continue
 
             item_name = proto_dict.get('key')
-            price_str = owner.currency.positive_coin_types_to_string(coin_dict=proto_dict.get('price'))
+            price_str = coin.positive_coin_types_to_string(proto_dict.get('price'))
             quantity = properties.get('quantity', 0)
 
             stock_table.add_row(f"{item_name} ", f"Price: {price_str}", f"Qty: {quantity}")
@@ -74,7 +75,7 @@ class MerchantHandler:
         if not buyer_coin_dict:
             return "You don't have any coin."
         else:
-            buyer_copper = buyer.currency.coin_dict_to_copper(buyer_coin_dict)
+            buyer_copper = coin.coin_dict_to_copper(buyer_coin_dict)
 
         potential_prototype_list = gen_mec.prototype_to_dictionary(item) # Returns a list of dictionaries.
         prototype_dict = None
@@ -94,7 +95,7 @@ class MerchantHandler:
         if not price_dict: # TODO: Add error logging here, including a mail sent to the admin.
             return f"|rERROR! The price for {item} could not be found! Please report this to the admin.|n"
         else:
-            copper_price = owner.currency.coin_dict_to_copper(price_dict)
+            copper_price = coin.coin_dict_to_copper(price_dict)
 
         # Check to make sure that the merchant has the item in stock, in the requested quantity.
         if stocked_items[item]['quantity'] <= 0:
@@ -103,8 +104,8 @@ class MerchantHandler:
             return f"{owner.name} does haven't {quantity} of {item} in stock!"
 
         total_copper_price = copper_price * quantity
-        total_price_dict = owner.currency.copper_to_coin_dict(total_copper_price)
-        total_price_str = owner.currency.positive_coin_types_to_string(coin_dict=total_price_dict)
+        total_price_dict = coin.copper_to_coin_dict(total_copper_price)
+        total_price_str = coin.positive_coin_types_to_string(total_price_dict)
 
         # Check if the player has enough money
         if buyer_copper >= total_copper_price:

@@ -6,14 +6,13 @@ Commands describe the input the account can do to the game.
 """
 import re
 
-from evennia import TICKER_HANDLER as tickerhandler
 from evennia import Command as BaseCommand
-from evennia import logger
 from evennia import InterruptCommand
-from evennia.utils import create, inherits_from
+from evennia.utils import inherits_from
 from evennia.utils.evmenu import EvMenu
 
 from skills import skillsets
+from misc import coin
 
 
 class Command(BaseCommand):
@@ -844,13 +843,13 @@ class CmdConvertCoin(Command):
         result_type = self.result_type
 
         if coin_type == 'plat':
-            result_value = self.caller.currency.convert_coin_type(plat=coin_value, result_type=result_type)
+            result_value = coin.convert_coin_type(plat=coin_value, result_type=result_type)
         elif coin_type == 'gold':
-            result_value = self.caller.currency.convert_coin_type(gold=coin_value, result_type=result_type)
+            result_value = coin.convert_coin_type(gold=coin_value, result_type=result_type)
         elif coin_type == 'silver':
-            result_value = self.caller.currency.convert_coin_type(silver=coin_value, result_type=result_type)
+            result_value = coin.convert_coin_type(silver=coin_value, result_type=result_type)
         elif coin_type == 'copper':
-            result_value = self.caller.currency.convert_coin_type(copper=coin_value, result_type=result_type)
+            result_value = coin.convert_coin_type(copper=coin_value, result_type=result_type)
         self.caller.msg(f"{coin_value} {coin_type} is equal to {result_value} {result_type}")
 
 class CmdGroup(Command):

@@ -1,5 +1,7 @@
 from evennia.utils.evtable import EvTable
 
+from misc import coin
+
 class InventoryHandler():
     def __init__(self, owner):
         self.owner = owner
@@ -76,7 +78,7 @@ class InventoryHandler():
 
                 string = f"|wYou are carrying:\n{category_string}\n{table}"
         # Add currency
-        string = f"{string}\n{owner.currency.all_coin_types_to_string()}"
+        string = f"{string}\n{coin.all_coin_types_to_string(owner.db.coin)}"
         owner.msg(string)
     
     def get_inv_final_list(self, filtered_items, arg_type):

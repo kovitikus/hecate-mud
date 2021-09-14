@@ -1,5 +1,7 @@
 from evennia.utils.create import create_object
 from evennia.prototypes.spawner import spawn
+
+from misc import coin
 from misc.test_resources import HecateTest
 
 class TestItemHandler(HecateTest):
@@ -11,13 +13,13 @@ class TestItemHandler(HecateTest):
         # Total value of coin1 + coin2 = 1,226,306 (0 plat, 1 gold, 226 silver, 306 copper)
 
         coin1 = spawn('coin_pile')[0]
-        coin1.db.coin = coin1.currency.copper_to_coin_dict(coin1_value)
+        coin1.db.coin = coin.copper_to_coin_dict(coin1_value)
         coin2 = spawn('coin_pile')[0]
-        coin2.db.coin = coin2.currency.copper_to_coin_dict(coin2_value)
+        coin2.db.coin = coin.copper_to_coin_dict(coin2_value)
 
         self.two_coin_groupables = [coin1, coin2]
-        for coin in self.two_coin_groupables:
-            coin.location = self.obj_loc
+        for coin_obj in self.two_coin_groupables:
+            coin_obj.location = self.obj_loc
 
         coin3_value = 389294
         coin4_value = 849283
@@ -25,15 +27,15 @@ class TestItemHandler(HecateTest):
         # Total value of coin3 + coin4 + coin5 = 1,528,325 (0 plat, 1 gold, 528 silver, 325 copper)
 
         coin3 = spawn('coin_pile')[0]
-        coin3.db.coin = coin3.currency.copper_to_coin_dict(coin3_value)
+        coin3.db.coin = coin.copper_to_coin_dict(coin3_value)
         coin4 = spawn('coin_pile')[0]
-        coin4.db.coin = coin4.currency.copper_to_coin_dict(coin4_value)
+        coin4.db.coin = coin.copper_to_coin_dict(coin4_value)
         coin5 = spawn('coin_pile')[0]
-        coin5.db.coin = coin5.currency.copper_to_coin_dict(coin5_value)
+        coin5.db.coin = coin.copper_to_coin_dict(coin5_value)
 
         self.three_coin_groupables = [coin3, coin4, coin5]
-        for coin in self.three_coin_groupables:
-            coin.location = self.obj_loc
+        for coin_obj in self.three_coin_groupables:
+            coin_obj.location = self.obj_loc
 
         # Total value of coins 1-5 = 2,754,631 (0 plat, 2 gold, 754 silver, 631 copper)
 

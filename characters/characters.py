@@ -8,7 +8,6 @@ from items.item_handler import ItemHandler
 from characters.character_handler import CharacterHandler
 from characters.equipment_handler import EquipmentHandler
 from characters.inventory_handler import InventoryHandler
-from characters.currency_handler import CurrencyHandler
 from characters.status_handler import StatusHandler
 from characters.stat_handler import StatHandler
 from travel.travel_handler import TravelHandler
@@ -48,9 +47,6 @@ class Character(DefaultCharacter):
     @lazy_property
     def item(self):
         return ItemHandler(self)
-    @lazy_property
-    def currency(self):
-        return CurrencyHandler(self)
     @lazy_property
     def merch(self):
         return MerchantHandler(self)

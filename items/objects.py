@@ -1,17 +1,11 @@
 from evennia import DefaultObject
 from evennia import TICKER_HANDLER as tickerhandler
-from evennia.utils import create
-from evennia.utils import logger
-from evennia.utils import ansi
-from evennia.utils.utils import inherits_from, lazy_property
+from evennia.utils.utils import inherits_from
 
-from characters.currency_handler import CurrencyHandler
-from misc.generic_str import article
+from misc import coin
 
 class Object(DefaultObject):
-    @lazy_property
-    def currency(self):
-        return CurrencyHandler(self)
+    pass
 
 class Staves(Object):
     def at_object_creation(self):
@@ -45,10 +39,10 @@ class Coin(Object):
     def at_object_creation(self):
         self.tags.add('coin', category='groupable')
         self.tags.add('coin', category='currency')
-        self.attributes.add('coin', self.currency.create_coin_dict())
+        self.attributes.add('coin', coin.create_coin_dict())
     def return_appearance(self, looker, **kwargs):
         if self.attributes.has('coin'):
-            coin_str = self.currency.positive_coin_types_to_string()
+            coin_str = coin.positive_coin_types_to_string(self.db.coin)
             looker.msg(f"You see {self.get_display_name(looker)} worth {coin_str}.")
 
 class InventoryContainer(Container):
