@@ -1,3 +1,5 @@
+from evennia.prototypes.spawner import spawn
+
 def return_all_coin_types(coin_dict):
     """
     Takes a coin dictionary and returns the value of all 4 types of coins, as individual variables.
@@ -179,7 +181,7 @@ def is_homogenized(coin_dict):
     Checks a coin dictionary to find out if there's only 1 type of coin with a value above 0.
 
     Arguments:
-        coin_dict (dictionary): The coin dictionary to evaluate.
+        coin_dict (dict): A dictionary consisting of all 4 coin types.
     
     Returns:
         is_homogenized (boolean): True or False
@@ -192,3 +194,42 @@ def is_homogenized(coin_dict):
         return False
     else:
         return True
+
+def generate_coin_object(coin_dict=None, copper=None):
+    """
+    Determines what type of coin object and key to generate based on the coin dictionary.
+
+    Keyword Arguments:
+        coin_dict (dict): A dictionary consisting of all 4 coin types.
+        copper (integer): A value representing the total amount of coin.
+
+    Returns:
+        coin_obj (object): The final spawned object, with its key properly set.
+    """
+    if copper is not None:
+        coin_dict = copper_to_coin_dict(copper)
+    elif coin_dict is None and copper is None:
+        coin_dict = create_coin_dict()
+        # A coin must have some sort of value, therefore generate a single copper coin.
+        coin_dict['copper'] = 1
+
+    homogenized = is_homogenized(coin_dict)
+    coin_prototype = None
+    pluralized = False
+
+    if homogenized:
+        for coin_type, coin_value in coin_dict.items():
+            if coin_value > 0:
+                coin_prototype = f"{coin_type}_coin"
+            if coin_value > 1:
+                pluralized = True
+    else:
+        coin_prototype = 'coin_pile'
+
+    coin_obj = spawn(coin_prototype)[0]
+    coin_obj.db.coin = coin_dict
+
+    if pluralized:
+        coin_obj.key = f"a pile of {coin_obj.db.plural_key}"
+
+    return coin_obj

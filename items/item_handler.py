@@ -266,6 +266,7 @@ class ItemHandler():
         Arguments:
             coin_groupables (list): The coin objects to be grouped.
             obj_loc (object): The object that contains these groupable objects. Their location.
+
         Returns:
             coin_msg (string): The resulting string of the grouping action, which is sent back to the
                 caller of the command.
@@ -274,19 +275,18 @@ class ItemHandler():
         coin_names = gen_mec.comma_separated_string_list(gen_mec.objects_to_strings(coin_groupables))
 
         total_copper = 0
-        coin_group_obj = spawn('coin_pile')[0]
-        coin_group_obj.location = obj_loc
         for obj in coin_groupables:
             total_copper += coin.coin_dict_to_copper(obj.db.coin)
         
         for obj in coin_groupables:
             obj.delete()
 
-        coin_group_obj.db.coin = coin.copper_to_coin_dict(total_copper)
+        coin_obj = coin.generate_coin_object(copper=total_copper)
+        coin_obj.location = obj_loc
 
         coin_msg = f"You combine {coin_names}."
 
-        return coin_msg, coin_group_obj
+        return coin_msg, coin_obj
 
     def _group_quantity_objects(self, qty_groupables):
         """
@@ -460,25 +460,21 @@ class ItemHandler():
             if coin_value < 1:
                 return None
 
-            coin_obj = spawn(f"{coin_type}_coin")[0]
+            temp_coin_dict = {}
+            temp_coin_dict[coin_type] = coin_value
+            coin_dict = coin.create_coin_dict(**temp_coin_dict)
+            coin_obj = coin.generate_coin_object(coin_dict=coin_dict)
             coin_obj.location = obj_loc
-            if coin_value > 1:
-                coin_obj.key = f"a pile of {coin_obj.db.plural_key}"
-            else:
-                coin_obj.key = f"{coin_obj.db.singular_key}"
 
             if coin_obj is not None:
-                coin_obj.db.coin[coin_type] = coin_value
-                group_obj.db.coin['coin_type'] = 0
+                # Set the original group object's coin_type to zero, as it's been transferred over.
+                group_obj.db.coin[coin_type] = 0
+                # We only need to return the key here, because the new object is already generated
+                # and its location has been set.
                 return coin_obj.key
         #------------------------------------------------------------------------------------
         delete_group_obj = False
-        num_of_coin_types = 0
-
-        for value in group_obj.db.coin.values():
-            if value > 0:
-                num_of_coin_types += 1
-        if num_of_coin_types > 1:
+        if not coin.is_homogenized(group_obj.db.coin):
             new_coin_names = []
             # Iterate over the group object's coin dictionary and generate new coin piles.
             for coin_type, coin_value in group_obj.db.coin.items():
@@ -494,82 +490,179 @@ class ItemHandler():
                 "Use the split command instead.")
         return msg, delete_group_obj
 
-    def split_group(self, split_type, pile, obj_loc, quantity=0, qty_obj=None):
+    def split_group(self, split_type, pile, obj_loc, quantity=0, extract_obj=None):
         """
         Arguments:
             obj_loc (object): The object that contains these groupable objects. Their location.
         """
+        msg = ''
         pile_name = pile.name
 
+        if pile.tags.get('coin', category='groupable'):
+            msg = self._split_coins(split_type, pile, obj_loc, quantity, extract_obj, pile_name)
+
+        elif pile.tags.get('quantity', category='groupable'):
+            # This is a pile of quantity objects, or other similar pile.
+            msg = self._split_quantity_objects(self, split_type, pile, obj_loc, quantity, pile_name)
+
+        elif pile.is_typeclass('items.objects.InventoryGroup'):
+            msg = self._split_inventory_objects(split_type, pile, obj_loc, quantity, extract_obj,
+                pile_name)
+        return msg
+
+    def _split_coins(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
+        original_copper = 0
+        new_copper = 0
+
+        # Convert the coin into copper to do maths.
+        total_copper = coin.coin_dict_to_copper(pile.db.coin)
         if split_type == 'default':
-            # This condition splits the pile as evenly as possible into 2 piles.
-            # The original pile always contains the higher quantity of items, if not evenly split.
-            if pile.tags.get('coin', category='currency'):
-                total_copper = coin.coin_dict_to_copper(pile.db.coin)
-
-                if total_copper > 1:
-                    original_copper = total_copper // 2
-                    new_copper = (total_copper // 2) + (total_copper % 2)
-                else:
-                    return "You cannot split 1 copper!"
-
-                # Convert the coppers back to coin dictionaries.
-                original_coin_dict = coin.copper_to_coin_dict(original_copper)
-                new_coin_dict = coin.copper_to_coin_dict(new_copper)
-
-                #
-            pass
+            if total_copper > 1:
+                original_copper = (total_copper // 2) + (total_copper % 2)
+                new_copper = total_copper // 2
+            else:
+                return "You cannot split 1 copper!"
         elif split_type == 'from':
-            if pile.tags.get('coin', category='currency'):
-                coin_dict = pile.attributes.get('coin')
+            coin_type = 'plat' if extract_obj == 'platinum' else extract_obj
+            temp_coin_dict = {}
+            temp_coin_dict[coin_type] = quantity
+            new_copper = coin.coin_dict_to_copper(temp_coin_dict)
 
-                if qty_obj == 'platinum':
-                    qty_obj = 'plat'
-                coin_type = coin_dict.get(qty_obj)
-                if coin_type >= quantity:
-                    coin_dict[coin_type] -= quantity
-                    # We also have to determine here if the coin pile has homogenized and change its description.
+            if new_copper > total_copper:
+                return f"There isn't enough {extract_obj} to split from {pile_name}!"
+            else:
+                original_copper = total_copper - new_copper
 
-                    # Now we need to make a new coin pile with the value of the
-                    # new coins split from the original.
+        # Original pile no longer has a use and will be remade. Delete it.
+        pile.delete()
+        # Convert the coppers back to coin dictionaries.
+        original_coin_dict = coin.balance_coin_dict(coin.copper_to_coin_dict(original_copper))
+        new_coin_dict = coin.balance_coin_dict(coin.copper_to_coin_dict(new_copper))
 
+        original_coin_obj = coin.generate_coin_object(coin_dict=original_coin_dict)
+        original_coin_obj.location = obj_loc
+        new_coin_obj = coin.generate_coin_object(coin_dict=new_coin_dict)
+        new_coin_obj.location = obj_loc
+
+        if split_type == 'default':
+            msg = f"You split {pile_name} into {original_coin_obj.key} and {new_coin_obj.key}."
+        elif split_type == 'from':
+            msg = f"You split {new_coin_obj.key} from {pile_name}, leaving {original_coin_obj.key}."
+        return msg
+
+    def _split_quantity_objects(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
+        pile_qty = pile.attributes.get('quantity', default=0)
+        if pile_qty <= 1:
+            return f"{pile_name} has a quantity of {pile_qty} and cannot be split!"
+        if split_type == 'default':
+            original_pile_qty = (pile_qty // 2) + (pile_qty % 2)
+            new_pile_qty = pile_qty // 2
+        elif split_type == 'from':
+            if quantity > pile_qty:
+                return f"{pile_name} does not have {quantity} to split from itself!"
+
+            original_pile_qty = pile_qty - quantity
+            new_pile_qty = quantity
+
+        pile.db.quantity = original_pile_qty
+        new_pile = pile.copy()
+        new_pile.db.quantity = new_pile_qty
+        new_pile.location = obj_loc
+
+        for pile in [pile, new_pile]:
+            if pile.db.quantity > 1:
+                pile.key = pile.db.plural_key
+            else:
+                pile.key = pile.db.singular_key
+
+        if split_type == 'default':
+            msg = f"You split {pile_name} into {pile.key} and {new_pile.key}."
+        elif split_type == 'from':
+            msg = f"You split {new_pile.key} from {pile_name}, leaving {pile.key}"
+        return msg
+
+    def _split_inventory_objects(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
+        """
+        """
+        msg = ''
+        if split_type == 'default':
+            pile_qty = len(pile)
+
+            # Determine how many objects will be removed from the original pile.
+            original_pile_qty = (pile_qty // 2) + (pile_qty % 2)
+            new_pile_qty = pile_qty // 2
+
+            new_pile_items = []
+            # Grab references to all objects that are to be moved from the pile.
+            # New pile objects are always taken from the backend of the pile's contents.
+            # Due to list indexes starting at 0, the remaining quantity for the original pile
+            # will actually be the starting index of the new pile's candidates.
+            for index in range(original_pile_qty, pile_qty - 1):
+                new_pile_items.append(pile.contents[index])
+            
+            new_pile_qty = len(new_pile_items)
+            if new_pile_qty > 1:
+                # There are more than one object being split from the original pile.
+                if gen_mec.all_same(new_pile_items):
+                    new_pile = create_object(typeclass="items.objects.InventoryGroup",
+                        key=f"a pile of {new_pile_items[0].db.plural_key}", location=obj_loc)
                 else:
-                    # There's not enough coin in the pile to execute the action.
-                    msg = f"{pile.name} doesn't container {quantity} of {qty_obj}!"
-                    return msg
-            if pile.tags.get('quantity', category='groupable'):
-                # This is a pile of quantity objects, or other similar pile.
-                pass
-            elif pile.is_typeclass('items.objects.InventoryGroup'):
-                # Object has contents
-                qty_obj_names = []
+                    new_pile = create_object(typeclass="items.objects.InventoryGroup",
+                        key=f"a pile of various items", location=obj_loc)
 
-                qty_objects = pile.search(qty_obj, location=pile, quiet=True)
-                # Check that there are enough objects in the pile to meet requirements.
-                if len(qty_objects) >= quantity:
-                    num = 1
-                    while num <= quantity:
-                        obj = qty_objects.pop()
-                        qty_obj_names.append(obj.name)
-                        obj.move_to(obj_loc, quiet=True, move_hooks=False)
-                        num += 1
+                # Move the objects from the original pile to the new pile.
+                for item in new_pile_items:
+                    item.move_to(new_pile, quiet=True, move_hooks=False)
 
-                    msg = f"You split"
-                    if gen_mec.all_same(qty_obj_names):
-                        msg = f"{msg} {quantity} {qty_obj_names[0]}"
-                    else:
-                        msg = f"{msg} {gen_mec.comma_separated_string_list(qty_obj_names)}"
-                    msg= f"{msg} from {pile_name}."
-                else:
-                    msg = f"There aren't {quantity} of {qty_obj} in {pile.name}!"
-                    return msg
-
-                # Check if the pile has 1 or less objects remaining.
+                # Set each pile's quantity attribute.
+                pile.db.quantity = len(pile.contents)
+                new_pile.db.quantity = len(new_pile.contents)
+                msg = f"You split {pile.key} in two, creating {new_pile.key}"
+            else:
+                # The number of split objects is only 1 and is not a pile.
+                # Move the object into the room.
+                new_pile_items[0].move_to(obj_loc, quiet=True, move_hooks=False)
+                msg = f"You split {new_pile_items[0]} from {pile.key}."
+                
+                
+                # If only 1 object has been split from the pile, the original pile only has 1 or 2
+                # objects remaining.
                 if len(pile.contents) == 1:
-                    obj = pile.contents
-                    obj.move_to(obj_loc, quiet=True, move_hooks=False)
+                    for obj in pile.contents:
+                        obj.move_to(obj_loc, quiet=True, move_hooks=False)
+                        msg = f"{msg}\n{obj.key} is removed from {pile.key}. {pile.key} is no more."
                 if len(pile.contents) == 0:
                     pile.delete()
+
+        if split_type == 'from':
+            extract_obj_names = []
+
+            extract_objects = pile.search(extract_obj, location=pile, quiet=True)
+            # Check that there are enough objects in the pile to meet requirements.
+            if len(extract_objects) >= quantity:
+                num = 1
+                while num <= quantity:
+                    obj = extract_objects.pop()
+                    extract_obj_names.append(obj.name)
+                    obj.move_to(obj_loc, quiet=True, move_hooks=False)
+                    num += 1
+
+                msg = f"You split"
+                if gen_mec.all_same(extract_obj_names):
+                    msg = f"{msg} {quantity} {extract_obj_names[0]}"
+                else:
+                    msg = f"{msg} {gen_mec.comma_separated_string_list(extract_obj_names)}"
+                msg= f"{msg} from {pile_name}."
+            else:
+                msg = f"There aren't {quantity} of {extract_obj} in {pile.name}!"
+                return msg
+
+            # Check if the pile has 1 or less objects remaining.
+            if len(pile.contents) == 1:
+                obj = pile.contents[0]
+                obj.move_to(obj_loc, quiet=True, move_hooks=False)
+            if len(pile.contents) == 0:
+                pile.delete()
         return msg
 
     def spawn(self, item_type, item_name=None):
