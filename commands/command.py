@@ -969,12 +969,12 @@ class CmdSplit(Command):
             self.split_type = 'from'
             args = args.split('from', 1) # args = [' # object ', ' pile']
 
-            qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
-            self.quantity = qty_obj[0] # quantity = '#'
+            extract_obj = args[0].strip().split(' ', 1) # extract_obj = ['#', 'object']
+            self.quantity = extract_obj[0] # quantity = '#'
             if not self.quantity > 0:
                 caller.msg("Quantity must be greater than zero!")
                 raise InterruptCommand
-            self.qty_obj = qty_obj[1] # qty_obj = 'object'
+            self.extract_obj = extract_obj[1] # extract_obj = 'object'
 
             self.pile = args[1].strip()
             self.pile_loc = caller.location
@@ -984,12 +984,12 @@ class CmdSplit(Command):
             self.split_type = 'from'
             args = args.split('from', 1) # args = [' # object', ' my pile']
 
-            qty_obj = args[0].strip().split(' ', 1) # qty_obj = ['#', 'object']
-            self.quantity = qty_obj[0] # quantity = '#'
+            extract_obj = args[0].strip().split(' ', 1) # extract_obj = ['#', 'object']
+            self.quantity = extract_obj[0] # quantity = '#'
             if not self.quantity > 0:
                 caller.msg("Quantity must be greater than zero!")
                 raise InterruptCommand
-            self.qty_obj = qty_obj[1] # qty_obj = 'object'
+            self.extract_obj = extract_obj[1] # extract_obj = 'object'
 
             self.pile = args[1].strip().split(' ', 1)[1]
             self.pile_loc = caller
@@ -1011,7 +1011,7 @@ class CmdSplit(Command):
             if split_type == 'default':
                 msg = caller.item.split_group(split_type, pile, pile_loc)
             elif split_type == 'from':
-                msg = caller.item.split_group(split_type, pile, pile_loc, self.quantity, self.qty_obj)
+                msg = caller.item.split_group(split_type, pile, pile_loc, self.quantity, self.extract_obj)
 
         caller.msg(msg)
 
