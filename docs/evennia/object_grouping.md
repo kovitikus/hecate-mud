@@ -26,7 +26,7 @@ https://github.com/kovitikus/hecate
 	* [Split Inventory Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-inventory-objects-method)
 * [Test ItemHandler  Module](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#test-itemhandler-module)
 * [Coin Module](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#coin-module)
-* [Item Prototypes Module]
+* [Item Prototypes Module](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#item-prototypes-module)
 
 ***
 ### Introduction
@@ -497,7 +497,7 @@ def _group_inventory_objects(self, inv_groupables, obj_loc):
     return inv_msg
 ```
 
-### Ungroup Objects Method
+#### Ungroup Objects Method
 [Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def ungroup_objects(self, group_obj, obj_loc):
@@ -1595,6 +1595,7 @@ def generate_coin_object(coin_dict=None, copper=None):
 
 ***
 
+### Item Prototypes Module
 [Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 The last thing I'll include here is a link to my prototypes, because they are also used in my logic, but specific to my project. It does include my coin prototypes, which I rely on heavily for coin management.
