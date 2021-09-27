@@ -4,12 +4,33 @@ https://github.com/kovitikus/hecate
 
 ***
 ### Table of Contents
-* [Introduction]
-* [Command Logic]
-
+* [Introduction](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#introduction)
+* [Object Categorization](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#object-categorization)
+	* [Coin Objects](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#coin-objects)
+	* [Quantity Objects](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#quantity-objects)
+	* [Inventory Objects](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#inventory-objects)
+* [Command Logic](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#command-logic)
+	* [Group Command](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#group-command)
+	* [Ungroup Command](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#ungroup-command)
+	* [Split Command](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-command)
+* [ItemHandler Methods](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#itemhandler-methods)
+	* [Group Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#group-objects-method)
+	* [Group Coins Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#group-coins-method)
+	* [Group Quantity Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#group-quantity-objects-method)
+	* [Group Inventory Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#group-inventory-objects-method)
+	* [Ungroup Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#ungroup-objects-method)
+	* [Ungroup Coins Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#ungroup-coins-method)
+	* [Split Group Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-group-method)
+	* [Split Coins Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-coins-method)
+	* [Split Quantity Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-quantity-objects-method)
+	* [Split Inventory Objects Method](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#split-inventory-objects-method)
+* [Test ItemHandler  Module](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#test-itemhandler-module)
+* [Coin Module](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#coin-module)
+* [Item Prototypes Module]
 
 ***
 ### Introduction
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 I still have some cleanup to do, including a bit of additional functionality I wanted to write into the commands themselves, but the rest of what's missing is mostly just some docstrings and possible missing unit testing I want to consider.
 
@@ -20,8 +41,9 @@ I'll go back through later and generate a table of contents, as well as add in s
 ***
 
 ### Object Categorization
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
-My object grouping logic is broken up into 3 categories. Coins, quantity objects, and inventory objects.
+My object grouping logic is broken up into 3 categories: coins, quantity objects, and inventory objects.
 
 Much of the functionality is handled through tags, of the category `groupable`. The only two typeclasses that are unique here are the Coin and InventoryGroup typeclasses, found here in my objects module.
 
@@ -30,6 +52,7 @@ https://github.com/kovitikus/hecate/blob/master/items/objects.py
 These custom typeclasses serve mostly as a medium for the `return_appearance` hook to tell the player how much coin a coin object is worth and the contents of an inventory grouping.
 
 #### Coin Objects
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 Coins function as a dictionary on the object, as an attribute called coin. It consists of 4 currency tiers of coin: platinum, gold, silver, copper. Each of the tiers holds 999 in value, with the 1,000th value being pushed up to the next tier.
 
@@ -40,6 +63,7 @@ Physical coins, when grouped, will automatically generate the next tier of coin 
 Coins in Hecate are generally non-existent. Meaning that most transactions just subtract or add coin directly to the player or object. The only time physical coins are generated is when they must be represented in the game world. Either with the player holding a coin in their character's hands or inside a container or on the ground in a room.
 
 #### Quantity Objects
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 Quantity objects are objects that have no unique attributes per object of that type. They are named as such because they are represented entirely by their quantity counter.
 
@@ -52,6 +76,7 @@ Quantity objects are grouped by preserving the first object of its kind encounte
 To prevent players from ungrouping a pile of 10,000 rocks into 10,000 individual objects, there is no ungrouping logic written for quantity  objects. The player is forced to use the split command, which will either cut the pile into two or remove a specified number of objects from the pile (as a pile of its own, if greater than 1).
 
 #### Inventory Objects
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 Inventory objects are ones which have unique values on their attributes and must be preserved when grouping. Therefore, a container object is generated, to store items in its inventory or contents. Inventory objects that all have the same name spawn a pile of the same name, `a pile of torches`, for example. Any other type of grouping will spawn a variety pile, `a pile of various items`.
 
@@ -59,6 +84,7 @@ Most objects will fall into this category of grouping. Torches have a fuel count
 
 ***
 ### Command Logic
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 #### Group Command
 ```py
@@ -116,6 +142,7 @@ class CmdGroup(Command):
 ```
 
 #### Ungroup Command
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 class CmdUngroup(Command):
     """
@@ -156,6 +183,7 @@ class CmdUngroup(Command):
 ```
 
 #### Split Command
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 class CmdSplit(Command):
     """
@@ -235,6 +263,7 @@ class CmdSplit(Command):
 ***
 
 ### ItemHandler methods
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 #### Group Objects Method
 * Docstring explanation is incorrect about group objects. I haven't updated in awhile and I will fix it as part of my final pass over all of this. Objects are grouped into 3 categories, coins, quantity, and inventory.
@@ -326,6 +355,7 @@ def group_objects(self, objects, obj_loc):
 ```
 
 #### Group Coins Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _group_coins(self, coin_groupables, obj_loc):
     """
@@ -358,6 +388,7 @@ def _group_coins(self, coin_groupables, obj_loc):
 ```
 
 #### Group Quantity Objects Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _group_quantity_objects(self, qty_groupables):
     """
@@ -404,6 +435,7 @@ def _group_quantity_objects(self, qty_groupables):
 ```
 
 #### Group Inventory Objects Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _group_inventory_objects(self, inv_groupables, obj_loc):
     """
@@ -466,6 +498,7 @@ def _group_inventory_objects(self, inv_groupables, obj_loc):
 ```
 
 ### Ungroup Objects Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def ungroup_objects(self, group_obj, obj_loc):
     """
@@ -501,6 +534,7 @@ def ungroup_objects(self, group_obj, obj_loc):
 ```
 
 #### Ungroup Coins Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _ungroup_coins(self, group_obj, obj_loc):
     """
@@ -572,6 +606,7 @@ def _ungroup_coins(self, group_obj, obj_loc):
 ```
 
 #### Split Group Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def split_group(self, split_type, pile, obj_loc, quantity=0, extract_obj=None):
     """
@@ -595,6 +630,7 @@ def split_group(self, split_type, pile, obj_loc, quantity=0, extract_obj=None):
 ```
 
 #### Split Coins Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _split_coins(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
     original_copper = 0
@@ -638,6 +674,7 @@ def _split_coins(self, split_type, pile, obj_loc, quantity, extract_obj, pile_na
 ```
 
 #### Split Quantity Objects method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _split_quantity_objects(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
     pile_qty = pile.attributes.get('quantity', default=0)
@@ -672,6 +709,7 @@ def _split_quantity_objects(self, split_type, pile, obj_loc, quantity, extract_o
 ```
 
 #### Split Inventory Objects Method
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 ```py
 def _split_inventory_objects(self, split_type, pile, obj_loc, quantity, extract_obj, pile_name):
     """
@@ -761,6 +799,7 @@ def _split_inventory_objects(self, split_type, pile, obj_loc, quantity, extract_
 ***
 
 ### Test ItemHandler Module
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 Some of this may have pointless repetition. I wasn't sure if I should test the submethods or just the parent ones. I also don't know if I have full test coverage of all possibilities, so I'll likely be updating this a bit in the future.
 
 (Just group objects with coins thrown in, or specifically the group coins method as well.)
@@ -1313,6 +1352,7 @@ class TestItemHandler(HecateTest):
 ***
 
 ### Coin Module
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 This is pretty useful to have, and I rely heavily on it, but it is specific to my project. I'll include it anyways, so that the coin grouping makes better sense.
 
 ```py
@@ -1554,6 +1594,8 @@ def generate_coin_object(coin_dict=None, copper=None):
 ```
 
 ***
+
+[Return to Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/evennia/object_grouping.md#table-of-contents)
 
 The last thing I'll include here is a link to my prototypes, because they are also used in my logic, but specific to my project. It does include my coin prototypes, which I rely on heavily for coin management.
 
