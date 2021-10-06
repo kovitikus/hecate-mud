@@ -312,11 +312,11 @@ You must also use the same `secret_settings.py` file located in `project-directo
 If you are OK with starting with a fresh database, navigate to your project's directory and use the command `evennia migrate`
 
 > **WARNING!**
-> Some users have reported that the migration step fails. If this happens, please follow these steps. If your issues persist, please ask for help in the [Evennia Discord](https://discord.gg/AJJpcRUhtF) or on [Evennia's Discussions](https://github.com/evennia/evennia/discussions)
+> Some users have reported that the migration step fails. If this happens, please follow these steps (*provided by **mr_seeker** on Discord, yell at him if you have problems* 😂). If your issues persist, please ask for help in the [Evennia Discord](https://discord.gg/AJJpcRUhtF) or on [Evennia's Discussions](https://github.com/evennia/evennia/discussions)
 > 
-> * Run the evennia init script to create a folder with the configuration files
-> * Run "git init" to create a local git
-> * Connect remote to local
+> * Run the evennia init script to create a folder with the configuration files.
+> * Run "git init" to create a local git.
+> * Connect remote to local.
 > * Push to remote.
 
 After some output, your new database file will be generated. But your secret_settings.py file will still be missing. To fix that, run `evennia -initmissing`
