@@ -249,7 +249,7 @@ Connect to the Droplet server with SSH as your regular user, if not already conn
 
 Use `sudo apt-get update` just to be certain all package information is up-to-date.
 
-> At the moment of this tutorial's writing, Evennia has only been reported to work properly with 3.7 or 3.8, but you can check the `Getting Started` instructions to see if there are any changes. For installation of later Python versions, simply change the 3.8 sections of the following command to 3.9, for example.
+> At the moment of this tutorial's writing, Evennia has only been reported to work properly with 3.7 or 3.8, but you can check the [Getting Started](https://www.evennia.com/docs/latest/Getting-Started.html) instructions to see if there are any changes. For installation of later Python versions, simply change the 3.8 sections of the following command to 3.9, for example.
 
 Ubuntu 20.04 is currently using Python 3.8.5, so you must install 3.8 versions.
 
@@ -260,6 +260,8 @@ After a bit of processing, the console will prompt you to continue by pressing `
 ![Installing Python Packages](https://i.imgur.com/lz7qAdl.png)
 
 ***
+
+> **TIP:** GitHub no longer uses passwords and requires that you setup an authentication token.
 
 Now you must make your mud development main folder.
 
@@ -297,17 +299,25 @@ You can find your project's URL via the main GitHub page under the green `Code` 
 
 ![Github Project URL](https://i.imgur.com/XkioHCm.png)
 
-Once your project is cloned into the `/muddev` directory, you can execute the `ls` command to verify that the 3 subdirectories exist. Evennia, the virtual environment, and your project folder.
+Once your project is cloned into the `/muddev` directory, you can execute the `ls` command to verify that the 3 sub-directories exist. Evennia, the virtual environment, and your project folder.
 
 ![Cloned Project Directory](https://i.imgur.com/A7qiTpi.png)
 
-Be aware, this project will come without a database. If you need to preserve an old database and add it to this new server, you must transfer the `evennia.db3` database file manually. It is located in `project-directory/server`.
+Be aware, this project will come without a database. If you need to preserve an old database and add it to this new server, you must [transfer the `evennia.db3` database file manually](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#transferring-an-existing-database). It is located in `project-directory/server`.
 
 You must also use the same `secret_settings.py` file located in `project-directory/server/conf`. The secret settings file contains a secret key that validates already registered users' existing sessions.
 
 > **TIP:** Neither of these files should -ever- be uploaded to Github, for security reasons. Files ignored by git are specified within the project directory inside `.gitignore`.
 
 If you are OK with starting with a fresh database, navigate to your project's directory and use the command `evennia migrate`
+
+> **WARNING!**
+> Some users have reported that the migration step fails. If this happens, please follow these steps. If your issues persist, please ask for help in the [Evennia Discord](https://discord.gg/AJJpcRUhtF) or on [Evennia's Discussions](https://github.com/evennia/evennia/discussions)
+> 
+> * Run the evennia init script to create a folder with the configuration files
+> * Run "git init" to create a local git
+> * Connect remote to local
+> * Push to remote.
 
 After some output, your new database file will be generated. But your secret_settings.py file will still be missing. To fix that, run `evennia -initmissing`
 
