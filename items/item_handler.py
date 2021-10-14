@@ -176,11 +176,11 @@ class ItemHandler():
 
     def group_objects(self, objects, obj_loc):
         """
-        Takes a list of objects and organizes them into two categories:
-            Objects that are unique and grouped as inventory.
-            Objects that are identical and grouped as a quantity attribute.
-        
-        Generates a new group object and transfers the listed objects into this group object.
+        Takes a list of objects and groups them based on 3 categories:
+            Coin objects that have a coin dictionary.
+            Quantity objects that are identical in both key and attributes.
+            All other objects that have unique attribute values and are grouped into a pile,
+                which behaves like a container.
 
         Arguments:
             objects (list): This is the list of objects passed in from the grouping command.
@@ -192,9 +192,9 @@ class ItemHandler():
                 caller of the command.
         """
         msg = ''
-        coin_msg = False
-        qty_msg = False
-        inv_msg = False
+        coin_msg = None
+        qty_msg = None
+        inv_msg = None
         groupables = []
         coin_groupables = []
         qty_groupables = []
@@ -241,7 +241,7 @@ class ItemHandler():
 
             obj_names = gen_mec.comma_separated_string_list(qty_names)
             qty_msg = f"You combine {obj_names}."
-            if coin_msg:
+            if coin_msg is not None:
                 msg = f"{msg}\n"
             msg = f"{msg}{qty_msg}"
 
@@ -253,7 +253,7 @@ class ItemHandler():
             inv_groupables.extend(coin_groupables)
             inv_groupables.extend(qty_groupables)
             inv_msg = self._group_inventory_objects(inv_groupables, obj_loc)
-            if qty_msg or coin_msg:
+            if qty_msg is not None or coin_msg is not None:
                 msg = f"{msg}\n"
             msg = f"{msg}{inv_msg}"
 
