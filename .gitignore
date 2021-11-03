@@ -54,3 +54,6 @@ server/logs/server.log2.old
 
 # Docs
 .obsidian
+
+# VSCode
+.vscode/*
