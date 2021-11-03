@@ -10,38 +10,6 @@ class StatHandler:
         self.default_character_base_energy = variable_from_module("world.hecate_settings",
             variable='DEFAULT_CHARACTER_BASE_ENERGY')
 
-    def init_char_stats(self):
-        """
-        Logic for adding database attributes to the character and initializing each one.
-        """
-        owner = self.owner
-
-        starting_stats = {'vigor': 225, 'tenacity': 225, 'celerity': 225, 'awareness': 225,
-            'aptitude': 225, 'sanity': 225}
-
-        owner.attributes.add('stats', starting_stats)
-
-        # Health
-        owner.attributes.add('health', {'base_health': 0, 'max_health': 0, 'current_health': 0})
-        self.set_base_health()
-        self.set_max_health()
-        owner.db.health['current_health'] = owner.db.health['max_health']
-
-        # Energy
-        owner.attributes.add('energy', {'base_energy': 0, 'max_energy': 0, 'current_energy': 0})
-        self.set_base_energy()
-        self.set_max_energy()
-        owner.db.energy['current_energy'] = owner.db.energy['max_energy']
-
-        owner.attributes.add('armor', 0)
-        owner.attributes.add('hunger', 0)
-        owner.attributes.add('thirst', 0)
-        owner.attributes.add('resistances', {'fire': 0, 'ice': 0, 'light': 0, 'shadow': 0,
-            'poison': 0, 'arcane': 0})
-
-        owner.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
-        owner.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
-
     def set_base_health(self):
         """
         This method retrieves the base health of a character (owner) and then subsequently sets

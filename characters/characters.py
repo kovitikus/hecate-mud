@@ -59,7 +59,16 @@ class Character(DefaultCharacter):
         self.cmdset.add("travel.travel_cmdset.TravelCmdSet", permanent=True)
 
         # Stats
-        self.stats.init_char_stats()
+        self.init_char_stats()
+
+        self.stats.set_base_health()
+        self.stats.set_max_health()
+        self.db.health['current_health'] = self.db.health['max_health']
+
+        self.stats.set_base_energy()
+        self.stats.set_max_energy()
+        self.db.energy['current_energy'] = self.db.energy['max_energy']
+
         self.equip.initialize_equipment_attribute()
 
         # Avoids execution of this code on initial setup of superuser.
@@ -72,6 +81,31 @@ class Character(DefaultCharacter):
 
         # Follow and lead behaviors for traversing an exit as a group.
         self.cmdset.add('travel.travel_cmdset.TravelCmdSet')
+
+        # Skills
+        self.skill.generate_fresh_skillset('martial arts')
+
+    def init_char_stats(self):
+        """
+        Logic for adding database attributes to the character and initializing each one.
+        """
+        starting_stats = {'vigor': 225, 'tenacity': 225, 'celerity': 225, 'awareness': 225,
+            'aptitude': 225, 'sanity': 225}
+
+        self.attributes.add('stats', starting_stats)
+
+        self.attributes.add('health', {'base_health': 0, 'max_health': 0, 'current_health': 0})
+        self.attributes.add('energy', {'base_energy': 0, 'max_energy': 0, 'current_energy': 0})
+
+        self.attributes.add('armor', 0)
+        self.attributes.add('hunger', 0)
+        self.attributes.add('thirst', 0)
+        self.attributes.add('resistances', {'fire': 0, 'ice': 0, 'light': 0, 'shadow': 0,
+            'poison': 0, 'arcane': 0})
+
+        self.attributes.add('inventory_slots', {'max_slots': 0, 'occupied_slots': 0})
+        self.attributes.add('coin', {'plat': 0, 'gold': 0, 'silver': 0, 'copper': 0})
+
         self.attributes.add('leader', None)
         self.attributes.add('followers', [])
 
@@ -82,17 +116,13 @@ class Character(DefaultCharacter):
         self.attributes.add('busy', False)
         self.attributes.add('hands', {'main': None, 'off': None})
         self.attributes.add('hands_desc', {'main': 'right', 'off': 'left'})
-        self.attributes.add('wielding', {'main': None, 'off': None, 
-                            'both': None})
+        self.attributes.add('wielding', {'main': None, 'off': None, 'both': None})
         self.attributes.add('stance', None)
         self.attributes.add('standing', True)
         self.attributes.add('kneeling', False)
         self.attributes.add('sitting', False)
         self.attributes.add('lying', False)
         self.attributes.add('afk_timer', 600) # 10 minute timeout
-
-        # Skills
-        self.skill.generate_fresh_skillset('martial arts')
 
     def announce_move_from(self, destination, msg=None, mapping=None, 
                             **kwargs):
