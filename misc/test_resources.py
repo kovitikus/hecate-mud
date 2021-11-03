@@ -158,7 +158,7 @@ class HecateTest(TestCase):
     #---------------
     # Setup the characters.
         self.char1 = create.create_object(
-            self.character_typeclass, key="Char", location=self.main_office, home=self.main_office
+            self.character_typeclass, key="Char1", location=self.main_office, home=self.main_office
         )
         self.char1.permissions.add("Developer")
         
@@ -184,6 +184,17 @@ class HecateTest(TestCase):
         SESSIONS.login(session, self.account, testmode=True)
         self.session = session
 
+        dummysession = ServerSession()
+        dummysession.init_session("telnet", ("localhost", "testmode"), SESSIONS)
+        dummysession.sessid = 2
+        SESSIONS.portal_connect(
+            dummysession.get_sync_data()
+        )  # note that this creates a new Session!
+        session = SESSIONS.session_from_sessid(2)  # the real session
+        SESSIONS.login(session, self.account2, testmode=True)
+        self.session2 = session
+        self.char2.sessions.add(self.session2)
+
     def tearDown(self):
         def clean_objects(objects):
             for object in objects:
@@ -204,6 +215,7 @@ class HecateTest(TestCase):
         settings.DEFAULT_HOME = self.backups[2]
 
         del SESSIONS[self.session.sessid]
+        del SESSIONS[self.session2.sessid]
         self.account.delete()
         self.account2.delete()
 
