@@ -216,6 +216,7 @@ INVENTORY_CONTAINER = {
 
 INVENTORY_BAG = {
     'prototype_parent': 'inventory_container',
+    'prototype_key': 'inventory_bag',
     'key': lambda: generate_random_bag_key(),
     'home': lambda: trash_bin()
 }
