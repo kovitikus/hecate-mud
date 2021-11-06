@@ -1,5 +1,5 @@
 # Character Attributes
-![Example Attributes](https://i.imgur.com/kyT8CQ5.png)
+![Example Attributes](https://i.imgur.com/Dov5rze.png)
 
 There are a total of 6 main character attributes in Hecate.
 * Vigor
@@ -111,6 +111,10 @@ A character with 225 points in any given attribute will be exactly in the middle
 
 **Temporary Explanation** - The character's ability to take in the world around them. Improves all success rates, including defensive abilities. Reduces any darkness penalties or other awareness checks. Reduces any stun times. Improves quality of any crafted items.
 
+Lighting functions by directly modifying the awareness attribute. This is a temporary change. When looking at the stat page of a character, it will show the lighting penalty applied to awareness, as well as the character's normal base awareness.
+
+Some alchemy potions may grant a temporary boost to awareness, at the cost of sanity.
+
 ***
 
 #### Aptitude
@@ -129,6 +133,8 @@ A character with 225 points in any given attribute will be exactly in the middle
 ***
 
 #### Sanity
+**Temporary Explanation** - Sanity can fluctuate throughout a character's life. It is regained by meditation and by magical rituals, but it is lost when a character journeys into the underworld or other-worldly places. It is also lost when characters consume certain alchemy potions, or similar substances.
+
 * **Tier 1** - Luminous
 * **Tier 2** - Lucid
 * **Tier 3** - Judicious
