@@ -76,7 +76,7 @@ class Character(DefaultCharacter):
         # to DEFAULT_HOME, which is Limbo.
         # In the initial_setup module, Limbo isn't created until after
         # the superuser. https://gist.github.com/kovitikus/9b358ea0ebc09ec1e3840f332e93c00d
-        if not self.dbref == '#1':
+        if self.dbref != '#1':
             self.equip.generate_starting_equipment()
 
         # Follow and lead behaviors for traversing an exit as a group.
