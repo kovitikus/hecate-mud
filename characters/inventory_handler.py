@@ -7,7 +7,6 @@ class InventoryHandler():
         self.owner = owner
 
         self.inventory_contents = owner.contents
-        self.hands = owner.attributes.get('hands', default=None)
         self.hands_desc = owner.db.hands_desc
 
     def get_object(self, obj, container, owner_possess):
@@ -99,38 +98,40 @@ class InventoryHandler():
         # calling at_get hook method
         obj.at_get(owner)
 
-    def stow_object(self, obj):
+    def stow_object(self, item):
         owner = self.owner
-        main_hand, off_hand = owner.db.hands.values()
-        wielding = owner.db.wielding
-        main_wield, off_wield, both_wield  = wielding.values()
+        main_hand, off_hand = self.get_hands()
+        main_wield, off_wield, both_wield  = owner.equip.get_wielding()
         
-        if obj in [main_hand, off_hand]:
+        if item in [main_hand, off_hand]:
             # If the stowed object is currently wielded, stop wielding it and stow it.
-            if obj in [main_wield, off_wield, both_wield]:
-                owner.msg(f"You stop wielding {obj.name} and stow it away.")
-                owner.location.msg_contents(f"{owner.name} stops wielding {obj.name} and stows it away.", exclude=owner)
-                if obj == off_wield:
-                    wielding['off'] = None
-                elif obj == main_wield:
-                    wielding['main'] = None
-                else:
-                    wielding['both'] = None
-            else:
-                owner.msg(f"You stow away {obj.name}.")
-                owner.location.msg_contents(f"{owner.name} stows away {obj.name}.", exclude=owner)
+            if item in [main_wield, off_wield, both_wield]:
+                # The item is wielded, stop wielding it.
+                owner.equip.stop_wielding(item)
 
-            if obj == off_hand:
+            # Item is simply in the hands, send basic stow message.
+            for looker in owner.location.contents:
+                if looker == owner:
+                    owner.msg(f"You stow away {item.name}.")
+                else:
+                    looker.msg(f"{owner.get_display_name(looker)} stows away "
+                        f"{item.get_display_name(looker)}.")
+            # Hands need to be cleared, no matter if it was wielded or held.
+            if item == off_hand:
                 owner.db.hands['off'] = None
             else:
                 owner.db.hands['main'] = None
-        elif obj.location == owner.location:
-            owner.msg(f"You pick up {obj.name} and stow it away.")
-            owner.location.msg_contents(f"{owner.name} picks up {obj.name} and stows it away.", exclude=owner)
-            obj.move_to(owner, quiet=True)
+        elif item.location == owner.location:
+            for looker in owner.location.contents:
+                if looker == owner:
+                    looker.msg(f"You pick up {item.get_display_name(looker)} and stow it away.")
+                else:
+                    looker.msg(f"{owner.get_display_name(looker)} picks up "
+                        f"{item.get_display_name(looker)} and stows it away.")
+            item.move_to(owner, quiet=True)
 
         # calling at_get hook method
-        obj.at_get(owner)
+        item.at_get(owner)
 
     def drop_object(self, obj):
         owner = self.owner
@@ -188,7 +189,7 @@ class InventoryHandler():
                 this method will instead return None.
         """
         owner = self.owner
-        if hand == None or hand not in ['main', 'off']:
+        if hand is None or hand not in ['main', 'off']:
             hand = 'main'
         if isinstance(item, str):
             found_item = owner.search(item, quiet=True)
@@ -198,45 +199,64 @@ class InventoryHandler():
                 return None
 
 
-        hand_obj = self.hands[hand]
+        hand_obj = self.get_hands(hand=hand)
         hand_wield = owner.equip.get_wielding(hand=hand)
 
-        for obj in owner.location.contents:
+        for looker in owner.location.contents:
             if hand_obj is not None:
                 if hand_wield is not None:
-                    if obj == owner:
-                        obj.msg(f"You stop wielding {hand_obj.get_display_name(owner)}")
+                    if looker == owner:
+                        looker.msg(f"You stop wielding {hand_obj.get_display_name(looker)}")
                     else:
-                        obj.msg(f"{owner.get_display_name(obj)} stops wielding "
-                            f"{hand_obj.get_display_name(obj)}.")
-                if obj == owner:
-                    obj.msg(f"You stow away {hand_obj.get_display_name(owner)}.")
+                        looker.msg(f"{owner.get_display_name(looker)} stops wielding "
+                            f"{hand_obj.get_display_name(looker)}.")
+                if looker == owner:
+                    looker.msg(f"You stow away {hand_obj.get_display_name(looker)}.")
                 else:
-                    obj.msg(f"{owner.get_display_name(obj)} stows away "
-                        f"{hand_obj.get_display_name(obj)}.")
+                    looker.msg(f"{owner.get_display_name(looker)} stows away "
+                        f"{hand_obj.get_display_name(looker)}.")
 
             if item.location == owner:
-                if obj == owner:
-                    obj.msg(f"You get {item.get_display_name(obj)} from your inventory.")
+                # Item is in the character's inventory.
+                if looker == owner:
+                    looker.msg(f"You get {item.get_display_name(looker)} from your inventory.")
                 else:
-                    obj.msg(f"{owner.get_display_name(obj)} gets {item.get_display_name(obj)} from "
+                    looker.msg(f"{owner.get_display_name(looker)} gets {item.get_display_name(looker)} from "
                         "their inventory.")
             elif item.location == owner.location:
-                if obj == owner:
-                    obj.msg(f"You pick up {item.get_display_name(obj)} from the ground.")
+                # Item is in the room.
+                if looker == owner:
+                    looker.msg(f"You pick up {item.get_display_name(looker)} from the ground.")
                 else:
-                    obj.msg(f"{owner.get_display_name(obj)} picks up {item.get_display_name(obj)} from the ground.")
+                    looker.msg(f"{owner.get_display_name(looker)} picks up "
+                        f"{item.get_display_name(looker)} from the ground.")
             else:
-                if obj == owner:
-                    obj.msg(f"You get {item.get_display_name(obj)} from "
-                        f"{item.location.get_display_name(obj)}.")
+                # Item is in some other container.
+                if looker == owner:
+                    looker.msg(f"You get {item.get_display_name(looker)} from "
+                        f"{item.location.get_display_name(looker)}.")
                 else:
-                    obj.msg(f"{owner.get_display_name(obj)} gets {item.get_display_name(obj)} from "
-                    f"{item.location.get_display_name(obj)}")
+                    looker.msg(f"{owner.get_display_name(looker)} gets {item.get_display_name(looker)} "
+                    f"from {item.location.get_display_name(looker)}")
         
         # Move the object and assign it a hand.
         if item.location != owner:
             item.move_to(owner, quiet=True)
+        self.set_hands(hand, item=item)
+
+    def get_hands(self, hand=None):
+        """
+        Returns the requested wielded status of the owner, based on the kwarg provided.
+        """
+        if self.hands is None:
+            self.hands = self.owner.attributes.get('hands')
+
+        if hand is None:
+            return self.hands.values()
+        else:
+            return self.hands.get(hand)
+
+    def set_hands(self, hand, item=None):
         self.hands[hand] = item
         self._save_hands()
 
