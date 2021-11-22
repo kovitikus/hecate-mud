@@ -539,93 +539,10 @@ class CmdWield(Command):
     def func(self):
         caller = self.caller
         if not self.args:
-            caller.msg("Usage: wield <weapon>")
-            return
-        args = self.args.strip()
-
-        main_wield, off_wield, both_wield = caller.db.wielding.values()
-        main_hand, off_hand = caller.db.hands.values()
-        main_desc, off_desc = caller.db.hands_desc.values()
-
-        obj = caller.search(args, location=[caller],
-                            nofound_string="You must be holding a weapon to wield it.",
-                            multimatch_string=f"There are more than one {args}.")
-        if not obj:
-            return
-        if obj == caller:
-            caller.msg("You can't wield yourself.")
-            return
-        if not obj.attributes.get('wieldable'):
-            caller.msg("That's not a wieldable item.")
-        if obj in [main_wield, off_wield, both_wield]: # Check for an item already wielded.
-            caller.msg(f"You are already wielding {obj.name}.")
-            return
-
-        hands_req = obj.attributes.get('wieldable')
-
-        # main hand is dominate.
-
-
-        if obj not in [main_hand, off_hand]: # Automagically get the object from the inventory.
-            if main_hand and not main_wield:
-                caller.msg(f"You stow away {main_hand.name}.")
-                caller.location.msg_contents(f"{caller.name} stows away {main_hand.name}.", exclude=caller)
-                caller.db.hands['main'] = None
-            caller.msg(f"You get {obj.name} from your inventory.")
-            caller.location.msg_contents(f"{caller.name} gets {obj.name} from their inventory.", exclude=caller)
-            caller.db.hands['main'] = obj
-            # Refresh hand variables before the next check.
-            main_hand, off_hand = caller.db.hands.values()
-            
-        
-        if obj in [main_hand, off_hand]:
-            if hands_req == 1:
-                if inherits_from(obj, 'items.objects.OffHand'): #For wielding shields.
-                    if obj == main_hand and not main_wield:
-                        if off_hand: # If theres any item in the off hand, stow it first.
-                            caller.db.hands['off'] = None
-                            caller.msg(f"You stow away {off_hand.name}.")
-                            caller.location.msg_contents(f"{caller.name} stows away {off_hand.name}.", exclude=caller)
-                        # Send the offhand weapon to the off hand.
-                        caller.db.hands['main'] = None
-                        caller.db.hands['off'] = obj
-                        caller.msg(f"You swap {obj.name} to your {off_desc} hand.")
-                        caller.location.msg_contents(f"{caller.name} swaps {obj.name} to their {off_desc} hand.", exclude=caller)
-                    # Offhand item is certainly already in the off hand.
-                    caller.msg(f"You wield {obj.name} in your {off_desc} hand.")
-                    caller.location.msg_contents(f"{caller.name} wields {obj.name} in their {off_desc} hand.", exclude=caller)
-                    caller.db.wielding['off'] = obj
-                elif obj == off_hand and not inherits_from(obj, 'items.objects.OffHand'): # Make sure the item is a main hand wield.
-                    caller.msg(f"You swap the contents of your hands and wield {obj.name} in your {main_desc} hand.")
-                    caller.location.msg_contents(f"{caller.name} swaps the content of their hands "
-                                                    f"and wields {obj.name} in their {main_desc} hand.", exclude=caller)
-                    caller.db.hands['main'] = obj
-                    if main_hand:
-                        caller.db.hands['main'] = None
-                        caller.db.hands['off'] = obj
-                    caller.db.wielding['main'] = obj
-                elif obj == main_hand and not inherits_from(obj, 'items.objects.OffHand'): # Make sure the item is a main hand wield.
-                    caller.msg(f"You wield {obj.name} in your {main_desc} hand.")
-                    caller.location.msg_contents(f"{caller.name} wields {obj.name} in their {main_desc} hand.", exclude=caller)
-                    caller.db.wielding['main'] = obj
-            elif hands_req == 2:
-                if obj == off_hand:
-                    if main_hand:
-                        caller.msg(f"You stow away {main_hand.name}.")
-                        caller.location.msg_contents(f"{caller.name} stows away {main_hand}.", exclude=caller)
-                        caller.db.hands['main'] = None
-                elif obj == main_hand:
-                    if off_hand:
-                        caller.msg(f"You stow away {off_hand.name}.")
-                        caller.location.msg_contents(f"{caller.name} stows away {off_hand}.", exclude=caller)
-                        caller.db.hands['off'] = None
-                caller.msg(f"You wield {obj.name} in both hands.")
-                caller.location.msg_contents(f"{caller.name} wields {obj.name} in both hands.", exclude=caller)
-                caller.db.wielding['both'] = obj
-                caller.db.hands['main'] = obj
-        elif obj.location == caller.location:
-            caller.msg(f"You must be carrying a weapon to wield it.")
-            return
+            caller.equip.wield()
+        else:
+            weapon = self.args.strip()
+            caller.equip.wield(weapon)
 
 class CmdUnwield(Command):
     """
