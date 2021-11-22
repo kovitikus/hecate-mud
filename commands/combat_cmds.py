@@ -70,17 +70,23 @@ class CmdStaveSwat(BaseCommand):
 
     def func(self):
         caller = self.caller
+        required_weapon = 'stave'
         both_wield = caller.db.wielding['both']
-        if not caller.db.standing:
-            caller.msg("You must be standing to attack!")
-            return
-        if not both_wield or not both_wield.is_typeclass('items.objects.Staves'):
-            caller.msg("You must be wielding a stave to do that!")
-            return
+
         target = caller.search(self.args, quiet=True)
         if not target:
             caller.msg('That target does not exist!')
             return
+        else:
+            target = target[0]
+
+        can_attack, err_msg = caller.status.can_attack(required_weapon)
+        target_can_be_attacked, err_msg = target.status.can_be_attacked()
+
+        if not both_wield or not both_wield.is_typeclass('items.objects.Staves'):
+            caller.msg("You must be wielding a stave to do that!")
+            return
+        
         target = target[0]
         if not target.attributes.has('health'):
             caller.msg('You cannot attack that target!')
