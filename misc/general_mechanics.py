@@ -3,10 +3,10 @@ import time, random
 from evennia.utils.utils import delay
 from evennia.prototypes.prototypes import search_prototype
 
-def check_roundtime(owner):
+def check_roundtime(owner):  # sourcery skip: remove-redundant-if
     if owner.db.ko == True:
-        owner.msg("You can't do that while unconscious!")
-        return False
+        msg = "You can't do that while unconscious!"
+        return msg, False
 
     # Create cooldown attribute if non-existent.
     if not owner.attributes.has('roundtime'):
@@ -22,10 +22,10 @@ def check_roundtime(owner):
     if time_remaining > 0 or owner.db.busy == True:
         if time_remaining >= 2:
             message = f"You need to wait {int(time_remaining)} more seconds."
-        elif time_remaining >= 1 and time_remaining < 2:
+        elif time_remaining >= 1:
             message = f"You need to wait {int(time_remaining)} more second."
         elif time_remaining < 1:
-            message = f"You are in the middle of something."
+            message = "You are in the middle of something."
         owner.msg(message)
         return False
     return True
@@ -43,8 +43,7 @@ def unbusy(owner):
         owner.sentient.check_for_target()
 
 def roll_die(sides=100):
-    roll = random.randint(1, sides)
-    return roll
+    return random.randint(1, sides)
 
 def prototype_to_dictionary(prototype):
     """
@@ -62,9 +61,7 @@ def prototype_to_dictionary(prototype):
     result_list = []
     proto_list = search_prototype(prototype)
     for prototype in proto_list:
-        common_dict = {}
-        common_dict['key'] = prototype['key']
-
+        common_dict = {'key': prototype['key']}
         # Attributes saved within prototype dictionaries are formatted as a list of tuples.
         attr_list = prototype['attrs']
         for (key, value, category, lock) in attr_list:
@@ -76,15 +73,9 @@ def all_same(items):
     return all(x == items[0] for x in items)
 
 def objects_to_strings(object_list):
-    string_list = []
-    for i in object_list:
-        string_list.append(i.name)
-    return string_list
+    return [i.name for i in object_list]
 def objects_to_display_names(objects, looker):
-    string_list = []
-    for i in objects:
-        string_list.append(i.get_display_name(looker))
-    return string_list
+    return [i.get_display_name(looker) for i in objects]
 
 def comma_separated_string_list(string_list):
     """
