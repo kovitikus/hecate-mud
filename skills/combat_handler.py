@@ -14,77 +14,61 @@ class CombatHandler:
         self.pronoun = generic_str.pronoun
         self.prop_name = generic_str.proper_name
 
-        self.has_approached_attr = True if owner.attributes.has('approached') else False
+        self.has_approached_attr = bool(owner.attributes.has('approached'))
         self.approached_list = self.get_approached()
 
     def attack(self, target, skillset, skill):
+        self.target = target
         owner = self.owner
-
         if not gen_mec.check_roundtime(owner):
             return
 
         # This is where the fun begins.
-        self.init_variables(target, skillset, skill)
-        self.set_weapon_type()
-        self.set_damage_type()
-        self.set_attack_aim()
-        self.set_body_part()
-        self.set_die_roll()
-        self.set_success()
-        self.set_damage_tier()
-        self.set_hit()
-        self.create_attack_desc()
+        weapon = self.get_weapon_type(skillset, skill)
+        damage_type = owner.skill.return_damage_type(skillset, skill)
+        attack_aim = owner.skill.return_default_aim(skillset, skill)
+        body_part = self.set_body_part(attack_aim)
+        die_roll = gen_mec.roll_die()
+        success = self.set_success(attack_aim, skillset, skill)
+        damage_tier, damage = self.set_damage_tier(die_roll, success)
+
+        hit = die_roll > success
+        self.create_attack_desc(skillset, skill, weapon, damage_type, body_part, die_roll, success,
+        damage_tier, hit)
 
         if self.hit:
-            target.combat.take_damage(owner, self.damage)
-        
+            target.combat.take_damage(owner, damage)
+
         gen_mec.set_roundtime(owner)
 
         if owner.has_account:
             owner.skill.grant_action_points(skillset)
-
-    def init_variables(self, target, skillset, skill):
-        self.target = target
-        self.skillset = skillset
-        self.skill = skill
     
-    def set_weapon_type(self):
-        if self.skillset in skillsets.VIABLE_SKILLSETS:
-            if self.skill in skillsets.skillsets[self.skillset]:
-                self.weapon_type = skillsets.skillsets[self.skillset][self.skill]['weapon']
+    def set_weapon_type(self, skillset, skill):
+        if skillset in skillsets.VIABLE_SKILLSETS:
+            if skill in skillsets.skillsets[skillset]:
+                return skillsets.skillsets[skillset][skill]['weapon']
     
-    def set_damage_type(self):
-        self.damage_type = self.owner.skill.return_damage_type(self.skillset, self.skill)
-    
-    def set_attack_aim(self):
-        self.attack_aim = self.owner.skill.return_default_aim(self.skillset, self.skill)
-    
-    def set_body_part(self):
-        attack_aim = self.attack_aim
+    def set_body_part(self, attack_aim):
         high_body = ['head', 'face', 'neck', 'left shoulder', 'right shoulder']
         mid_body = ['chest', 'back', 'left arm', 'left hand', 'right arm', 'right hand', 'waist']
         low_body = ['left thigh', 'left leg', 'left foot', 'right thigh', 'right leg', 'right foot']
         
         if attack_aim == 'high':
-            self.body_part = random.choice(high_body)
+            body_part = random.choice(high_body)
         elif attack_aim == 'mid':
-            self.body_part = random.choice(mid_body)
+            body_part = random.choice(mid_body)
         elif attack_aim == 'low':
-            self.body_part = random.choice(low_body)
+            body_part = random.choice(low_body)
+        return body_part
     
-    def set_die_roll(self):
-        self.die_roll = gen_mec.roll_die()
-    
-    def set_success(self):
+    def set_success(self, attack_aim, skillset, skill):
         """
         Only whole numbers (rounded down) are used to determine the offensive RS.
 
         TODO: Add a round down for the final RS. Integers only!
         """
         owner = self.owner
-        attack_aim = self.attack_aim
-        skillset = self.skillset
-        skill = self.skill
 
         attack_rank = owner.skill.return_skill_rank(skillset, skill)
         attack_difficulty = skillsets.skillsets[skillset][skill].get('difficulty')
@@ -115,14 +99,11 @@ class CombatHandler:
         elif success > 95:
             success = 95
 
-        self.success = int(success)
+        return int(success)
     
-    def set_damage_tier(self):
-        roll = self.die_roll
-        success = self.success
-
-        if roll > success:
-            difference = roll - success
+    def set_damage_tier(self, die_roll, success):
+        if die_roll > success:
+            difference = die_roll - success
             if 1 <= difference <= 10:
                 damage_tier = 0
                 damage = random.randrange(1, 4)
@@ -138,35 +119,20 @@ class CombatHandler:
             elif 71 <= difference <= 100:
                 damage_tier = 4
                 damage = random.randrange(17, 20)
-        elif roll <= success:
+        elif die_roll <= success:
             damage_tier = 0
             damage = 0
         
-        self.damage_tier = damage_tier
-        self.damage = damage
+        return damage_tier, damage
     
-    def set_hit(self):
-        if self.die_roll > self.success:
-            self.hit = True
-        else:
-            self.hit = False
-    
-    def create_attack_desc(self):
+    def create_attack_desc(self, skillset, skill, weapon, damage_type, body_part, die_roll, success,
+        damage_tier, hit):
         article = self.article
         pronoun = self.pronoun
         prop_name = self.prop_name
 
         owner = self.owner
         target = self.target
-        skillset = self.skillset
-        skill = self.skill
-        weapon = self.weapon_type
-        damage_type = self.damage_type
-        body_part = self.body_part
-        die_roll = self.die_roll
-        success = self.success
-        damage_tier = self.damage_tier
-        hit = self.hit
 
         cap = str.capitalize
 
@@ -455,26 +421,25 @@ class CombatHandler:
 
     def get_approached(self):
         owner = self.owner
-        approached_list = []
         if self.has_approached_attr:
-            approached_list = list(owner.attributes.get('approached'))
+            approached_list = list(owner.attributes.get('approached', default=[]))
         return approached_list
 
     def add_approached(self, character):
-        owner = self.owner
         if self.has_approached_attr:
+            owner = self.owner
             owner.db.approached.append(character)
             self.approached_list.append(character)
 
     def remove_approached(self, character):
-        owner = self.owner
         if self.has_approached_attr:
+            owner = self.owner
             owner.db.approached.remove(character)
             self.approached_list.remove(character)
 
     def clear_approached(self):
-        owner = self.owner
         if self.has_approached_attr:
+            owner = self.owner
             owner.db.approached.clear()
             self.approached_list.clear()
 
