@@ -314,7 +314,7 @@ If you are OK with starting with a fresh database, navigate to your project's di
 > **WARNING!**
 > Some users have reported that the migration step fails. If this happens, it is likely you are attempting to create a new empty Evennia project. You must follow the normal Evennia [Getting Started](https://www.evennia.com/docs/latest/Getting-Started.html#linux-install) instructions to generate a new project. `evennia migrate` will only work after the initial `evennia --init newgamefolder`.
 
-After some output, your new database file will be generated. But your secret_settings.py file will still be missing. To fix that, run `evennia -initmissing`
+After some output, your new database file will be generated. But your secret_settings.py file will still be missing. To fix that, run `evennia --initmissing`
 
 ![Evennia Generate Missing Secret Settings File](https://i.imgur.com/m1xIN5j.png)
 
