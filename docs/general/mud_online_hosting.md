@@ -29,11 +29,13 @@ Following this link helps out production of Evennia by providing referral credit
 ### Introduction
 * [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 
-This tutorial is geared toward those using Windows 10. It can still be used as a reference for Linux users, but those users shouldn't need much guidance, if any. 
+This tutorial is geared toward those using Windows 10. It can still be used as a reference for Linux users. 
 
 Online hosting covered in this tutorial is presented via **[Digital Ocean](https://www.digitalocean.com/)**, but [Linode](https://www.linode.com/) is pretty much exactly the same. Both options are paid hosting and will cost roughly $5 USD a month. There is a free option through Amazon Web Services (AWS), but it is generally more complex and it is not covered in this tutorial.
 
 You can find a list of recommended hosting options [here](https://github.com/evennia/evennia/wiki/Online-Setup#hosting-options) in the Evennia documentation.
+
+Another important thing to keep in mind is that Long-term Support versions of Linux will not always support the latest version of Python. Be certain to check the highest version of Python supported on the Linux distribution that you are planning to use and compare it with the Python version you wish to use for Evennia.
 
 ***
 ### Windows Subsystem for Linux
@@ -245,11 +247,11 @@ If all went well, you should be able to SSH in as the new user.
 * [Table of Contents](https://github.com/kovitikus/hecate/blob/master/docs/general/mud_online_hosting.md#table-of-contents)
 * [Evennia - Getting Started - Linux Setup](https://github.com/evennia/evennia/wiki/Getting-Started#linux-install)
 
+> At the moment of this tutorial's writing, Evennia has only been reported to work properly with 3.7 or 3.8, but you can check the [Getting Started](https://www.evennia.com/docs/latest/Getting-Started.html) instructions to see if there are any changes. For installation of later Python versions, simply change the 3.8 sections of the following command to 3.9, for example. If you are uncertain or lost, ask the community for help. Elements of the installation process change, whereas documents such as this one may not be updated to reflect those changes.
+
 Connect to the Droplet server with SSH as your regular user, if not already connected. If already connected and logged in as root, use `su - username` to switch to your normal user account. 
 
 Use `sudo apt-get update` just to be certain all package information is up-to-date.
-
-> At the moment of this tutorial's writing, Evennia has only been reported to work properly with 3.7 or 3.8, but you can check the [Getting Started](https://www.evennia.com/docs/latest/Getting-Started.html) instructions to see if there are any changes. For installation of later Python versions, simply change the 3.8 sections of the following command to 3.9, for example.
 
 Ubuntu 20.04 is currently using Python 3.8.5, so you must install 3.8 versions.
 
