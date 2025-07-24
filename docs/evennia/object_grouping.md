@@ -800,6 +800,7 @@ def _split_inventory_objects(self, split_type, pile, obj_loc, quantity, extract_
 
 ### Test ItemHandler Module
 [Return to Table of Contents](https://github.com/kovitikus/hecate-mud/blob/master/docs/evennia/object_grouping.md#table-of-contents)
+
 Some of this may have pointless repetition. I wasn't sure if I should test the submethods or just the parent ones. I also don't know if I have full test coverage of all possibilities, so I'll likely be updating this a bit in the future.
 
 (Just group objects with coins thrown in, or specifically the group coins method as well.)
@@ -1353,6 +1354,7 @@ class TestItemHandler(HecateTest):
 
 ### Coin Module
 [Return to Table of Contents](https://github.com/kovitikus/hecate-mud/blob/master/docs/evennia/object_grouping.md#table-of-contents)
+
 This is pretty useful to have, and I rely heavily on it, but it is specific to my project. I'll include it anyways, so that the coin grouping makes better sense.
 
 ```py
